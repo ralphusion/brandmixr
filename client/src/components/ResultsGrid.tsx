@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { type BrandName } from "@shared/schema";
@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { apiRequest } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface GeneratedName {
   name: string;
@@ -33,7 +34,7 @@ interface GeneratedName {
 
 interface ResultsGridProps {
   names: (string | GeneratedName)[];
-  onSave: (name: string) => void;
+  onSave: (name: GeneratedName) => void;
   readOnly?: boolean;
 }
 
@@ -58,10 +59,17 @@ const cardColors = [
 export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProps) {
   const { toast } = useToast();
   const [copiedName, setCopiedName] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Fetch saved names to check favorite status
+  const { data: savedNames = [] } = useQuery<BrandName[]>({
+    queryKey: ["/api/names/saved"],
+  });
+
+  // Create a Set of saved names for O(1) lookup
+  const savedNamesSet = new Set(savedNames.map(n => n.name));
 
   const handleCopy = async (name: string) => {
     await navigator.clipboard.writeText(name);
@@ -73,15 +81,9 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
     setTimeout(() => setCopiedName(null), 2000);
   };
 
-  const toggleFavorite = (name: string) => {
-    const newFavorites = new Set(favorites);
-    if (favorites.has(name)) {
-      newFavorites.delete(name);
-    } else {
-      newFavorites.add(name);
-      onSave(name);
-    }
-    setFavorites(newFavorites);
+  const handleSave = async (nameData: string | GeneratedName) => {
+    const name = typeof nameData === 'string' ? nameData : nameData.name;
+    await onSave(typeof nameData === 'string' ? { name, domain: '', domainAvailable: false } : nameData);
   };
 
   const handleNameClick = async (name: string) => {
@@ -117,6 +119,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
           const trademarkExists = typeof nameData === 'string' ? null : nameData.trademarkExists;
           const colorSet = cardColors[index % cardColors.length];
+          const isSaved = savedNamesSet.has(name);
 
           return (
             <Card 
@@ -148,11 +151,11 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                       className="h-8 w-8 bg-white/80 hover:bg-white"
                       onClick={(e) => {
                         e.stopPropagation();
-                        toggleFavorite(name);
+                        handleSave(nameData);
                       }}
                     >
                       <Heart 
-                        className={`h-4 w-4 ${favorites.has(name) ? "fill-current" : ""}`} 
+                        className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} 
                       />
                     </Button>
                   </div>
