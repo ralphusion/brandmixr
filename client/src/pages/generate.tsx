@@ -14,6 +14,19 @@ import { Logo } from "@/components/Logo";
 
 const NAMES_PER_PAGE = 12;
 
+interface GeneratedName {
+  name: string;
+  domain: string;
+  domainAvailable: boolean;
+  trademarkExists?: boolean;
+  similarTrademarks?: Array<{
+    serialNumber: string;
+    registrationNumber: string;
+    wordMark: string;
+    status: string;
+  }>;
+}
+
 export default function Generate() {
   const [generatedNames, setGeneratedNames] = useState<GeneratedName[]>([]);
   const [displayedNames, setDisplayedNames] = useState<GeneratedName[]>([]);
@@ -25,13 +38,20 @@ export default function Generate() {
 
   const formData = sessionStorage.getItem('generatorFormData');
 
+  // Load saved generated names from sessionStorage
   useEffect(() => {
-    if (!formData) {
+    const savedGeneratedNames = sessionStorage.getItem('generatedNames');
+    if (savedGeneratedNames) {
+      const parsedNames = JSON.parse(savedGeneratedNames);
+      setGeneratedNames(parsedNames);
+      setDisplayedNames(parsedNames.slice(0, NAMES_PER_PAGE));
+    } else if (!formData) {
       navigate('/');
       return;
+    } else {
+      // Generate names when the page loads and no saved names exist
+      generateMutation.mutate(JSON.parse(formData));
     }
-    // Generate names when the page loads
-    generateMutation.mutate(JSON.parse(formData));
   }, []);
 
   const { data: savedNames = [] } = useQuery<BrandName[]>({
@@ -68,9 +88,12 @@ export default function Generate() {
       return res.json();
     },
     onSuccess: (data: GeneratedName[]) => {
-      setGeneratedNames(prev => [...prev, ...data]);
+      setGeneratedNames(data);
+      setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
       setPage(1);
       setIsGenerating(false);
+      // Store generated names in sessionStorage
+      sessionStorage.setItem('generatedNames', JSON.stringify(data));
     },
     onError: () => {
       setIsGenerating(false);
