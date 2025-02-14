@@ -15,9 +15,19 @@ import { apiRequest } from "@/lib/queryClient";
 interface ResultsGridProps {
   names: string[];
   onSave: (name: string) => void;
+  readOnly?: boolean;
 }
 
-export function ResultsGrid({ names, onSave }: ResultsGridProps) {
+const FONT_STYLES = [
+  'uppercase tracking-wider font-bold',
+  'uppercase tracking-tight font-light',
+  'normal-case tracking-wide font-semibold',
+  'font-serif italic font-medium',
+  'font-mono uppercase tracking-widest',
+  'font-sans small-caps tracking-normal font-normal',
+];
+
+export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProps) {
   const { toast } = useToast();
   const [copiedName, setCopiedName] = useState<string | null>(null);
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -84,42 +94,46 @@ export function ResultsGrid({ names, onSave }: ResultsGridProps) {
         {names.map((name, index) => (
           <Card 
             key={index}
-            className={`${cardColors[index % cardColors.length]} transition-transform hover:scale-105 aspect-square cursor-pointer`}
+            className={`${cardColors[index % cardColors.length]} transition-transform hover:scale-105 aspect-square cursor-pointer group`}
             onClick={() => handleNameClick(name)}
           >
-            <CardContent className="p-6 relative h-full flex flex-col justify-between">
-              <div className="absolute top-3 right-3 flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleCopy(name);
-                  }}
-                >
-                  {copiedName === name ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    toggleFavorite(name);
-                  }}
-                >
-                  <Heart 
-                    className={`h-4 w-4 ${favorites.has(name) ? "fill-current" : ""}`} 
-                  />
-                </Button>
-              </div>
-              <h3 className="text-2xl font-semibold mt-4 mb-2">{name}</h3>
-              <Info className="h-4 w-4 opacity-50" />
+            <CardContent className="p-6 relative h-full flex flex-col items-center justify-center">
+              {!readOnly && (
+                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopy(name);
+                    }}
+                  >
+                    {copiedName === name ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(name);
+                    }}
+                  >
+                    <Heart 
+                      className={`h-4 w-4 ${favorites.has(name) ? "fill-current" : ""}`} 
+                    />
+                  </Button>
+                </div>
+              )}
+              <h3 className={`text-2xl text-center ${FONT_STYLES[index % FONT_STYLES.length]}`}>
+                {name}
+              </h3>
+              <Info className="h-4 w-4 opacity-50 mt-4" />
             </CardContent>
           </Card>
         ))}

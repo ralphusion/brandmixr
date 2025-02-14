@@ -9,6 +9,7 @@ import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const NAMES_PER_PAGE = 5;
 
@@ -124,30 +125,58 @@ export default function Generate() {
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back
         </Button>
-        <h1 className="text-4xl font-bold">Generated Names</h1>
+        <h1 className="text-4xl font-bold">Brand Names</h1>
       </div>
 
-      {generateMutation.isPending && (
-        <div className="text-center py-12">
-          <p className="text-lg text-muted-foreground">Generating names...</p>
-        </div>
-      )}
+      <Tabs defaultValue="generated" className="mt-8">
+        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+          <TabsTrigger value="generated">Generated Names</TabsTrigger>
+          <TabsTrigger value="saved">Saved Names</TabsTrigger>
+        </TabsList>
 
-      {displayedNames.length > 0 && (
-        <div className="mt-8">
-          <ResultsGrid
-            names={displayedNames}
-            onSave={(name) => saveMutation.mutate(name)}
-          />
-          {generatedNames.length > displayedNames.length && (
-            <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-              <p className="text-muted-foreground">Scroll for more names...</p>
+        <TabsContent value="generated">
+          {generateMutation.isPending && (
+            <div className="text-center py-12">
+              <p className="text-lg text-muted-foreground">Generating names...</p>
             </div>
           )}
-        </div>
-      )}
 
-      <SavedNames names={savedNames} onExport={handleExport} />
+          {displayedNames.length > 0 && (
+            <div className="mt-8">
+              <ResultsGrid
+                names={displayedNames}
+                onSave={(name) => saveMutation.mutate(name)}
+              />
+              {generatedNames.length > displayedNames.length && (
+                <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+                  <p className="text-muted-foreground">Scroll for more names...</p>
+                </div>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="saved">
+          <div className="mt-8">
+            <div className="flex justify-end mb-4">
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                Export CSV
+              </Button>
+            </div>
+            {savedNames.length > 0 ? (
+              <ResultsGrid
+                names={savedNames.map(n => n.name)}
+                onSave={() => {}}
+                readOnly
+              />
+            ) : (
+              <p className="text-center text-muted-foreground py-12">
+                No saved names yet. Heart your favorite names to save them!
+              </p>
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
