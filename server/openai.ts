@@ -14,7 +14,7 @@ export async function generateNames(request: GenerateNameRequest): Promise<strin
     auto: "Mix different styles to create a diverse set of names."
   }[request.style];
 
-  const prompt = `Generate 5 creative brand names based on the following criteria:
+  const prompt = `Generate 20 creative brand names based on the following criteria:
 Industry: ${request.industry}
 Business Description: ${request.description}
 Keywords: ${request.keywords.join(", ")}
@@ -31,7 +31,7 @@ For the selected style "${request.style}", follow these specific guidelines:
 ${styleGuide}
 
 Please respond with a JSON array of strings containing only the generated names.
-Format the response as: {"names": ["name1", "name2", "name3", "name4", "name5"]}`;
+Format the response as: {"names": ["name1", "name2", ..., "name20"]}`;
 
   const response = await openai.chat.completions.create({
     model: "gpt-4o",

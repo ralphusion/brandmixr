@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { NameGeneratorForm } from "@/components/NameGeneratorForm";
 import { ResultsGrid } from "@/components/ResultsGrid";
@@ -8,13 +8,39 @@ import { queryClient } from "@/lib/queryClient";
 import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
+const NAMES_PER_PAGE = 10;
+
 export default function Home() {
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
+  const [displayedNames, setDisplayedNames] = useState<string[]>([]);
+  const [page, setPage] = useState(1);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const { data: savedNames = [] } = useQuery<BrandName[]>({
     queryKey: ["/api/names/saved"],
   });
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && generatedNames.length > displayedNames.length) {
+          setPage((prev) => prev + 1);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [generatedNames.length, displayedNames.length]);
+
+  useEffect(() => {
+    setDisplayedNames(generatedNames.slice(0, page * NAMES_PER_PAGE));
+  }, [page, generatedNames]);
 
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
@@ -23,6 +49,7 @@ export default function Home() {
     },
     onSuccess: (data) => {
       setGeneratedNames(data);
+      setPage(1);
     },
     onError: () => {
       toast({
@@ -72,19 +99,20 @@ export default function Home() {
   return (
     <div className="container mx-auto py-8 px-4">
       <h1 className="text-4xl font-bold text-center mb-8">AI Brand Name Generator</h1>
-      
+
       <NameGeneratorForm
         onGenerate={(data) => generateMutation.mutate(data)}
         isGenerating={generateMutation.isPending}
       />
 
-      {generatedNames.length > 0 && (
+      {displayedNames.length > 0 && (
         <div className="mt-8">
           <h2 className="text-2xl font-semibold mb-4">Generated Names</h2>
           <ResultsGrid
-            names={generatedNames}
+            names={displayedNames}
             onSave={(name) => saveMutation.mutate(name)}
           />
+          <div ref={loadMoreRef} className="h-10" />
         </div>
       )}
 
