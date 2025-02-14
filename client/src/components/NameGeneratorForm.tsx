@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -16,7 +16,7 @@ interface NameGeneratorFormProps {
 
 export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFormProps) {
   const [description, setDescription] = useState("");
-  
+
   const form = useForm({
     resolver: zodResolver(generateNameSchema),
     defaultValues: {
@@ -26,6 +26,16 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
       style: "auto"
     }
   });
+
+  // Load saved form data when component mounts
+  useEffect(() => {
+    const savedData = sessionStorage.getItem('generatorFormData');
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      form.reset(parsedData);
+      setDescription(parsedData.description || "");
+    }
+  }, []);
 
   const generateRandomDescription = (industry: string) => {
     const descriptions = PLACEHOLDER_DESCRIPTIONS[industry] || [];
@@ -55,6 +65,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
                       field.onChange(value);
                       onIndustryChange(value);
                     }}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -100,6 +111,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
                   <FormControl>
                     <Input 
                       {...field} 
+                      value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                       onChange={(e) => field.onChange(e.target.value.split(',').map(k => k.trim()))}
                     />
                   </FormControl>
@@ -114,7 +126,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Brand Style</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a style" />
