@@ -8,7 +8,7 @@ import { queryClient } from "@/lib/queryClient";
 import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 
-const NAMES_PER_PAGE = 10;
+const NAMES_PER_PAGE = 5;
 
 export default function Home() {
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
@@ -28,7 +28,7 @@ export default function Home() {
           setPage((prev) => prev + 1);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.5 }
     );
 
     if (loadMoreRef.current) {
@@ -39,7 +39,9 @@ export default function Home() {
   }, [generatedNames.length, displayedNames.length]);
 
   useEffect(() => {
-    setDisplayedNames(generatedNames.slice(0, page * NAMES_PER_PAGE));
+    const endIndex = page * NAMES_PER_PAGE;
+    const newNames = generatedNames.slice(0, endIndex);
+    setDisplayedNames(newNames);
   }, [page, generatedNames]);
 
   const generateMutation = useMutation({
@@ -49,6 +51,7 @@ export default function Home() {
     },
     onSuccess: (data) => {
       setGeneratedNames(data);
+      setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
       setPage(1);
     },
     onError: () => {
@@ -112,7 +115,11 @@ export default function Home() {
             names={displayedNames}
             onSave={(name) => saveMutation.mutate(name)}
           />
-          <div ref={loadMoreRef} className="h-10" />
+          {generatedNames.length > displayedNames.length && (
+            <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+              <p className="text-muted-foreground">Scroll for more names...</p>
+            </div>
+          )}
         </div>
       )}
 
