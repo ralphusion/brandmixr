@@ -8,7 +8,7 @@ import {
 
 export interface IStorage {
   getBrandNames(): Promise<BrandName[]>;
-  saveBrandName(name: InsertBrandName): Promise<BrandName>;
+  saveBrandName(name: InsertBrandName & { domainAvailable?: boolean }): Promise<BrandName>;
   toggleSaved(id: number): Promise<BrandName>;
   getSavedNames(): Promise<BrandName[]>;
   // Style preset methods
@@ -22,13 +22,13 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(brandNames);
   }
 
-  async saveBrandName(name: InsertBrandName): Promise<BrandName> {
+  async saveBrandName(name: InsertBrandName & { domainAvailable?: boolean }): Promise<BrandName> {
     const [brandName] = await db
       .insert(brandNames)
       .values({
         ...name,
-        domainAvailable: null,
-        domainCheckedAt: null,
+        domainAvailable: name.domainAvailable ?? null,
+        domainCheckedAt: name.domainAvailable !== undefined ? new Date() : null,
         colorPalette: null,
         fontPairings: null,
         rating: 0
@@ -61,7 +61,6 @@ export class DatabaseStorage implements IStorage {
       .where(eq(brandNames.saved, true));
   }
 
-  // New style preset methods
   async getStylePresets(): Promise<StylePreset[]> {
     return await db.select().from(stylePresets);
   }

@@ -5,6 +5,7 @@ import { generateNames, generateDescription } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
+import { checkDomainAvailability } from "./utils/domain";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -15,7 +16,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = generateNameSchema.parse(req.body);
       const names = await generateNames(data);
-      res.json(names);
+
+      // Check domain availability for each name
+      const namesWithDomains = await Promise.all(
+        names.map(async (name) => {
+          const domainCheck = await checkDomainAvailability(name);
+          return {
+            name,
+            domain: domainCheck.domain,
+            domainAvailable: domainCheck.available
+          };
+        })
+      );
+
+      res.json(namesWithDomains);
     } catch (error) {
       if (error instanceof ZodError || error instanceof Error) {
         res.status(400).json({ error: error.message });
@@ -45,8 +59,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.post("/api/names", async (req, res) => {
-    const name = await storage.saveBrandName(req.body);
-    res.json(name);
+    try {
+      // Check domain availability before saving
+      const { name } = req.body;
+      const domainCheck = await checkDomainAvailability(name);
+
+      const savedName = await storage.saveBrandName({
+        ...req.body,
+        domainAvailable: domainCheck.available
+      });
+
+      res.json(savedName);
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
   });
 
   app.post("/api/names/:id/toggle", async (req, res) => {
