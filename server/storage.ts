@@ -8,10 +8,13 @@ import {
 
 export interface IStorage {
   getBrandNames(): Promise<BrandName[]>;
-  saveBrandName(name: InsertBrandName & { domainAvailable?: boolean }): Promise<BrandName>;
+  saveBrandName(name: InsertBrandName & {
+    domainAvailable?: boolean;
+    trademarkExists?: boolean;
+    similarTrademarks?: any[];
+  }): Promise<BrandName>;
   toggleSaved(id: number): Promise<BrandName>;
   getSavedNames(): Promise<BrandName[]>;
-  // Style preset methods
   getStylePresets(): Promise<StylePreset[]>;
   getStylePreset(id: number): Promise<StylePreset | undefined>;
   createStylePreset(preset: InsertStylePreset): Promise<StylePreset>;
@@ -22,13 +25,20 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(brandNames);
   }
 
-  async saveBrandName(name: InsertBrandName & { domainAvailable?: boolean }): Promise<BrandName> {
+  async saveBrandName(name: InsertBrandName & {
+    domainAvailable?: boolean;
+    trademarkExists?: boolean;
+    similarTrademarks?: any[];
+  }): Promise<BrandName> {
     const [brandName] = await db
       .insert(brandNames)
       .values({
         ...name,
         domainAvailable: name.domainAvailable ?? null,
         domainCheckedAt: name.domainAvailable !== undefined ? new Date() : null,
+        trademarkExists: name.trademarkExists ?? null,
+        trademarkCheckedAt: name.trademarkExists !== undefined ? new Date() : null,
+        similarTrademarks: name.similarTrademarks ?? null,
         colorPalette: null,
         fontPairings: null,
         rating: 0

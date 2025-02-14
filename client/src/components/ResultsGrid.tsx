@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { type BrandName } from "@shared/schema";
-import { Heart, Copy, Check, Info, Globe } from "lucide-react";
+import { Heart, Copy, Check, Info, Globe, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -16,6 +16,13 @@ interface GeneratedName {
   name: string;
   domain: string;
   domainAvailable: boolean;
+  trademarkExists?: boolean;
+  similarTrademarks?: Array<{
+    serialNumber: string;
+    registrationNumber: string;
+    wordMark: string;
+    status: string;
+  }>;
 }
 
 interface ResultsGridProps {
@@ -101,6 +108,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           const name = typeof nameData === 'string' ? nameData : nameData.name;
           const domain = typeof nameData === 'string' ? null : nameData.domain;
           const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
+          const trademarkExists = typeof nameData === 'string' ? null : nameData.trademarkExists;
 
           return (
             <Card 
@@ -144,14 +152,24 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                 <h3 className={`text-2xl text-center ${FONT_STYLES[index % FONT_STYLES.length]}`}>
                   {name}
                 </h3>
-                {domain && (
-                  <div className="mt-2 flex items-center gap-2 text-sm">
-                    <Globe className="h-4 w-4" />
-                    <span className={domainAvailable ? "text-green-600" : "text-red-600"}>
-                      {domainAvailable ? "Available" : "Taken"}
-                    </span>
-                  </div>
-                )}
+                <div className="mt-2 space-y-2">
+                  {domain && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Globe className="h-4 w-4" />
+                      <span className={domainAvailable ? "text-green-600" : "text-red-600"}>
+                        {domainAvailable ? "Domain Available" : "Domain Taken"}
+                      </span>
+                    </div>
+                  )}
+                  {trademarkExists !== null && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Shield className="h-4 w-4" />
+                      <span className={!trademarkExists ? "text-green-600" : "text-red-600"}>
+                        {!trademarkExists ? "No Similar Trademarks" : "Similar Trademarks Found"}
+                      </span>
+                    </div>
+                  )}
+                </div>
                 <Info className="h-4 w-4 opacity-50 mt-4" />
               </CardContent>
             </Card>

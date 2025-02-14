@@ -6,7 +6,7 @@ export const stylePresets = pgTable("style_presets", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description").notNull(),
-  settings: jsonb("settings").notNull(), // Contains length preferences, patterns, etc.
+  settings: jsonb("settings").notNull(),
 });
 
 export const brandNames = pgTable("brand_names", {
@@ -17,10 +17,12 @@ export const brandNames = pgTable("brand_names", {
   keywords: text("keywords").array().notNull(),
   style: text("style").notNull(),
   saved: boolean("saved").default(false).notNull(),
-  // New fields for enhanced features
   languageCode: text("language_code").default("en").notNull(),
   domainAvailable: boolean("domain_available"),
   domainCheckedAt: timestamp("domain_checked_at"),
+  trademarkExists: boolean("trademark_exists"),
+  trademarkCheckedAt: timestamp("trademark_checked_at"),
+  similarTrademarks: jsonb("similar_trademarks"),
   colorPalette: jsonb("color_palette"),
   fontPairings: jsonb("font_pairings"),
   rating: integer("rating").default(0),
@@ -39,7 +41,7 @@ export const comments = pgTable("comments", {
   brandNameId: integer("brand_name_id").references(() => brandNames.id).notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  userId: uuid("user_id").notNull(), // References the user who made the comment
+  userId: uuid("user_id").notNull(),
 });
 
 export const apiKeys = pgTable("api_keys", {
@@ -52,7 +54,6 @@ export const apiKeys = pgTable("api_keys", {
   rateLimit: integer("rate_limit").default(100).notNull(),
 });
 
-// Update insert schemas
 export const insertBrandNameSchema = createInsertSchema(brandNames).pick({
   name: true,
   industry: true,
@@ -62,6 +63,12 @@ export const insertBrandNameSchema = createInsertSchema(brandNames).pick({
   saved: true,
   languageCode: true,
   workspaceId: true,
+  trademarkExists: true,
+  trademarkCheckedAt: true,
+  similarTrademarks: true,
+  colorPalette: true,
+  fontPairings: true,
+  rating: true,
 });
 
 export const insertWorkspaceSchema = createInsertSchema(workspaces).pick({
@@ -83,7 +90,6 @@ export const insertApiKeySchema = createInsertSchema(apiKeys).pick({
   rateLimit: true,
 });
 
-// Export types
 export type InsertBrandName = z.infer<typeof insertBrandNameSchema>;
 export type BrandName = typeof brandNames.$inferSelect;
 export type Workspace = typeof workspaces.$inferSelect;

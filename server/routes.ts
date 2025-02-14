@@ -6,6 +6,7 @@ import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
 import { checkDomainAvailability } from "./utils/domain";
+import { checkTrademarkAvailability } from "./utils/trademark";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -17,19 +18,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = generateNameSchema.parse(req.body);
       const names = await generateNames(data);
 
-      // Check domain availability for each name
-      const namesWithDomains = await Promise.all(
+      // Check domain and trademark availability for each name
+      const namesWithChecks = await Promise.all(
         names.map(async (name) => {
-          const domainCheck = await checkDomainAvailability(name);
+          const [domainCheck, trademarkCheck] = await Promise.all([
+            checkDomainAvailability(name),
+            checkTrademarkAvailability(name)
+          ]);
+
           return {
             name,
             domain: domainCheck.domain,
-            domainAvailable: domainCheck.available
+            domainAvailable: domainCheck.available,
+            trademarkExists: trademarkCheck.exists,
+            similarTrademarks: trademarkCheck.similarMarks
           };
         })
       );
 
-      res.json(namesWithDomains);
+      res.json(namesWithChecks);
     } catch (error) {
       if (error instanceof ZodError || error instanceof Error) {
         res.status(400).json({ error: error.message });
@@ -60,13 +67,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/names", async (req, res) => {
     try {
-      // Check domain availability before saving
       const { name } = req.body;
-      const domainCheck = await checkDomainAvailability(name);
+      const [domainCheck, trademarkCheck] = await Promise.all([
+        checkDomainAvailability(name),
+        checkTrademarkAvailability(name)
+      ]);
 
       const savedName = await storage.saveBrandName({
         ...req.body,
-        domainAvailable: domainCheck.available
+        domainAvailable: domainCheck.available,
+        trademarkExists: trademarkCheck.exists,
+        similarTrademarks: trademarkCheck.similarMarks,
+        trademarkCheckedAt: new Date()
       });
 
       res.json(savedName);
