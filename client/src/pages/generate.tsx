@@ -11,6 +11,20 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+interface GeneratedName {
+  name: string;
+  domain: string;
+  domainAvailable: boolean;
+  trademarkExists?: boolean;
+  similarTrademarks?: Array<{
+    serialNumber: string;
+    registrationNumber: string;
+    wordMark: string;
+    status: string;
+  }>;
+  logoUrl?: string | null;
+}
+
 const NAMES_PER_PAGE = 12;
 
 export default function Generate() {
@@ -64,18 +78,23 @@ export default function Generate() {
     mutationFn: async (data: GenerateNameRequest) => {
       setIsGenerating(true);
       const res = await apiRequest("POST", "/api/generate", data);
-      return res.json();
+      const responseData = await res.json();
+      if (!res.ok) {
+        throw new Error(responseData.error || 'Failed to generate names');
+      }
+      return responseData as GeneratedName[];
     },
-    onSuccess: (data: GeneratedName[]) => {
-      setGeneratedNames(prev => [...prev, ...data]);
+    onSuccess: (data) => {
+      setGeneratedNames(data);
+      setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
       setPage(1);
       setIsGenerating(false);
     },
-    onError: () => {
+    onError: (error) => {
       setIsGenerating(false);
       toast({
         title: "Error",
-        description: "Failed to generate names. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to generate names. Please try again.",
         variant: "destructive",
       });
     },
@@ -83,12 +102,13 @@ export default function Generate() {
 
   const saveMutation = useMutation({
     mutationFn: async (name: string) => {
+      const formDataObj = JSON.parse(formData || '{}');
       const res = await apiRequest("POST", "/api/names", {
         name,
-        industry: JSON.parse(formData || '{}').industry || "",
-        description: JSON.parse(formData || '{}').description || "",
-        keywords: JSON.parse(formData || '{}').keywords || [],
-        style: JSON.parse(formData || '{}').style || "",
+        industry: formDataObj.industry || "",
+        description: formDataObj.description || "",
+        keywords: formDataObj.keywords || [],
+        style: formDataObj.style || "",
         saved: true,
       });
       return res.json();
@@ -154,7 +174,7 @@ export default function Generate() {
             <div className="mt-8">
               <ResultsGrid
                 names={displayedNames}
-                onSave={(name) => saveMutation.mutate(name.name)}
+                onSave={(name) => saveMutation.mutate(name)}
               />
               {generatedNames.length > displayedNames.length && !isGenerating && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
