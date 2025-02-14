@@ -90,12 +90,13 @@ Please respond with just the description text, no JSON formatting needed.`;
 }
 
 export async function generateLogoWithDalle(brandName: string, style: string): Promise<{ url: string }> {
-  const prompt = `Create a minimalist, professional logo for the brand name "${brandName}". The design should be:
-- Clean and modern with simple geometric shapes
-- Suitable for both light and dark backgrounds
-- Memorable and unique
-- Using a minimal color palette
-- Incorporating the brand name in a stylish typography
+  const prompt = `Create a simple, minimalistic icon for "${brandName}". The design should be:
+- Extremely minimalistic, using only essential geometric shapes (circles, squares, lines)
+- Single color design that works on both light and dark backgrounds
+- No text or lettering
+- Focus on a single memorable symbol that represents the brand's essence
+- Clean, bold lines and shapes
+- Professional and modern look
 Style guidance: ${style}`;
 
   const response = await openai.images.generate({
@@ -106,5 +107,5 @@ Style guidance: ${style}`;
     quality: "standard",
   });
 
-  return { url: response.data[0].url };
+  return { url: response.data[0].url || '' };
 }

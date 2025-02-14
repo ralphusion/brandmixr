@@ -79,7 +79,7 @@ export default function BrandVariations() {
     try {
       const res = await apiRequest("POST", "/api/generate-logo", { 
         brandName,
-        style: "minimalist brand logo design with simple shapes and clean typography" 
+        style: "minimalist icon design using simple geometric shapes" 
       });
       const data = await res.json();
       setLogoUrl(data.url);
@@ -120,7 +120,7 @@ export default function BrandVariations() {
           className="flex items-center gap-2"
         >
           <RefreshCw className={`h-4 w-4 ${isGeneratingLogo ? 'animate-spin' : ''}`} />
-          Refresh Logo
+          Refresh Icon
         </Button>
       </div>
 
@@ -135,13 +135,17 @@ export default function BrandVariations() {
             >
               <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
                 {logoUrl && (
-                  <div className="w-24 h-24 mb-4">
-                    <img src={logoUrl} alt="Brand Logo" className="w-full h-full object-contain" />
+                  <div className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm">
+                    <img 
+                      src={logoUrl} 
+                      alt="Brand Icon" 
+                      className="w-full h-full object-contain filter dark:invert"
+                    />
                   </div>
                 )}
                 {isGeneratingLogo && !logoUrl && (
-                  <div className="w-24 h-24 mb-4 flex items-center justify-center">
-                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <div className="w-16 h-16 mb-2 flex items-center justify-center">
+                    <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
                 )}
                 <h3 className={`text-3xl text-center ${style.text} ${fontStyle}`}>
