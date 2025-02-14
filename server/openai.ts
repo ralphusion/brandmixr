@@ -49,15 +49,33 @@ ${styleGuide}
 Please respond with a JSON array of strings containing only the generated names.
 Format the response as: {"names": ["name1", "name2", ..., "name50"]}`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" }
-  });
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
 
-  const content = response.choices[0].message.content || '{"names": []}';
-  const result = JSON.parse(content) as { names: string[] };
-  return result.names;
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No content received from OpenAI");
+    }
+
+    const result = JSON.parse(content) as { names: string[] };
+    if (!Array.isArray(result.names)) {
+      throw new Error("Invalid response format from OpenAI");
+    }
+
+    return result.names;
+  } catch (error) {
+    console.error("Error generating names:", error);
+    if (error instanceof OpenAI.APIError) {
+      if (error.status === 429) {
+        throw new Error("Rate limit exceeded. Please try again in a few minutes.");
+      }
+    }
+    throw new Error("Failed to generate names. Please try again.");
+  }
 }
 
 export async function generateDescription(
@@ -81,12 +99,21 @@ Create a description that:
 
 Please respond with just the description text, no JSON formatting needed.`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-  });
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  return response.choices[0].message.content || "Description not available.";
+    const content = response.choices[0].message.content;
+    if (!content) {
+      throw new Error("No content received from OpenAI");
+    }
+    return content;
+  } catch (error) {
+    console.error("Error generating description:", error);
+    throw new Error("Failed to generate description. Please try again.");
+  }
 }
 
 export async function generateLogo(
@@ -124,7 +151,6 @@ Style requirements:
       style: "natural",
     });
 
-    // Handle potential undefined URL
     if (!response.data[0].url) {
       throw new Error("No image URL returned from OpenAI");
     }
@@ -132,6 +158,9 @@ Style requirements:
     return response.data[0].url;
   } catch (error) {
     console.error("Error generating logo:", error);
+    if (error instanceof OpenAI.APIError && error.status === 429) {
+      throw new Error("Rate limit exceeded for logo generation. Logo will be generated later.");
+    }
     throw new Error("Failed to generate logo");
   }
 }

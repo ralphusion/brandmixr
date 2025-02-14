@@ -8,7 +8,7 @@ import { queryClient } from "@/lib/queryClient";
 import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface GeneratedName {
@@ -77,12 +77,17 @@ export default function Generate() {
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
       setIsGenerating(true);
-      const res = await apiRequest("POST", "/api/generate", data);
-      const responseData = await res.json();
-      if (!res.ok) {
-        throw new Error(responseData.error || 'Failed to generate names');
+      try {
+        const res = await apiRequest("POST", "/api/generate", data);
+        const responseData = await res.json();
+        if (!res.ok) {
+          throw new Error(responseData.error || 'Failed to generate names');
+        }
+        return responseData as GeneratedName[];
+      } catch (error) {
+        console.error("Generation error:", error);
+        throw error;
       }
-      return responseData as GeneratedName[];
     },
     onSuccess: (data) => {
       setGeneratedNames(data);
@@ -166,11 +171,29 @@ export default function Generate() {
         <TabsContent value="generated">
           {generateMutation.isPending && (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Generating names...</p>
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+              <p className="text-lg text-muted-foreground">Generating names and logos...</p>
+              <p className="text-sm text-muted-foreground mt-2">This might take a moment</p>
             </div>
           )}
 
-          {displayedNames.length > 0 && (
+          {!generateMutation.isPending && generateMutation.isError && (
+            <div className="text-center py-12">
+              <p className="text-lg text-destructive">
+                {generateMutation.error instanceof Error 
+                  ? generateMutation.error.message 
+                  : "Failed to generate names. Please try again."}
+              </p>
+              <Button
+                onClick={handleGenerateMore}
+                className="mt-4"
+              >
+                Try Again
+              </Button>
+            </div>
+          )}
+
+          {!generateMutation.isPending && displayedNames.length > 0 && (
             <div className="mt-8">
               <ResultsGrid
                 names={displayedNames}
@@ -197,11 +220,6 @@ export default function Generate() {
 
         <TabsContent value="saved">
           <div className="mt-8">
-            <div className="flex justify-end mb-4">
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                Export CSV
-              </Button>
-            </div>
             {savedNames.length > 0 ? (
               <ResultsGrid
                 names={savedNames.map(n => ({
