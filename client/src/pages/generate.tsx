@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Logo } from "@/components/Logo";
 
 const NAMES_PER_PAGE = 12;
 
@@ -125,16 +126,18 @@ export default function Generate() {
 
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center mb-8">
-        <Button
-          variant="ghost"
-          className="mr-4"
-          onClick={() => navigate('/')}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back
-        </Button>
-        <h1 className="text-4xl font-bold">Brand Names</h1>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            className="mr-4"
+            onClick={() => navigate('/')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <Logo />
+        </div>
       </div>
 
       <Tabs defaultValue="generated" className="mt-8">
