@@ -11,18 +11,13 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-const NAMES_PER_PAGE = 5;
-
-interface GeneratedName {
-  name: string;
-  domain: string;
-  domainAvailable: boolean;
-}
+const NAMES_PER_PAGE = 12;
 
 export default function Generate() {
   const [generatedNames, setGeneratedNames] = useState<GeneratedName[]>([]);
   const [displayedNames, setDisplayedNames] = useState<GeneratedName[]>([]);
   const [page, setPage] = useState(1);
+  const [isGenerating, setIsGenerating] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -45,7 +40,7 @@ export default function Generate() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && generatedNames.length > displayedNames.length) {
+        if (entries[0].isIntersecting && !isGenerating && generatedNames.length > displayedNames.length) {
           setPage((prev) => prev + 1);
         }
       },
@@ -57,7 +52,7 @@ export default function Generate() {
     }
 
     return () => observer.disconnect();
-  }, [generatedNames.length, displayedNames.length]);
+  }, [generatedNames.length, displayedNames.length, isGenerating]);
 
   useEffect(() => {
     const endIndex = page * NAMES_PER_PAGE;
@@ -67,15 +62,17 @@ export default function Generate() {
 
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
+      setIsGenerating(true);
       const res = await apiRequest("POST", "/api/generate", data);
       return res.json();
     },
-    onSuccess: (data: GeneratedName[]) => { // Type annotation added for clarity
-      setGeneratedNames(data);
-      setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
+    onSuccess: (data: GeneratedName[]) => {
+      setGeneratedNames(prev => [...prev, ...data]);
       setPage(1);
+      setIsGenerating(false);
     },
     onError: () => {
+      setIsGenerating(false);
       toast({
         title: "Error",
         description: "Failed to generate names. Please try again.",
@@ -120,6 +117,12 @@ export default function Generate() {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleGenerateMore = () => {
+    if (formData) {
+      generateMutation.mutate(JSON.parse(formData));
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center mb-8">
@@ -151,11 +154,21 @@ export default function Generate() {
             <div className="mt-8">
               <ResultsGrid
                 names={displayedNames}
-                onSave={(name) => saveMutation.mutate(name.name)} // Accessing name property
+                onSave={(name) => saveMutation.mutate(name.name)}
               />
-              {generatedNames.length > displayedNames.length && (
+              {generatedNames.length > displayedNames.length && !isGenerating && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-                  <p className="text-muted-foreground">Scroll for more names...</p>
+                  <p className="text-muted-foreground">Loading more names...</p>
+                </div>
+              )}
+              {displayedNames.length === generatedNames.length && (
+                <div className="mt-8 flex justify-center">
+                  <Button 
+                    onClick={handleGenerateMore}
+                    disabled={isGenerating}
+                  >
+                    Generate More Names
+                  </Button>
                 </div>
               )}
             </div>
@@ -171,7 +184,11 @@ export default function Generate() {
             </div>
             {savedNames.length > 0 ? (
               <ResultsGrid
-                names={savedNames.map(n => n.name)}
+                names={savedNames.map(n => ({
+                  name: n.name,
+                  domain: '',
+                  domainAvailable: false
+                }))}
                 onSave={() => {}}
                 readOnly
               />
