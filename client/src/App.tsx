@@ -6,20 +6,14 @@ import Input from "@/pages/input";
 import Generate from "@/pages/generate";
 import NotFound from "@/pages/not-found";
 
-function Router() {
-  return (
-    <Switch>
-      <Route path="/" component={Input} />
-      <Route path="/generate" component={Generate} />
-      <Route component={NotFound} />
-    </Switch>
-  );
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
+      <Switch>
+        <Route path="/" component={Input} />
+        <Route path="/generate" component={Generate} />
+        <Route component={NotFound} />
+      </Switch>
       <Toaster />
     </QueryClientProvider>
   );
