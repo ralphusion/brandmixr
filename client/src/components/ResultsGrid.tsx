@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/tooltip";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 
 interface GeneratedName {
   name: string;
@@ -76,6 +77,7 @@ const cardColors = [
 
 export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProps) {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const [copiedName, setCopiedName] = useState<string | null>(null);
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
@@ -104,7 +106,8 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
     await onSave(typeof nameData === 'string' ? { name, domain: '', domainAvailable: false } : nameData);
   };
 
-  const handleNameClick = async (name: string) => {
+  const handleInfoClick = async (e: React.MouseEvent, name: string) => {
+    e.stopPropagation();
     setSelectedName(name);
     setIsLoading(true);
     try {
@@ -128,6 +131,10 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
     }
   };
 
+  const handleCardClick = (name: string) => {
+    navigate(`/brand-variations?name=${encodeURIComponent(name)}`);
+  };
+
   return (
     <TooltipProvider>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -143,7 +150,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
             <Card 
               key={index}
               className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
-              onClick={() => handleNameClick(name)}
+              onClick={() => handleCardClick(name)}
             >
               <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
                 {!readOnly && (
@@ -219,14 +226,16 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                   )}
                 </div>
 
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-4 w-4 opacity-50 hover:opacity-75 absolute bottom-3 left-3 dark:text-gray-300" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Click for more details</p>
-                  </TooltipContent>
-                </Tooltip>
+                <div className="absolute bottom-3 left-3" onClick={(e) => handleInfoClick(e, name)}>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <Info className="h-4 w-4 opacity-50 hover:opacity-75 dark:text-gray-300" />
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Click for brand description</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </div>
               </CardContent>
             </Card>
           );

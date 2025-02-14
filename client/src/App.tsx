@@ -4,6 +4,7 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import Input from "@/pages/input";
 import Generate from "@/pages/generate";
+import BrandVariations from "@/pages/brand-variations";
 import NotFound from "@/pages/not-found";
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
       <Switch>
         <Route path="/" component={Input} />
         <Route path="/generate" component={Generate} />
+        <Route path="/brand-variations" component={BrandVariations} />
         <Route component={NotFound} />
       </Switch>
       <Toaster />
