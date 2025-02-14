@@ -4,8 +4,13 @@ import { storage } from "./storage";
 import { generateNames, generateDescription } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
+import { apiRouter } from "./routes/api";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // API Routes
+  app.use("/api", apiRouter);
+
+  // Web App Routes
   app.post("/api/generate", async (req, res) => {
     try {
       const data = generateNameSchema.parse(req.body);
