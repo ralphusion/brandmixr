@@ -44,3 +44,32 @@ Format the response as: {"names": ["name1", "name2", ..., "name20"]}`;
   const result = JSON.parse(content) as { names: string[] };
   return result.names;
 }
+
+export async function generateDescription(
+  name: string,
+  industry: string,
+  description: string,
+  keywords: string[]
+): Promise<string> {
+  const prompt = `Generate a compelling brand description for a business with the following details:
+
+Brand Name: ${name}
+Industry: ${industry}
+Business Description: ${description}
+Keywords: ${keywords.join(", ")}
+
+Create a description that:
+1. Explains why the name is perfect for the brand
+2. Connects the name to the industry and business purpose
+3. Highlights the brand's potential identity and values
+4. Is concise but engaging (2-3 sentences)
+
+Please respond with just the description text, no JSON formatting needed.`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  return response.choices[0].message.content || "Description not available.";
+}

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames } from "./openai";
+import { generateNames, generateDescription } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 
@@ -13,6 +13,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(names);
     } catch (error) {
       if (error instanceof ZodError || error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
+  app.post("/api/describe", async (req, res) => {
+    try {
+      const { name, industry, description, keywords } = req.body;
+      const brandDescription = await generateDescription(name, industry, description, keywords);
+      res.json({ description: brandDescription });
+    } catch (error) {
+      if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
         res.status(500).json({ error: "An unexpected error occurred" });
