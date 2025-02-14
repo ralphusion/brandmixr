@@ -27,6 +27,7 @@ export const brandNames = pgTable("brand_names", {
   fontPairings: jsonb("font_pairings"),
   rating: integer("rating").default(0),
   workspaceId: uuid("workspace_id").references(() => workspaces.id),
+  logoUrl: text("logo_url"), // Added field for storing logo URL
 });
 
 export const workspaces = pgTable("workspaces", {
@@ -69,6 +70,7 @@ export const insertBrandNameSchema = createInsertSchema(brandNames).pick({
   colorPalette: true,
   fontPairings: true,
   rating: true,
+  logoUrl:true
 });
 
 export const insertWorkspaceSchema = createInsertSchema(workspaces).pick({

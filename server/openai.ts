@@ -88,3 +88,45 @@ Please respond with just the description text, no JSON formatting needed.`;
 
   return response.choices[0].message.content || "Description not available.";
 }
+
+export async function generateLogo(
+  name: string,
+  industry: string,
+  description: string,
+  keywords: string[]
+): Promise<string> {
+  const prompt = `Create a modern, minimal, and professional logo for a brand called "${name}" in the ${industry} industry.
+Description: ${description}
+Keywords: ${keywords.join(", ")}
+
+The logo should be:
+- Clean and simple
+- Memorable and unique
+- Suitable for both digital and print use
+- Professional and industry-appropriate
+- Work well in both color and black & white
+- NOT include any text, just the icon/symbol
+
+Style requirements:
+- Use a minimalist design approach
+- Avoid complex patterns or gradients
+- Create a single iconic symbol
+- Use simple geometric shapes
+- Ensure it works at small sizes`;
+
+  try {
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard",
+      style: "natural",
+    });
+
+    return response.data[0].url;
+  } catch (error) {
+    console.error("Error generating logo:", error);
+    throw new Error("Failed to generate logo");
+  }
+}
