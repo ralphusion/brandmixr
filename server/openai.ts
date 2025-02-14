@@ -124,6 +124,11 @@ Style requirements:
       style: "natural",
     });
 
+    // Handle potential undefined URL
+    if (!response.data[0].url) {
+      throw new Error("No image URL returned from OpenAI");
+    }
+
     return response.data[0].url;
   } catch (error) {
     console.error("Error generating logo:", error);
