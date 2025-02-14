@@ -160,13 +160,19 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                   </div>
                 )}
 
-                {logoUrl && (
-                  <div className="w-24 h-24 mb-4 rounded-lg overflow-hidden bg-white shadow-md">
-                    <img 
-                      src={logoUrl} 
-                      alt={`${name} logo`}
-                      className="w-full h-full object-contain p-2"
-                    />
+                {typeof nameData !== 'string' && (
+                  <div className="w-24 h-24 mb-4 rounded-lg overflow-hidden bg-white/90 shadow-md">
+                    {logoUrl ? (
+                      <img 
+                        src={logoUrl} 
+                        alt={`${name} logo`}
+                        className="w-full h-full object-contain p-2"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
+                        Logo pending
+                      </div>
+                    )}
                   </div>
                 )}
 

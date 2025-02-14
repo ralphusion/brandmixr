@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription, generateLogo } from "./openai"; // Added generateLogo import
+import { generateNames, generateDescription, generateLogo } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
@@ -18,23 +18,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const data = generateNameSchema.parse(req.body);
       const names = await generateNames(data);
 
-      // Check domain, trademark availability and generate logo for each name
+      // Check domain and trademark availability for each name
+      // Generate logos separately to handle rate limits
       const namesWithChecks = await Promise.all(
         names.map(async (name) => {
-          const [domainCheck, trademarkCheck, logoUrl] = await Promise.all([
-            checkDomainAvailability(name),
-            checkTrademarkAvailability(name),
-            generateLogo(name, data.industry, data.description, data.keywords)
-          ]);
+          try {
+            const [domainCheck, trademarkCheck] = await Promise.all([
+              checkDomainAvailability(name),
+              checkTrademarkAvailability(name),
+            ]);
 
-          return {
-            name,
-            domain: domainCheck.domain,
-            domainAvailable: domainCheck.available,
-            trademarkExists: trademarkCheck.exists,
-            similarTrademarks: trademarkCheck.similarMarks,
-            logoUrl
-          };
+            let logoUrl = null;
+            try {
+              logoUrl = await generateLogo(name, data.industry, data.description, data.keywords);
+            } catch (logoError) {
+              console.error(`Error generating logo for ${name}:`, logoError);
+              // Continue without logo if generation fails
+            }
+
+            return {
+              name,
+              domain: domainCheck.domain,
+              domainAvailable: domainCheck.available,
+              trademarkExists: trademarkCheck.exists,
+              similarTrademarks: trademarkCheck.similarMarks,
+              logoUrl
+            };
+          } catch (error) {
+            // If any check fails, return the name with default values
+            return {
+              name,
+              domain: `${name.toLowerCase()}.com`,
+              domainAvailable: false,
+              trademarkExists: false,
+              similarTrademarks: [],
+              logoUrl: null
+            };
+          }
         })
       );
 
