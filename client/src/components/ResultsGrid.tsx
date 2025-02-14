@@ -48,12 +48,30 @@ const FONT_STYLES = [
 ];
 
 const cardColors = [
-  { bg: "bg-gradient-to-br from-emerald-50 to-teal-100", text: "text-emerald-800" },
-  { bg: "bg-gradient-to-br from-blue-50 to-indigo-100", text: "text-blue-800" },
-  { bg: "bg-gradient-to-br from-amber-50 to-yellow-100", text: "text-amber-800" },
-  { bg: "bg-gradient-to-br from-rose-50 to-pink-100", text: "text-rose-800" },
-  { bg: "bg-gradient-to-br from-violet-50 to-purple-100", text: "text-violet-800" },
-  { bg: "bg-gradient-to-br from-slate-50 to-gray-100", text: "text-slate-800" },
+  { 
+    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-900/20 dark:to-teal-900/30", 
+    text: "text-emerald-800 dark:text-emerald-200" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/30", 
+    text: "text-blue-800 dark:text-blue-200" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-900/20 dark:to-yellow-900/30", 
+    text: "text-amber-800 dark:text-amber-200" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-900/20 dark:to-pink-900/30", 
+    text: "text-rose-800 dark:text-rose-200" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-900/20 dark:to-purple-900/30", 
+    text: "text-violet-800 dark:text-violet-200" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/30", 
+    text: "text-slate-800 dark:text-slate-200" 
+  },
 ];
 
 export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProps) {
@@ -133,7 +151,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 bg-white/80 hover:bg-white"
+                      className="h-8 w-8 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCopy(name);
@@ -148,7 +166,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 bg-white/80 hover:bg-white"
+                      className="h-8 w-8 bg-white/80 hover:bg-white dark:bg-gray-800/80 dark:hover:bg-gray-800"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSave(nameData);

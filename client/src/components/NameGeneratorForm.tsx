@@ -50,7 +50,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto border dark:border-gray-800">
       <CardContent className="pt-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onGenerate)} className="space-y-6">
@@ -59,7 +59,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               name="industry"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Industry</FormLabel>
+                  <FormLabel className="dark:text-gray-200">Industry</FormLabel>
                   <Select 
                     onValueChange={(value) => {
                       field.onChange(value);
@@ -68,7 +68,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
                     value={field.value}
                   >
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:border-gray-700">
                         <SelectValue placeholder="Select an industry" />
                       </SelectTrigger>
                     </FormControl>
@@ -90,12 +90,17 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Business Description</FormLabel>
+                  <FormLabel className="dark:text-gray-200">Business Description</FormLabel>
                   <FormControl>
-                    <Input {...field} value={description} onChange={(e) => {
-                      field.onChange(e);
-                      setDescription(e.target.value);
-                    }} />
+                    <Input 
+                      {...field} 
+                      value={description} 
+                      onChange={(e) => {
+                        field.onChange(e);
+                        setDescription(e.target.value);
+                      }}
+                      className="dark:border-gray-700"
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -107,12 +112,13 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               name="keywords"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Keywords (comma-separated)</FormLabel>
+                  <FormLabel className="dark:text-gray-200">Keywords (comma-separated)</FormLabel>
                   <FormControl>
                     <Input 
                       {...field} 
                       value={Array.isArray(field.value) ? field.value.join(', ') : ''}
                       onChange={(e) => field.onChange(e.target.value.split(',').map(k => k.trim()))}
+                      className="dark:border-gray-700"
                     />
                   </FormControl>
                   <FormMessage />
@@ -125,10 +131,10 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               name="style"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Brand Style</FormLabel>
+                  <FormLabel className="dark:text-gray-200">Brand Style</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger>
+                      <SelectTrigger className="dark:border-gray-700">
                         <SelectValue placeholder="Select a style" />
                       </SelectTrigger>
                     </FormControl>
@@ -145,7 +151,11 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               )}
             />
 
-            <Button type="submit" className="w-full" disabled={isGenerating}>
+            <Button 
+              type="submit" 
+              className="w-full dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90" 
+              disabled={isGenerating}
+            >
               {isGenerating ? "Generating..." : "Generate Names"}
             </Button>
           </form>
