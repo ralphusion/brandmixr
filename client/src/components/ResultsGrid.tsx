@@ -10,6 +10,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { apiRequest } from "@/lib/queryClient";
 
 interface GeneratedName {
@@ -33,11 +39,20 @@ interface ResultsGridProps {
 
 const FONT_STYLES = [
   'uppercase tracking-wider font-bold',
-  'uppercase tracking-tight font-light',
+  'uppercase tracking-tight font-extrabold',
   'normal-case tracking-wide font-semibold',
   'font-serif italic font-medium',
-  'font-mono uppercase tracking-widest',
-  'font-sans small-caps tracking-normal font-normal',
+  'font-mono uppercase tracking-widest font-bold',
+  'font-sans small-caps tracking-normal font-bold',
+];
+
+const cardColors = [
+  { bg: "bg-gradient-to-br from-emerald-50 to-teal-100", text: "text-emerald-800" },
+  { bg: "bg-gradient-to-br from-blue-50 to-indigo-100", text: "text-blue-800" },
+  { bg: "bg-gradient-to-br from-amber-50 to-yellow-100", text: "text-amber-800" },
+  { bg: "bg-gradient-to-br from-rose-50 to-pink-100", text: "text-rose-800" },
+  { bg: "bg-gradient-to-br from-violet-50 to-purple-100", text: "text-violet-800" },
+  { bg: "bg-gradient-to-br from-slate-50 to-gray-100", text: "text-slate-800" },
 ];
 
 export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProps) {
@@ -47,14 +62,6 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
   const [selectedName, setSelectedName] = useState<string | null>(null);
   const [description, setDescription] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
-
-  const cardColors = [
-    "bg-[#F5F5F5] text-[#37B5B5]",  // Teal
-    "bg-[#E6E6E6] text-[#4A4A4A]",  // Gray
-    "bg-[#F0F7F4] text-[#A77E58]",  // Brown
-    "bg-[#FFE4E1] text-[#FF6B6B]",  // Pink
-    "bg-[#F5F5DC] text-[#8B4513]"   // Beige
-  ];
 
   const handleCopy = async (name: string) => {
     await navigator.clipboard.writeText(name);
@@ -102,27 +109,28 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
   };
 
   return (
-    <>
+    <TooltipProvider>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {names.map((nameData, index) => {
           const name = typeof nameData === 'string' ? nameData : nameData.name;
           const domain = typeof nameData === 'string' ? null : nameData.domain;
           const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
           const trademarkExists = typeof nameData === 'string' ? null : nameData.trademarkExists;
+          const colorSet = cardColors[index % cardColors.length];
 
           return (
             <Card 
               key={index}
-              className={`${cardColors[index % cardColors.length]} transition-transform hover:scale-105 aspect-square cursor-pointer group`}
+              className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative overflow-hidden`}
               onClick={() => handleNameClick(name)}
             >
-              <CardContent className="p-6 relative h-full flex flex-col items-center justify-center">
+              <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
                 {!readOnly && (
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 bg-white/80 hover:bg-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleCopy(name);
@@ -137,7 +145,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8"
+                      className="h-8 w-8 bg-white/80 hover:bg-white"
                       onClick={(e) => {
                         e.stopPropagation();
                         toggleFavorite(name);
@@ -149,28 +157,47 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                     </Button>
                   </div>
                 )}
-                <h3 className={`text-2xl text-center ${FONT_STYLES[index % FONT_STYLES.length]}`}>
+
+                <h3 className={`text-3xl text-center mb-6 ${colorSet.text} ${FONT_STYLES[index % FONT_STYLES.length]}`}>
                   {name}
                 </h3>
-                <div className="mt-2 space-y-2">
+
+                <div className="absolute bottom-3 right-3 flex gap-2">
                   {domain && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Globe className="h-4 w-4" />
-                      <span className={domainAvailable ? "text-green-600" : "text-red-600"}>
-                        {domainAvailable ? "Domain Available" : "Domain Taken"}
-                      </span>
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className={`rounded-full p-1.5 ${domainAvailable ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                          <Globe className="h-4 w-4" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{domainAvailable ? "Domain name is available" : "Domain name is taken"}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
+
                   {trademarkExists !== null && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Shield className="h-4 w-4" />
-                      <span className={!trademarkExists ? "text-green-600" : "text-red-600"}>
-                        {!trademarkExists ? "No Similar Trademarks" : "Similar Trademarks Found"}
-                      </span>
-                    </div>
+                    <Tooltip>
+                      <TooltipTrigger>
+                        <div className={`rounded-full p-1.5 ${!trademarkExists ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                          <Shield className="h-4 w-4" />
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{!trademarkExists ? "No similar trademarks found" : "Similar trademarks exist"}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   )}
                 </div>
-                <Info className="h-4 w-4 opacity-50 mt-4" />
+
+                <Tooltip>
+                  <TooltipTrigger>
+                    <Info className="h-4 w-4 opacity-50 absolute bottom-3 left-3" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Click for more details</p>
+                  </TooltipContent>
+                </Tooltip>
               </CardContent>
             </Card>
           );
@@ -191,6 +218,6 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           </div>
         </DialogContent>
       </Dialog>
-    </>
+    </TooltipProvider>
   );
 }
