@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { type BrandName } from "@shared/schema";
-import { Heart, Copy, Check, Info } from "lucide-react";
+import { Heart, Copy, Check, Info, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
@@ -12,8 +12,14 @@ import {
 } from "@/components/ui/dialog";
 import { apiRequest } from "@/lib/queryClient";
 
+interface GeneratedName {
+  name: string;
+  domain: string;
+  domainAvailable: boolean;
+}
+
 interface ResultsGridProps {
-  names: string[];
+  names: (string | GeneratedName)[];
   onSave: (name: string) => void;
   readOnly?: boolean;
 }
@@ -91,52 +97,66 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
   return (
     <>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {names.map((name, index) => (
-          <Card 
-            key={index}
-            className={`${cardColors[index % cardColors.length]} transition-transform hover:scale-105 aspect-square cursor-pointer group`}
-            onClick={() => handleNameClick(name)}
-          >
-            <CardContent className="p-6 relative h-full flex flex-col items-center justify-center">
-              {!readOnly && (
-                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleCopy(name);
-                    }}
-                  >
-                    {copiedName === name ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(name);
-                    }}
-                  >
-                    <Heart 
-                      className={`h-4 w-4 ${favorites.has(name) ? "fill-current" : ""}`} 
-                    />
-                  </Button>
-                </div>
-              )}
-              <h3 className={`text-2xl text-center ${FONT_STYLES[index % FONT_STYLES.length]}`}>
-                {name}
-              </h3>
-              <Info className="h-4 w-4 opacity-50 mt-4" />
-            </CardContent>
-          </Card>
-        ))}
+        {names.map((nameData, index) => {
+          const name = typeof nameData === 'string' ? nameData : nameData.name;
+          const domain = typeof nameData === 'string' ? null : nameData.domain;
+          const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
+
+          return (
+            <Card 
+              key={index}
+              className={`${cardColors[index % cardColors.length]} transition-transform hover:scale-105 aspect-square cursor-pointer group`}
+              onClick={() => handleNameClick(name)}
+            >
+              <CardContent className="p-6 relative h-full flex flex-col items-center justify-center">
+                {!readOnly && (
+                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopy(name);
+                      }}
+                    >
+                      {copiedName === name ? (
+                        <Check className="h-4 w-4" />
+                      ) : (
+                        <Copy className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(name);
+                      }}
+                    >
+                      <Heart 
+                        className={`h-4 w-4 ${favorites.has(name) ? "fill-current" : ""}`} 
+                      />
+                    </Button>
+                  </div>
+                )}
+                <h3 className={`text-2xl text-center ${FONT_STYLES[index % FONT_STYLES.length]}`}>
+                  {name}
+                </h3>
+                {domain && (
+                  <div className="mt-2 flex items-center gap-2 text-sm">
+                    <Globe className="h-4 w-4" />
+                    <span className={domainAvailable ? "text-green-600" : "text-red-600"}>
+                      {domainAvailable ? "Available" : "Taken"}
+                    </span>
+                  </div>
+                )}
+                <Info className="h-4 w-4 opacity-50 mt-4" />
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <Dialog open={!!selectedName} onOpenChange={() => setSelectedName(null)}>

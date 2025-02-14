@@ -13,9 +13,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const NAMES_PER_PAGE = 5;
 
+interface GeneratedName {
+  name: string;
+  domain: string;
+  domainAvailable: boolean;
+}
+
 export default function Generate() {
-  const [generatedNames, setGeneratedNames] = useState<string[]>([]);
-  const [displayedNames, setDisplayedNames] = useState<string[]>([]);
+  const [generatedNames, setGeneratedNames] = useState<GeneratedName[]>([]);
+  const [displayedNames, setDisplayedNames] = useState<GeneratedName[]>([]);
   const [page, setPage] = useState(1);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -64,7 +70,7 @@ export default function Generate() {
       const res = await apiRequest("POST", "/api/generate", data);
       return res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: GeneratedName[]) => { // Type annotation added for clarity
       setGeneratedNames(data);
       setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
       setPage(1);
@@ -145,7 +151,7 @@ export default function Generate() {
             <div className="mt-8">
               <ResultsGrid
                 names={displayedNames}
-                onSave={(name) => saveMutation.mutate(name)}
+                onSave={(name) => saveMutation.mutate(name.name)} // Accessing name property
               />
               {generatedNames.length > displayedNames.length && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
