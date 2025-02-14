@@ -106,10 +106,10 @@ export default function BrandVariations() {
           <Button
             variant="ghost"
             className="mr-4"
-            onClick={() => window.history.back()}
+            onClick={() => navigate('/generate')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            Back to Generated Names
           </Button>
           <Logo />
         </div>

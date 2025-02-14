@@ -41,13 +41,17 @@ export default function Generate() {
   // Load saved generated names from sessionStorage
   useEffect(() => {
     const savedGeneratedNames = sessionStorage.getItem('generatedNames');
+    const formData = sessionStorage.getItem('generatorFormData');
+
+    if (!formData) {
+      navigate('/');
+      return;
+    }
+
     if (savedGeneratedNames) {
       const parsedNames = JSON.parse(savedGeneratedNames);
       setGeneratedNames(parsedNames);
       setDisplayedNames(parsedNames.slice(0, NAMES_PER_PAGE));
-    } else if (!formData) {
-      navigate('/');
-      return;
     } else {
       // Generate names when the page loads and no saved names exist
       generateMutation.mutate(JSON.parse(formData));
@@ -157,6 +161,10 @@ export default function Generate() {
 
   const handleGenerateMore = () => {
     if (formData) {
+      // Clear existing names when generating new ones
+      setGeneratedNames([]);
+      setDisplayedNames([]);
+      sessionStorage.removeItem('generatedNames');
       generateMutation.mutate(JSON.parse(formData));
     }
   };
@@ -203,7 +211,7 @@ export default function Generate() {
               )}
               {displayedNames.length === generatedNames.length && (
                 <div className="mt-8 flex justify-center">
-                  <Button 
+                  <Button
                     onClick={handleGenerateMore}
                     disabled={isGenerating}
                   >

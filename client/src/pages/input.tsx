@@ -7,6 +7,8 @@ export default function Input() {
   const [, navigate] = useLocation();
 
   const handleGenerate = (data: GenerateNameRequest) => {
+    // Clear previous generated names when submitting new parameters
+    sessionStorage.removeItem('generatedNames');
     // Store form data in sessionStorage to persist between pages
     sessionStorage.setItem('generatorFormData', JSON.stringify(data));
     navigate('/generate');
