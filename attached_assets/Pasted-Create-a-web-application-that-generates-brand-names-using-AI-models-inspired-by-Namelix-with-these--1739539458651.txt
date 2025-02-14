@@ -1,0 +1,35 @@
+Create a web application that generates brand names using AI models, inspired by Namelix with these key features:
+
+1. AI-Based Brand Name Generation: Use machine learning models (e.g., GPT-3) to generate unique and creative brand names in real-time as users input criteria.
+
+2. Customizable Input Options: Allow users to specify industry type (e.g., tech, fashion, food), keywords, and style preferences (e.g., modern, retro, luxury).
+
+3. Real-Time Generation: Names should be generated immediately upon user input without requiring manual triggers or page refreshes.
+
+4. Key Features: The input should include the following fields:
+- Industry - include a list of 20 top business categories
+- Business Description - include a placeholder but random text for a given industry chosen by the user. The description should dynamically change each time even if the same industry is chosen again
+- Keywords - Allow the user to enter appropriate keywords relevant to their business or brand
+- Branding Style - Should include the following list items:
+   -- Real Words - Should include real words related to the keyword, description and context of the industry chosen
+   -- Alternate Spelling - Should include alternative spelling where vowels and consonants are replaced but the word still sounds like a real word. For eg. Fiverr, Lyft
+   -- Compund Words - Which combines two words to make a brandable single word for eg. FlipKart
+   -- Brandable - which makes a brandable word like Google, Zomato
+   -- Phrase - short phrase of 2-4 words
+   -- Auto - Include Random mix of all Styles
+   
+5. Output Validation and Filtering: Automatically filter names by length, uniqueness, and domain availability; include manual filtering options.
+
+6. Save and Export Functionality: Enable users to save favorite names and export them in bulk (e.g., CSV, text files) with a history feature.
+
+7. Responsive Design: Ensure seamless operation across desktops, mobile devices, and tablets with an optimized interface.
+
+8. Performance Optimization: Optimize for speed and efficiency, including caching and potential offline capabilities to enhance user experience.
+
+9. Advanced Features: Include multilingual support (e.g., Spanish, French) and API integration for developers to access features programmatically.
+
+10. User Interface:
+
+- Provide a minimalist or detailed interface with options for style preferences.
+- Include quick access buttons for common actions and tooltips/guided tours for new users.
+- Use a list or grid view for output display with additional metrics like uniqueness score and style match percentage.
