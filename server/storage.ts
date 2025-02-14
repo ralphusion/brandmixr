@@ -1,48 +1,85 @@
-import { brandNames, type BrandName, type InsertBrandName } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
+import { 
+  brandNames, stylePresets,
+  type BrandName, type InsertBrandName,
+  type StylePreset, type InsertStylePreset
+} from "@shared/schema";
 
 export interface IStorage {
   getBrandNames(): Promise<BrandName[]>;
   saveBrandName(name: InsertBrandName): Promise<BrandName>;
   toggleSaved(id: number): Promise<BrandName>;
   getSavedNames(): Promise<BrandName[]>;
+  // New methods for style presets
+  getStylePresets(): Promise<StylePreset[]>;
+  getStylePreset(id: number): Promise<StylePreset | undefined>;
+  createStylePreset(preset: InsertStylePreset): Promise<StylePreset>;
 }
 
-export class MemStorage implements IStorage {
-  private brandNames: Map<number, BrandName>;
-  private currentId: number;
-
-  constructor() {
-    this.brandNames = new Map();
-    this.currentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   async getBrandNames(): Promise<BrandName[]> {
-    return Array.from(this.brandNames.values());
+    return await db.select().from(brandNames);
   }
 
   async saveBrandName(name: InsertBrandName): Promise<BrandName> {
-    const id = this.currentId++;
-    const brandName: BrandName = { 
-      ...name, 
-      id,
-      saved: name.saved ?? false // Ensure saved is always a boolean
-    };
-    this.brandNames.set(id, brandName);
+    const [brandName] = await db
+      .insert(brandNames)
+      .values({
+        ...name,
+        domainAvailable: null,
+        domainCheckedAt: null,
+        colorPalette: null,
+        fontPairings: null,
+        rating: 0
+      })
+      .returning();
     return brandName;
   }
 
   async toggleSaved(id: number): Promise<BrandName> {
-    const name = this.brandNames.get(id);
+    const [name] = await db
+      .select()
+      .from(brandNames)
+      .where(eq(brandNames.id, id));
+
     if (!name) throw new Error("Name not found");
 
-    const updated = { ...name, saved: !name.saved };
-    this.brandNames.set(id, updated);
+    const [updated] = await db
+      .update(brandNames)
+      .set({ saved: !name.saved })
+      .where(eq(brandNames.id, id))
+      .returning();
+
     return updated;
   }
 
   async getSavedNames(): Promise<BrandName[]> {
-    return Array.from(this.brandNames.values()).filter(name => name.saved);
+    return await db
+      .select()
+      .from(brandNames)
+      .where(eq(brandNames.saved, true));
+  }
+
+  async getStylePresets(): Promise<StylePreset[]> {
+    return await db.select().from(stylePresets);
+  }
+
+  async getStylePreset(id: number): Promise<StylePreset | undefined> {
+    const [preset] = await db
+      .select()
+      .from(stylePresets)
+      .where(eq(stylePresets.id, id));
+    return preset;
+  }
+
+  async createStylePreset(preset: InsertStylePreset): Promise<StylePreset> {
+    const [newPreset] = await db
+      .insert(stylePresets)
+      .values(preset)
+      .returning();
+    return newPreset;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
