@@ -4,15 +4,6 @@ import { db } from "../db";
 import { apiKeys } from "@shared/schema";
 import { eq } from "drizzle-orm";
 
-// Extend Express Request type
-declare global {
-  namespace Express {
-    interface Request {
-      apiKey?: typeof apiKeys.$inferSelect;
-    }
-  }
-}
-
 export async function generateApiKey(name: string, rateLimit: number = 100): Promise<string> {
   const key = `bng_${crypto.randomBytes(32).toString('hex')}`;
   await db.insert(apiKeys).values({
@@ -25,7 +16,7 @@ export async function generateApiKey(name: string, rateLimit: number = 100): Pro
 
 export async function validateApiKey(req: Request, res: Response, next: NextFunction) {
   const apiKey = req.headers['x-api-key'];
-
+  
   if (!apiKey || typeof apiKey !== 'string') {
     return res.status(401).json({ error: "API key is required" });
   }

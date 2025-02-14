@@ -49,33 +49,15 @@ ${styleGuide}
 Please respond with a JSON array of strings containing only the generated names.
 Format the response as: {"names": ["name1", "name2", ..., "name50"]}`;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" }
-    });
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" }
+  });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content received from OpenAI");
-    }
-
-    const result = JSON.parse(content) as { names: string[] };
-    if (!Array.isArray(result.names)) {
-      throw new Error("Invalid response format from OpenAI");
-    }
-
-    return result.names;
-  } catch (error) {
-    console.error("Error generating names:", error);
-    if (error instanceof OpenAI.APIError) {
-      if (error.status === 429) {
-        throw new Error("Rate limit exceeded. Please try again in a few minutes.");
-      }
-    }
-    throw new Error("Failed to generate names. Please try again.");
-  }
+  const content = response.choices[0].message.content || '{"names": []}';
+  const result = JSON.parse(content) as { names: string[] };
+  return result.names;
 }
 
 export async function generateDescription(
@@ -99,68 +81,10 @@ Create a description that:
 
 Please respond with just the description text, no JSON formatting needed.`;
 
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-    });
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+  });
 
-    const content = response.choices[0].message.content;
-    if (!content) {
-      throw new Error("No content received from OpenAI");
-    }
-    return content;
-  } catch (error) {
-    console.error("Error generating description:", error);
-    throw new Error("Failed to generate description. Please try again.");
-  }
-}
-
-export async function generateLogo(
-  name: string,
-  industry: string,
-  description: string,
-  keywords: string[]
-): Promise<string> {
-  const prompt = `Create a modern, minimal, and professional logo for a brand called "${name}" in the ${industry} industry.
-Description: ${description}
-Keywords: ${keywords.join(", ")}
-
-The logo should be:
-- Clean and simple
-- Memorable and unique
-- Suitable for both digital and print use
-- Professional and industry-appropriate
-- Work well in both color and black & white
-- NOT include any text, just the icon/symbol
-
-Style requirements:
-- Use a minimalist design approach
-- Avoid complex patterns or gradients
-- Create a single iconic symbol
-- Use simple geometric shapes
-- Ensure it works at small sizes`;
-
-  try {
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt,
-      n: 1,
-      size: "1024x1024",
-      quality: "standard",
-      style: "natural",
-    });
-
-    if (!response.data[0].url) {
-      throw new Error("No image URL returned from OpenAI");
-    }
-
-    return response.data[0].url;
-  } catch (error) {
-    console.error("Error generating logo:", error);
-    if (error instanceof OpenAI.APIError && error.status === 429) {
-      throw new Error("Rate limit exceeded for logo generation. Logo will be generated later.");
-    }
-    throw new Error("Failed to generate logo");
-  }
+  return response.choices[0].message.content || "Description not available.";
 }

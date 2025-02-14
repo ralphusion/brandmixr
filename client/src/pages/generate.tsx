@@ -8,22 +8,8 @@ import { queryClient } from "@/lib/queryClient";
 import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-interface GeneratedName {
-  name: string;
-  domain: string;
-  domainAvailable: boolean;
-  trademarkExists?: boolean;
-  similarTrademarks?: Array<{
-    serialNumber: string;
-    registrationNumber: string;
-    wordMark: string;
-    status: string;
-  }>;
-  logoUrl?: string | null;
-}
 
 const NAMES_PER_PAGE = 12;
 
@@ -77,29 +63,19 @@ export default function Generate() {
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
       setIsGenerating(true);
-      try {
-        const res = await apiRequest("POST", "/api/generate", data);
-        const responseData = await res.json();
-        if (!res.ok) {
-          throw new Error(responseData.error || 'Failed to generate names');
-        }
-        return responseData as GeneratedName[];
-      } catch (error) {
-        console.error("Generation error:", error);
-        throw error;
-      }
+      const res = await apiRequest("POST", "/api/generate", data);
+      return res.json();
     },
-    onSuccess: (data) => {
-      setGeneratedNames(data);
-      setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
+    onSuccess: (data: GeneratedName[]) => {
+      setGeneratedNames(prev => [...prev, ...data]);
       setPage(1);
       setIsGenerating(false);
     },
-    onError: (error) => {
+    onError: () => {
       setIsGenerating(false);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to generate names. Please try again.",
+        description: "Failed to generate names. Please try again.",
         variant: "destructive",
       });
     },
@@ -107,13 +83,12 @@ export default function Generate() {
 
   const saveMutation = useMutation({
     mutationFn: async (name: string) => {
-      const formDataObj = JSON.parse(formData || '{}');
       const res = await apiRequest("POST", "/api/names", {
         name,
-        industry: formDataObj.industry || "",
-        description: formDataObj.description || "",
-        keywords: formDataObj.keywords || [],
-        style: formDataObj.style || "",
+        industry: JSON.parse(formData || '{}').industry || "",
+        description: JSON.parse(formData || '{}').description || "",
+        keywords: JSON.parse(formData || '{}').keywords || [],
+        style: JSON.parse(formData || '{}').style || "",
         saved: true,
       });
       return res.json();
@@ -171,33 +146,15 @@ export default function Generate() {
         <TabsContent value="generated">
           {generateMutation.isPending && (
             <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-              <p className="text-lg text-muted-foreground">Generating names and logos...</p>
-              <p className="text-sm text-muted-foreground mt-2">This might take a moment</p>
+              <p className="text-lg text-muted-foreground">Generating names...</p>
             </div>
           )}
 
-          {!generateMutation.isPending && generateMutation.isError && (
-            <div className="text-center py-12">
-              <p className="text-lg text-destructive">
-                {generateMutation.error instanceof Error 
-                  ? generateMutation.error.message 
-                  : "Failed to generate names. Please try again."}
-              </p>
-              <Button
-                onClick={handleGenerateMore}
-                className="mt-4"
-              >
-                Try Again
-              </Button>
-            </div>
-          )}
-
-          {!generateMutation.isPending && displayedNames.length > 0 && (
+          {displayedNames.length > 0 && (
             <div className="mt-8">
               <ResultsGrid
                 names={displayedNames}
-                onSave={(name) => saveMutation.mutate(name)}
+                onSave={(name) => saveMutation.mutate(name.name)}
               />
               {generatedNames.length > displayedNames.length && !isGenerating && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
@@ -220,6 +177,11 @@ export default function Generate() {
 
         <TabsContent value="saved">
           <div className="mt-8">
+            <div className="flex justify-end mb-4">
+              <Button variant="outline" size="sm" onClick={handleExport}>
+                Export CSV
+              </Button>
+            </div>
             {savedNames.length > 0 ? (
               <ResultsGrid
                 names={savedNames.map(n => ({

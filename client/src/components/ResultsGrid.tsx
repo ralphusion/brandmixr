@@ -29,7 +29,6 @@ interface GeneratedName {
     wordMark: string;
     status: string;
   }>;
-  logoUrl?: string;
 }
 
 interface ResultsGridProps {
@@ -117,7 +116,6 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           const domain = typeof nameData === 'string' ? null : nameData.domain;
           const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
           const trademarkExists = typeof nameData === 'string' ? null : nameData.trademarkExists;
-          const logoUrl = typeof nameData === 'string' ? null : nameData.logoUrl;
           const colorSet = cardColors[index % cardColors.length];
 
           return (
@@ -126,7 +124,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
               className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative overflow-hidden`}
               onClick={() => handleNameClick(name)}
             >
-              <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[280px]">
+              <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
                 {!readOnly && (
                   <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button
@@ -157,22 +155,6 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                         className={`h-4 w-4 ${favorites.has(name) ? "fill-current" : ""}`} 
                       />
                     </Button>
-                  </div>
-                )}
-
-                {typeof nameData !== 'string' && (
-                  <div className="w-24 h-24 mb-4 rounded-lg overflow-hidden bg-white/90 shadow-md">
-                    {logoUrl ? (
-                      <img 
-                        src={logoUrl} 
-                        alt={`${name} logo`}
-                        className="w-full h-full object-contain p-2"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-muted-foreground text-sm">
-                        Logo pending
-                      </div>
-                    )}
                   </div>
                 )}
 
