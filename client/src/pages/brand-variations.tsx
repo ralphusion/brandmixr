@@ -1,8 +1,11 @@
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { useState, useEffect } from "react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const FONT_STYLES = [
   'uppercase tracking-wider font-bold',
@@ -38,12 +41,58 @@ const BACKGROUNDS = [
     bg: "bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950 dark:to-gray-900", 
     text: "text-slate-800 dark:text-slate-100" 
   },
+  // Additional pastel and darker variants
+  { 
+    bg: "bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900", 
+    text: "text-lime-800 dark:text-lime-100" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900", 
+    text: "text-sky-800 dark:text-sky-100" 
+  },
+  { 
+    bg: "bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900", 
+    text: "text-orange-800 dark:text-orange-100" 
+  }
 ];
 
 export default function BrandVariations() {
   const [, navigate] = useLocation();
+  const [logoUrl, setLogoUrl] = useState<string>("");
+  const [isGeneratingLogo, setIsGeneratingLogo] = useState(false);
+  const { toast } = useToast();
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
+
+  useEffect(() => {
+    if (!brandName) {
+      navigate('/');
+      return;
+    }
+    generateLogo();
+  }, [brandName]);
+
+  const generateLogo = async () => {
+    if (!brandName) return;
+
+    setIsGeneratingLogo(true);
+    try {
+      const res = await apiRequest("POST", "/api/generate-logo", { 
+        brandName,
+        style: "minimalist brand logo design with simple shapes and clean typography" 
+      });
+      const data = await res.json();
+      setLogoUrl(data.url);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate logo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingLogo(false);
+    }
+  };
 
   if (!brandName) {
     navigate('/');
@@ -57,13 +106,22 @@ export default function BrandVariations() {
           <Button
             variant="ghost"
             className="mr-4"
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back
           </Button>
           <Logo />
         </div>
+        <Button
+          variant="outline"
+          onClick={generateLogo}
+          disabled={isGeneratingLogo}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw className={`h-4 w-4 ${isGeneratingLogo ? 'animate-spin' : ''}`} />
+          Refresh Logo
+        </Button>
       </div>
 
       <h1 className="text-3xl font-bold mb-6">Brand Variations: {brandName}</h1>
@@ -75,7 +133,17 @@ export default function BrandVariations() {
               key={`${bgIndex}-${fontIndex}`}
               className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
             >
-              <CardContent className="p-6 flex items-center justify-center min-h-[200px]">
+              <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
+                {logoUrl && (
+                  <div className="w-24 h-24 mb-4">
+                    <img src={logoUrl} alt="Brand Logo" className="w-full h-full object-contain" />
+                  </div>
+                )}
+                {isGeneratingLogo && !logoUrl && (
+                  <div className="w-24 h-24 mb-4 flex items-center justify-center">
+                    <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                )}
                 <h3 className={`text-3xl text-center ${style.text} ${fontStyle}`}>
                   {brandName}
                 </h3>

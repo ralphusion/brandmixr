@@ -88,3 +88,23 @@ Please respond with just the description text, no JSON formatting needed.`;
 
   return response.choices[0].message.content || "Description not available.";
 }
+
+export async function generateLogoWithDalle(brandName: string, style: string): Promise<{ url: string }> {
+  const prompt = `Create a minimalist, professional logo for the brand name "${brandName}". The design should be:
+- Clean and modern with simple geometric shapes
+- Suitable for both light and dark backgrounds
+- Memorable and unique
+- Using a minimal color palette
+- Incorporating the brand name in a stylish typography
+Style guidance: ${style}`;
+
+  const response = await openai.images.generate({
+    model: "dall-e-3",
+    prompt,
+    n: 1,
+    size: "1024x1024",
+    quality: "standard",
+  });
+
+  return { url: response.data[0].url };
+}

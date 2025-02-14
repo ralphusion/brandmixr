@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription } from "./openai";
+import { generateNames, generateDescription, generateLogoWithDalle } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
@@ -17,28 +17,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = generateNameSchema.parse(req.body);
       const names = await generateNames(data);
-
-      // Check domain and trademark availability for each name
-      const namesWithChecks = await Promise.all(
-        names.map(async (name) => {
-          const [domainCheck, trademarkCheck] = await Promise.all([
-            checkDomainAvailability(name),
-            checkTrademarkAvailability(name)
-          ]);
-
-          return {
-            name,
-            domain: domainCheck.domain,
-            domainAvailable: domainCheck.available,
-            trademarkExists: trademarkCheck.exists,
-            similarTrademarks: trademarkCheck.similarMarks
-          };
-        })
-      );
-
-      res.json(namesWithChecks);
+      res.json(names);
     } catch (error) {
       if (error instanceof ZodError || error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
+  app.post("/api/generate-logo", async (req, res) => {
+    try {
+      const { brandName, style } = req.body;
+      if (!brandName) {
+        throw new Error("Brand name is required");
+      }
+      const result = await generateLogoWithDalle(brandName, style);
+      res.json(result);
+    } catch (error) {
+      if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {
         res.status(500).json({ error: "An unexpected error occurred" });
