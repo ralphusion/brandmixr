@@ -92,12 +92,14 @@ export default function Generate() {
       return res.json();
     },
     onSuccess: (data: GeneratedName[]) => {
-      setGeneratedNames(data);
-      setDisplayedNames(data.slice(0, NAMES_PER_PAGE));
-      setPage(1);
+      // Append new names to existing ones instead of replacing
+      setGeneratedNames(prev => [...prev, ...data]);
+      // Update displayed names to show all names up to the current page
+      const endIndex = page * NAMES_PER_PAGE;
+      setDisplayedNames(prev => [...prev, ...data].slice(0, endIndex));
       setIsGenerating(false);
-      // Store generated names in sessionStorage
-      sessionStorage.setItem('generatedNames', JSON.stringify(data));
+      // Store all generated names in sessionStorage
+      sessionStorage.setItem('generatedNames', JSON.stringify([...generatedNames, ...data]));
     },
     onError: () => {
       setIsGenerating(false);
@@ -161,10 +163,6 @@ export default function Generate() {
 
   const handleGenerateMore = () => {
     if (formData) {
-      // Clear existing names when generating new ones
-      setGeneratedNames([]);
-      setDisplayedNames([]);
-      sessionStorage.removeItem('generatedNames');
       generateMutation.mutate(JSON.parse(formData));
     }
   };
@@ -194,7 +192,7 @@ export default function Generate() {
         <TabsContent value="generated">
           {generateMutation.isPending && (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Generating names...</p>
+              <p className="text-lg text-muted-foreground">Generating more names...</p>
             </div>
           )}
 
