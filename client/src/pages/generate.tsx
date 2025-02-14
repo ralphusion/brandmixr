@@ -103,6 +103,20 @@ export default function Generate() {
     },
   });
 
+  const toggleSaveMutation = useMutation({
+    mutationFn: async (name: BrandName) => {
+      const res = await apiRequest("POST", `/api/names/${name.id}/toggle`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/names/saved"] });
+      toast({
+        title: "Success",
+        description: "Name updated successfully!",
+      });
+    },
+  });
+
   const handleExport = () => {
     const csvContent = savedNames
       .map((name) => `${name.name},${name.industry},${name.style}`)
@@ -192,8 +206,12 @@ export default function Generate() {
                   domain: '',
                   domainAvailable: false
                 }))}
-                onSave={() => {}}
-                readOnly
+                onSave={(name) => {
+                  const savedName = savedNames.find(n => n.name === name.name);
+                  if (savedName) {
+                    toggleSaveMutation.mutate(savedName);
+                  }
+                }}
               />
             ) : (
               <p className="text-center text-muted-foreground py-12">
