@@ -17,7 +17,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const data = generateNameSchema.parse(req.body);
       const names = await generateNames(data);
-      res.json(names);
+
+      // Check domain and trademark availability for each name
+      const namesWithChecks = await Promise.all(
+        names.map(async (name) => {
+          const [domainCheck, trademarkCheck] = await Promise.all([
+            checkDomainAvailability(name),
+            checkTrademarkAvailability(name)
+          ]);
+
+          return {
+            name,
+            domain: domainCheck.domain,
+            domainAvailable: domainCheck.available,
+            trademarkExists: trademarkCheck.exists,
+            similarTrademarks: trademarkCheck.similarMarks
+          };
+        })
+      );
+
+      res.json(namesWithChecks);
     } catch (error) {
       if (error instanceof ZodError || error instanceof Error) {
         res.status(400).json({ error: error.message });
