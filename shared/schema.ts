@@ -2,6 +2,13 @@ import { pgTable, text, serial, integer, boolean, jsonb, timestamp, uuid, foreig
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const stylePresets = pgTable("style_presets", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  settings: jsonb("settings").notNull(), // Contains length preferences, patterns, etc.
+});
+
 export const brandNames = pgTable("brand_names", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
@@ -33,13 +40,6 @@ export const comments = pgTable("comments", {
   content: text("content").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   userId: uuid("user_id").notNull(), // References the user who made the comment
-});
-
-export const stylePresets = pgTable("style_presets", {
-  id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  description: text("description").notNull(),
-  settings: jsonb("settings").notNull(), // Contains length preferences, patterns, etc.
 });
 
 export const apiKeys = pgTable("api_keys", {
@@ -75,11 +75,8 @@ export const insertCommentSchema = createInsertSchema(comments).pick({
   userId: true,
 });
 
-export const insertStylePresetSchema = createInsertSchema(stylePresets).pick({
-  name: true,
-  description: true,
-  settings: true,
-});
+export const insertStylePresetSchema = createInsertSchema(stylePresets);
+export const stylePresetSchema = insertStylePresetSchema;
 
 export const insertApiKeySchema = createInsertSchema(apiKeys).pick({
   name: true,
@@ -93,6 +90,7 @@ export type Workspace = typeof workspaces.$inferSelect;
 export type Comment = typeof comments.$inferSelect;
 export type StylePreset = typeof stylePresets.$inferSelect;
 export type ApiKey = typeof apiKeys.$inferSelect;
+export type InsertStylePreset = z.infer<typeof insertStylePresetSchema>;
 
 export const generateNameSchema = z.object({
   industry: z.string(),

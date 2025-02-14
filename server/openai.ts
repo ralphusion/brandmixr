@@ -1,7 +1,23 @@
 import OpenAI from "openai";
 import { type GenerateNameRequest } from "@shared/schema";
+import { db } from "./db";
+import { apiKeys } from "@shared/schema";
+import crypto from "crypto";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+export async function generateApiKey(name: string, rateLimit: number = 100): Promise<string> {
+  const key = `bng_${crypto.randomBytes(32).toString('hex')}`;
+  const [apiKey] = await db.insert(apiKeys)
+    .values({
+      key,
+      name,
+      rateLimit,
+      usageCount: 0
+    })
+    .returning();
+  return apiKey.key;
+}
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
 export async function generateNames(request: GenerateNameRequest): Promise<string[]> {

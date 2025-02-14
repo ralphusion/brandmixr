@@ -11,7 +11,7 @@ export interface IStorage {
   saveBrandName(name: InsertBrandName): Promise<BrandName>;
   toggleSaved(id: number): Promise<BrandName>;
   getSavedNames(): Promise<BrandName[]>;
-  // New methods for style presets
+  // Style preset methods
   getStylePresets(): Promise<StylePreset[]>;
   getStylePreset(id: number): Promise<StylePreset | undefined>;
   createStylePreset(preset: InsertStylePreset): Promise<StylePreset>;
@@ -61,6 +61,7 @@ export class DatabaseStorage implements IStorage {
       .where(eq(brandNames.saved, true));
   }
 
+  // New style preset methods
   async getStylePresets(): Promise<StylePreset[]> {
     return await db.select().from(stylePresets);
   }
