@@ -108,6 +108,20 @@ const LETTER_SPACING = [
 
 type IconStyle = 'initials-simple' | 'initials-detailed' | 'abstract-geometric' | 'abstract-organic';
 
+interface FontRecommendation {
+  primary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  secondary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  explanation: string;
+}
+
 const BACKGROUNDS = [
   { bg: 'bg-blue-500 text-white', text: 'text-white' },
   { bg: 'bg-red-500 text-white', text: 'text-white' },
@@ -400,7 +414,7 @@ export default function MoodBoard() {
 
     // Filter out current style and select random
     const availableStyles = styles.filter(style => style !== iconStyle);
-    const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)];
+    const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
     // Generate new colors
     const hue = Math.floor(Math.random() * 360);
@@ -886,7 +900,7 @@ export default function MoodBoard() {
                         >
                           <img
                             src={imageUrl}
-                            alt={`Mood image ${index + 1}`}
+                            alt={`Mood image ${index+ 1}`}
                             className="w-full h-full object-contain"
                           />
                         </motion.div>
@@ -904,7 +918,7 @@ export default function MoodBoard() {
         )}
 
         <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
-          <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+          <DialogContent>
             <DialogHeader>
               <DialogTitle>AI-Recommended Font Combinations</DialogTitle>
             </DialogHeader>
@@ -912,7 +926,7 @@ export default function MoodBoard() {
             <div className="flex-1 overflow-y-auto pr-2">
               <div className="grid grid-cols-1 gap-6 py-4">
                 {loadingFonts ? (
-                  <p className="text-center text-mutedforeground">
+                  <p className="text-center text-muted-foreground">
                     Generating font recommendations...
                   </p>
                 ) : (
@@ -983,7 +997,7 @@ export default function MoodBoard() {
         </Dialog>
       </div>
     </TooltipProvider>
-    );
+  );
 }
 
 interface FontRecommendation {
