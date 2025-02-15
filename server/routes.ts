@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription, generateMoodBoard, generateFontRecommendations } from "./openai";
+import { generateNames, generateDescription, generateMoodBoard, generateFontRecommendations, generateLogoWithDalle } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
@@ -171,20 +171,25 @@ app.post("/api/generate-logo", async (req, res) => {
 
       console.log("Generated mood board content:", moodBoard);
 
-      // Since we're not using DALL-E anymore, we'll generate simple SVG images
-      const images = moodBoard.imagePrompts.map(() =>
-        generateSimpleLogo({
-          brandName: name as string,
-          style: style as string,
-          industry: industry as string
+      // Generate images using DALL-E for mood board
+      const generatedImages = await Promise.all(
+        moodBoard.imagePrompts.map(async (prompt) => {
+          try {
+            const result = await generateLogoWithDalle(name as string, prompt);
+            return result.url;
+          } catch (error) {
+            console.error("Error generating image:", error);
+            // Return a default image URL or pattern if DALL-E fails
+            return '/placeholder-image.svg';
+          }
         })
       );
 
-      console.log("Generated images:", images.length);
+      console.log("Generated images:", generatedImages.length);
 
       res.json({
         ...moodBoard,
-        images
+        images: generatedImages
       });
     } catch (error) {
       console.error("Error generating mood board:", error);
