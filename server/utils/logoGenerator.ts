@@ -31,7 +31,6 @@ const DEFAULT_COLORS = {
   }
 };
 
-// Function to generate a pastel color
 function generatePastelColor(): string {
   const hue = Math.floor(Math.random() * 360);
   const saturation = 25 + Math.floor(Math.random() * 25);
@@ -68,9 +67,7 @@ export function generateSimpleLogo(config: LogoConfig): string {
   const variations = [
     generateModernLogo(brandName, colors, industry, font),
     generateMinimalistLogo(brandName, colors, font),
-    generateIconicLogo(brandName, colors, industry, font),
-    generateAlignedLogo(brandName, colors, industry, font),
-    generateMaterialLogo(brandName, colors, industry, font)
+    generateIconicLogo(brandName, colors, industry, font)
   ];
 
   const svgContent = variations[Math.floor(Math.random() * variations.length)];
@@ -154,68 +151,6 @@ function generateIconicLogo(text: string, colors: any, industry: string, font: T
             font-style="${style}"
             fill="${primary}"
             letter-spacing="0.05em"
-            dominant-baseline="central">
-            ${text}
-      </text>
-    </g>
-  </svg>`;
-}
-
-// New aligned logo with material design influence
-function generateAlignedLogo(text: string, colors: any, industry: string, font: Typography): string {
-  const primary = getRandomElement(colors.primary);
-  const accent = getRandomElement(colors.accent);
-  const materialIcon = iconService.getMaterialIcon(industry);
-  const weight = getRandomElement(font.weights);
-  const style = getRandomElement(font.styles);
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
-    <defs>
-      <linearGradient id="gradAlign" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <g transform="translate(40, 35)">
-      <path d="${materialIcon}" fill="url(#gradAlign)" transform="scale(2)" stroke="none"/>
-      <text x="75" y="25" 
-            font-family="${font.family}, Arial, sans-serif" 
-            font-size="34"
-            font-weight="${weight}"
-            font-style="${style}"
-            fill="${primary}"
-            letter-spacing="0.03em"
-            dominant-baseline="central">
-            ${text}
-      </text>
-    </g>
-  </svg>`;
-}
-
-// Material design inspired logo
-function generateMaterialLogo(text: string, colors: any, industry: string, font: Typography): string {
-  const primary = getRandomElement(colors.primary);
-  const accent = getRandomElement(colors.accent);
-  const materialIcon = iconService.getMaterialIcon(industry);
-  const weight = getRandomElement(font.weights);
-  const style = getRandomElement(font.styles);
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
-    <defs>
-      <linearGradient id="gradMaterial" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${primary};stop-opacity:0.9" />
-        <stop offset="100%" style="stop-color:${accent};stop-opacity:0.9" />
-      </linearGradient>
-    </defs>
-    <g transform="translate(35, 30)">
-      <path d="${materialIcon}" fill="url(#gradMaterial)" transform="scale(2.2)" stroke="none"/>
-      <text x="85" y="30" 
-            font-family="${font.family}, Arial, sans-serif" 
-            font-size="36"
-            font-weight="${weight}"
-            font-style="${style}"
-            fill="${primary}"
-            letter-spacing="0.04em"
             dominant-baseline="central">
             ${text}
       </text>
