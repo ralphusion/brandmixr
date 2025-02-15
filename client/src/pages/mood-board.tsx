@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
@@ -59,7 +60,7 @@ export default function MoodBoard() {
           const img = new Image();
           img.onload = () => resolve(true);
           img.onerror = reject;
-          img.src = url; // Base64 images don't need crossOrigin
+          img.src = url;
         });
       });
 
@@ -86,9 +87,9 @@ export default function MoodBoard() {
 
     try {
       const canvas = await html2canvas(moodBoardRef.current, {
-        scale: 2, // Higher quality
+        scale: 2,
         backgroundColor: null,
-        logging: true, // Enable logging for debugging
+        logging: true,
         allowTaint: true,
         foreignObjectRendering: true,
         width: moodBoardRef.current.offsetWidth,
@@ -134,122 +135,124 @@ export default function MoodBoard() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            className="mr-4"
-            onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName)}`)}
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Brand Studio
-          </Button>
-          <Logo />
-        </div>
-        <div className="flex items-center gap-2">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="flex items-center gap-2"
-                disabled={!imagesLoaded}
-              >
-                <Download className="h-4 w-4" />
-                {imagesLoaded ? 'Download Mood Board' : 'Loading Images...'}
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => handleDownload('png')}>
-                Download as PNG
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDownload('pdf')}>
-                Download as PDF
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
-
-      <h1 className="text-3xl font-bold mb-6">Brand Mood Board: {brandName}</h1>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Skeleton className="h-[200px] rounded-lg" />
-          <Skeleton className="h-[200px] rounded-lg" />
-        </div>
-      ) : moodBoardData ? (
-        <div>
-          <div ref={moodBoardRef} className="grid grid-cols-1 gap-6 p-6 bg-background rounded-lg">
-            {/* Color Palette */}
-            <Card className="shadow-md">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
-                <ColorPaletteEditor
-                  colors={colors}
-                  onChange={setColors}
-                />
-              </CardContent>
-            </Card>
-
-            {/* Keywords */}
-            <Card className="shadow-md">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
-                <div className="flex flex-wrap gap-3">
-                  {moodBoardData.keywords.map((keyword, index) => (
-                    <motion.span
-                      key={index}
-                      className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      {keyword}
-                    </motion.span>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Description */}
-            <Card className="shadow-md">
-              <CardContent className="p-6">
-                <h2 className="text-xl font-semibold mb-4">Brand Mood</h2>
-                <p className="text-muted-foreground leading-relaxed">
-                  {moodBoardData.moodDescription}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* AI Generated Images */}
-            {moodBoardData.images?.map((imageUrl, index) => (
-              <motion.div
-                key={index}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.2 }}
-              >
-                <Card className="shadow-md">
-                  <CardContent className="p-6">
-                    <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={`Mood image ${index + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
+    <TooltipProvider>
+      <div className="container mx-auto py-8 px-4">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              className="mr-4"
+              onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName)}`)}
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Brand Studio
+            </Button>
+            <Logo />
+          </div>
+          <div className="flex items-center gap-2">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  className="flex items-center gap-2"
+                  disabled={!imagesLoaded}
+                >
+                  <Download className="h-4 w-4" />
+                  {imagesLoaded ? 'Download Mood Board' : 'Loading Images...'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handleDownload('png')}>
+                  Download as PNG
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                  Download as PDF
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
-      ) : (
-        <p className="text-center text-muted-foreground">
-          Failed to load mood board data. Please make sure you have selected a brand name and style.
-        </p>
-      )}
-    </div>
+
+        <h1 className="text-3xl font-bold mb-6">Brand Mood Board: {brandName}</h1>
+
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Skeleton className="h-[200px] rounded-lg" />
+            <Skeleton className="h-[200px] rounded-lg" />
+          </div>
+        ) : moodBoardData ? (
+          <div>
+            <div ref={moodBoardRef} className="grid grid-cols-1 gap-6 p-6 bg-background rounded-lg">
+              {/* Color Palette */}
+              <Card className="shadow-md">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
+                  <ColorPaletteEditor
+                    colors={colors}
+                    onChange={setColors}
+                  />
+                </CardContent>
+              </Card>
+
+              {/* Keywords */}
+              <Card className="shadow-md">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
+                  <div className="flex flex-wrap gap-3">
+                    {moodBoardData.keywords.map((keyword, index) => (
+                      <motion.span
+                        key={index}
+                        className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        {keyword}
+                      </motion.span>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Description */}
+              <Card className="shadow-md">
+                <CardContent className="p-6">
+                  <h2 className="text-xl font-semibold mb-4">Brand Mood</h2>
+                  <p className="text-muted-foreground leading-relaxed">
+                    {moodBoardData.moodDescription}
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* AI Generated Images */}
+              {moodBoardData.images?.map((imageUrl, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: index * 0.2 }}
+                >
+                  <Card className="shadow-md">
+                    <CardContent className="p-6">
+                      <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
+                        <img
+                          src={imageUrl}
+                          alt={`Mood image ${index + 1}`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground">
+            Failed to load mood board data. Please make sure you have selected a brand name and style.
+          </p>
+        )}
+      </div>
+    </TooltipProvider>
   );
 }
