@@ -28,19 +28,11 @@ interface MoodBoardData {
   images: string[];
 }
 
-interface FontRecommendation {
-  primary: {
-    family: string;
-    weight: string;
-    style: string;
-  };
-  secondary: {
-    family: string;
-    weight: string;
-    style: string;
-  };
-  explanation: string;
-}
+// Update the regeneration section type to include 'colors'
+type RegenerationSection = {
+  type: 'colors' | 'keywords' | 'mood' | 'image';
+  index?: number;
+};
 
 export default function MoodBoard() {
   const [, navigate] = useLocation();
@@ -51,10 +43,7 @@ export default function MoodBoard() {
   const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [regeneratingSection, setRegeneratingSection] = useState<{
-    type: 'keywords' | 'mood' | 'image';
-    index?: number;
-  } | null>(null);
+  const [regeneratingSection, setRegeneratingSection] = useState<RegenerationSection | null>(null);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -150,7 +139,7 @@ export default function MoodBoard() {
     }
   };
 
-  const handleRegenerate = async (section: 'keywords' | 'mood' | 'image', imageIndex?: number) => {
+  const handleRegenerate = async (section: RegenerationSection['type'], imageIndex?: number) => {
     if (!brandName || !formData.industry || !formData.style) return;
 
     setRegeneratingSection({ type: section, index: imageIndex });
@@ -160,6 +149,18 @@ export default function MoodBoard() {
       let updatedData;
 
       switch (section) {
+        case 'colors':
+          endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          const colorsResponse = await apiRequest("POST", endpoint);
+          updatedData = await colorsResponse.json();
+
+          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
+            ...oldData,
+            colors: updatedData.colors,
+          }));
+          setColors(updatedData.colors);
+          break;
+
         case 'keywords':
           endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
           const keywordsResponse = await apiRequest("POST", endpoint);
@@ -336,16 +337,35 @@ export default function MoodBoard() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => handleRegenerate('keywords')}
-                    disabled={regeneratingSection?.type === 'keywords'}
+                    onClick={() => handleRegenerate('colors')}
+                    disabled={regeneratingSection?.type === 'colors'}
                   >
-                    <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
+                    <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
-                <ColorPaletteEditor
-                  colors={colors}
-                  onChange={setColors}
-                />
+                <AnimatePresence mode="wait">
+                  {regeneratingSection?.type === 'colors' ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="space-y-2"
+                    >
+                      <Skeleton className="h-12 w-full rounded-lg" />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <ColorPaletteEditor
+                        colors={colors}
+                        onChange={setColors}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </CardContent>
             </Card>
 
@@ -655,4 +675,18 @@ export default function MoodBoard() {
       </div>
     </TooltipProvider>
   );
+}
+
+interface FontRecommendation {
+  primary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  secondary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  explanation: string;
 }

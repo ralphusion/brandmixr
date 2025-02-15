@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!name || !industry || !style) {
         console.error("Missing parameters:", { name, industry, style });
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Missing required parameters",
           details: {
             name: !name ? "missing" : "present",
@@ -264,12 +264,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/mood-board/regenerate-colors", async (req, res) => {
+    try {
+      const { name, industry, style } = req.query;
+      if (!name || !industry || !style) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      const moodBoard = await generateMoodBoard(
+        name as string,
+        industry as string,
+        style as string
+      );
+
+      res.json({
+        colors: moodBoard.colors,
+      });
+    } catch (error) {
+      console.error("Error regenerating colors:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
   app.get("/api/font-recommendations", async (req, res) => {
     try {
       const { name, industry, style } = req.query;
 
       if (!name || !industry || !style) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Missing required parameters",
           details: {
             name: !name ? "missing" : "present",
