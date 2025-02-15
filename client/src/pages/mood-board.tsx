@@ -147,16 +147,62 @@ export default function MoodBoard() {
   };
 
   const handleRegenerate = async (section: 'keywords' | 'mood' | 'image', imageIndex?: number) => {
-    if (!brandName) return;
+    if (!brandName || !formData.industry || !formData.style) return;
 
     try {
-      await queryClient.invalidateQueries({
-        queryKey: ['/api/mood-board', brandName]
-      });
+      let endpoint = '';
+      let updatedData;
+
+      switch (section) {
+        case 'keywords':
+          endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          const keywordsResponse = await apiRequest("POST", endpoint);
+          updatedData = await keywordsResponse.json();
+
+          // Update only keywords in the cached data
+          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
+            ...oldData,
+            keywords: updatedData.keywords,
+          }));
+          break;
+
+        case 'mood':
+          endpoint = `/api/mood-board/regenerate-mood?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          const moodResponse = await apiRequest("POST", endpoint);
+          updatedData = await moodResponse.json();
+
+          // Update only mood description in the cached data
+          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
+            ...oldData,
+            moodDescription: updatedData.moodDescription,
+          }));
+          break;
+
+        case 'image':
+          if (typeof imageIndex !== 'number' || !moodBoardData) return;
+
+          endpoint = `/api/mood-board/regenerate-image`;
+          const imageResponse = await apiRequest("POST", endpoint, {
+            prompt: moodBoardData.imagePrompts[imageIndex],
+            style: formData.style,
+          });
+          updatedData = await imageResponse.json();
+
+          // Update only the specific image in the cached data
+          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
+            const newImages = [...oldData.images];
+            newImages[imageIndex] = updatedData.image;
+            return {
+              ...oldData,
+              images: newImages,
+            };
+          });
+          break;
+      }
 
       toast({
-        title: "Regenerating...",
-        description: `Regenerating ${section}...`,
+        title: "Success",
+        description: `Regenerated ${section} successfully`,
       });
     } catch (error) {
       toast({

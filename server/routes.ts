@@ -187,6 +187,83 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/mood-board/regenerate-keywords", async (req, res) => {
+    try {
+      const { name, industry, style } = req.query;
+      if (!name || !industry || !style) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      const moodBoard = await generateMoodBoard(
+        name as string,
+        industry as string,
+        style as string
+      );
+
+      res.json({
+        keywords: moodBoard.keywords,
+      });
+    } catch (error) {
+      console.error("Error regenerating keywords:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
+  app.post("/api/mood-board/regenerate-mood", async (req, res) => {
+    try {
+      const { name, industry, style } = req.query;
+      if (!name || !industry || !style) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      const moodBoard = await generateMoodBoard(
+        name as string,
+        industry as string,
+        style as string
+      );
+
+      res.json({
+        moodDescription: moodBoard.moodDescription,
+      });
+    } catch (error) {
+      console.error("Error regenerating mood description:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
+  app.post("/api/mood-board/regenerate-image", async (req, res) => {
+    try {
+      const { prompt, style } = req.body;
+      if (!prompt || !style) {
+        return res.status(400).json({ error: "Missing required parameters" });
+      }
+
+      const result = await generateLogoWithDalle(prompt, style as string);
+      const response = await fetch(result.url);
+      const buffer = await response.arrayBuffer();
+      const base64 = Buffer.from(buffer).toString('base64');
+
+      res.json({
+        image: `data:image/png;base64,${base64}`
+      });
+    } catch (error) {
+      console.error("Error regenerating image:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
   app.get("/api/font-recommendations", async (req, res) => {
     try {
       const { name, industry, style } = req.query;
