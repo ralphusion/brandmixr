@@ -399,7 +399,7 @@ export default function MoodBoard() {
       setIconStyle(savedConfig.iconStyle);
       setIconColor(savedConfig.iconColor);
       setSelectedBackground(savedConfig.selectedBackground);
-      setSelectedFontStyle(JSON.parse(savedConfig.fontStyle));
+      setSelectedFontStyle(savedConfig.fontStyle);
     }
   }, []);
 
