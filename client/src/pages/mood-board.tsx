@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, Type, SparkleIcon, Copy } from "lucide-react";
@@ -682,22 +682,20 @@ export default function MoodBoard() {
       }
     });
 
-    const handleFontChange = (e: Event) => {
-      e.stopPropagation();
-      const value = (e.target as HTMLSelectElement).value;
+    const handleFontChange = useCallback((newValue: string) => {
       try {
-        setSelectedFont(value);
+        setSelectedFont(newValue);
         const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
         const newStyles = [...styles];
         newStyles[index] = {
           ...newStyles[index],
-          fontFamily: value,
+          fontFamily: newValue,
         };
         sessionStorage.setItem('fontStyles', JSON.stringify(newStyles));
       } catch (error) {
         console.error('Error saving font style:', error);
       }
-    };
+    }, [index]);
 
     return (
       <motion.div
@@ -709,10 +707,7 @@ export default function MoodBoard() {
           className={`${background} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
             isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
           }`}
-          onClick={(e) => {
-            e.preventDefault();
-            onSelect();
-          }}
+          onClick={onSelect}
         >
           <CardContent
             className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
@@ -749,16 +744,11 @@ export default function MoodBoard() {
           </CardContent>
           <div 
             className="p-4 bg-white/10 backdrop-blur-sm" 
-            onClick={(e) => {
-              e.stopPropagation();
-              e.preventDefault();
-            }}
+            onClick={(e) => e.stopPropagation()}
           >
             <Select 
-              value={selectedFont}
-              onValueChange={(value) => {
-                handleFontChange({ target: { value } } as any);
-              }}
+              defaultValue={selectedFont}
+              onValueChange={handleFontChange}
             >
               <SelectTrigger className="bg-white/90">
                 <SelectValue placeholder="Select font" />
