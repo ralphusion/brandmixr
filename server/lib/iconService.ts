@@ -88,6 +88,7 @@ export const iconService = {
   },
 
   async getRandomIcon(industry: string): Promise<string> {
+    console.log('Generating icon for industry:', industry);
     const normalizedIndustry = industry.toLowerCase();
     let category: keyof typeof INDUSTRY_ICONS = 'technology';
 
@@ -100,14 +101,21 @@ export const iconService = {
       category = 'creative';
     }
 
+    console.log('Selected category:', category);
+
     // Get random icon path from our predefined set
     const paths = INDUSTRY_ICONS[category];
     const path = getRandomElement(paths);
 
+    console.log('Selected path length:', path.length);
+
     // Return complete SVG with the selected path
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
       <path d="${path}"/>
     </svg>`;
+
+    console.log('Generated SVG:', svg);
+    return svg;
   },
 
   clearUsedCache() {
