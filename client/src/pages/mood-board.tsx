@@ -2,28 +2,15 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Type } from "lucide-react";
+import { ArrowLeft, Copy, RotateCw, Download, Type } from "lucide-react";
 import { Logo } from "@/components/Logo";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/queryClient";
-import html2canvas from 'html2canvas';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
 
 interface MoodBoardData {
@@ -55,6 +42,8 @@ export default function MoodBoard() {
   const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
   const [showFontDialog, setShowFontDialog] = useState(false);
   const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -113,6 +102,64 @@ export default function MoodBoard() {
 
     loadImages();
   }, [moodBoardData?.images]);
+
+  const handleCopyToClipboard = async (text: string, type: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast({
+        title: "Copied!",
+        description: `${type} copied to clipboard`,
+      });
+    } catch (err) {
+      toast({
+        title: "Failed to copy",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadImage = async (imageUrl: string, index: number) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-image-${index + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to download the image",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRegenerate = async (section: 'keywords' | 'mood' | 'image', imageIndex?: number) => {
+    if (!brandName) return;
+
+    try {
+      await queryClient.invalidateQueries({
+        queryKey: ['/api/mood-board', brandName]
+      });
+
+      toast({
+        title: "Regenerating...",
+        description: `Regenerating ${section}...`,
+      });
+    } catch (error) {
+      toast({
+        title: "Regeneration failed",
+        description: "Failed to regenerate content",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleDownload = async (format: 'png' | 'pdf') => {
     if (!moodBoardRef.current || !brandName || !imagesLoaded) {
@@ -181,43 +228,21 @@ export default function MoodBoard() {
             <Button
               variant="ghost"
               className="mr-4"
-              onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName)}`)}
+              onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName || '')}`)}
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Brand Studio
             </Button>
             <Logo />
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => setShowFontDialog(true)}
-              className="flex items-center gap-2"
-            >
-              <Type className="h-4 w-4" />
-              AI Font Recommendations
-            </Button>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="flex items-center gap-2"
-                  disabled={!imagesLoaded}
-                >
-                  <Download className="h-4 w-4" />
-                  {imagesLoaded ? 'Download Mood Board' : 'Loading Images...'}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={() => handleDownload('png')}>
-                  Download as PNG
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleDownload('pdf')}>
-                  Download as PDF
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+          <Button
+            variant="outline"
+            onClick={() => setShowFontDialog(true)}
+            className="flex items-center gap-2"
+          >
+            <Type className="h-4 w-4" />
+            AI Font Recommendations
+          </Button>
         </div>
 
         <h1 
@@ -237,13 +262,12 @@ export default function MoodBoard() {
             <Skeleton className="h-[200px] rounded-lg" />
           </div>
         ) : moodBoardData ? (
-          <div>
-            <div ref={moodBoardRef} className="grid grid-cols-1 gap-6 p-6 bg-background rounded-lg">
-              {/* Color Palette */}
-              <Card className="shadow-md">
-                <CardContent className="p-6">
+          <div className="grid grid-cols-1 gap-6">
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-4">
                   <h2 
-                    className="text-xl font-semibold mb-4"
+                    className="text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -252,18 +276,26 @@ export default function MoodBoard() {
                   >
                     Color Palette
                   </h2>
-                  <ColorPaletteEditor
-                    colors={colors}
-                    onChange={setColors}
-                  />
-                </CardContent>
-              </Card>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleRegenerate('keywords')}
+                  >
+                    <RotateCw className="h-4 w-4" />
+                  </Button>
+                </div>
+                <ColorPaletteEditor
+                  colors={colors}
+                  onChange={setColors}
+                />
+              </CardContent>
+            </Card>
 
-              {/* Keywords */}
-              <Card className="shadow-md">
-                <CardContent className="p-6">
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-4">
                   <h2 
-                    className="text-xl font-semibold mb-4"
+                    className="text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -272,32 +304,54 @@ export default function MoodBoard() {
                   >
                     Brand Keywords
                   </h2>
-                  <div className="flex flex-wrap gap-3">
-                    {moodBoardData.keywords.map((keyword, index) => (
-                      <motion.span
-                        key={index}
-                        className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.1 }}
-                        style={fonts?.secondary ? {
-                          fontFamily: fonts.secondary.family,
-                          fontWeight: fonts.secondary.weight,
-                          fontStyle: fonts.secondary.style,
-                        } : undefined}
-                      >
-                        {keyword}
-                      </motion.span>
-                    ))}
+                  <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopyToClipboard(moodBoardData.keywords.join(', '), 'Keywords')}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copy keywords</TooltipContent>
+                    </Tooltip>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRegenerate('keywords')}
+                    >
+                      <RotateCw className="h-4 w-4" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  {moodBoardData.keywords.map((keyword, index) => (
+                    <motion.span
+                      key={index}
+                      className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                      style={fonts?.secondary ? {
+                        fontFamily: fonts.secondary.family,
+                        fontWeight: fonts.secondary.weight,
+                        fontStyle: fonts.secondary.style,
+                      } : undefined}
+                    >
+                      {keyword}
+                    </motion.span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-              {/* Description */}
-              <Card className="shadow-md">
-                <CardContent className="p-6">
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-4">
                   <h2 
-                    className="text-xl font-semibold mb-4"
+                    className="text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -306,41 +360,82 @@ export default function MoodBoard() {
                   >
                     Brand Mood
                   </h2>
-                  <p 
-                    className="text-muted-foreground leading-relaxed"
-                    style={fonts?.secondary ? {
-                      fontFamily: fonts.secondary.family,
-                      fontWeight: fonts.secondary.weight,
-                      fontStyle: fonts.secondary.style,
-                    } : undefined}
-                  >
-                    {moodBoardData.moodDescription}
-                  </p>
-                </CardContent>
-              </Card>
-
-              {/* AI Generated Images */}
-              {moodBoardData.images?.map((imageUrl, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: index * 0.2 }}
+                  <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopyToClipboard(moodBoardData.moodDescription, 'Mood description')}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Copy description</TooltipContent>
+                    </Tooltip>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleRegenerate('mood')}
+                    >
+                      <RotateCw className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <p 
+                  className="text-muted-foreground leading-relaxed"
+                  style={fonts?.secondary ? {
+                    fontFamily: fonts.secondary.family,
+                    fontWeight: fonts.secondary.weight,
+                    fontStyle: fonts.secondary.style,
+                  } : undefined}
                 >
-                  <Card className="shadow-md">
-                    <CardContent className="p-6">
-                      <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
-                        <img
-                          src={imageUrl}
-                          alt={`Mood image ${index + 1}`}
-                          className="w-full h-full object-contain"
-                        />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+                  {moodBoardData.moodDescription}
+                </p>
+              </CardContent>
+            </Card>
+
+            {moodBoardData.images?.map((imageUrl, index) => (
+              <motion.div
+                key={index}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.2 }}
+              >
+                <Card className="shadow-md">
+                  <CardContent className="p-6">
+                    <div className="flex justify-end gap-2 mb-4">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDownloadImage(imageUrl, index)}
+                          >
+                            <Download className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Download image</TooltipContent>
+                      </Tooltip>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRegenerate('image', index)}
+                      >
+                        <RotateCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
+                      <img
+                        src={imageUrl}
+                        alt={`Mood image ${index + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
           </div>
         ) : (
           <p className="text-center text-muted-foreground">
@@ -348,7 +443,6 @@ export default function MoodBoard() {
           </p>
         )}
 
-        {/* Font Dialog */}
         <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
           <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
             <DialogHeader>
