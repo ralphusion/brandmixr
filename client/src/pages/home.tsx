@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link } from "wouter";
 import { NameGeneratorForm } from "@/components/NameGeneratorForm";
 import { ResultsGrid } from "@/components/ResultsGrid";
 import { SavedNames } from "@/components/SavedNames";
@@ -7,8 +8,31 @@ import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { Sparkles, Palette, Shapes } from "lucide-react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Logo } from "@/components/Logo";
 
 const NAMES_PER_PAGE = 5;
+
+const FEATURES = [
+  {
+    icon: <Sparkles className="w-5 h-5" />,
+    title: "AI-Powered Naming",
+    description: "Generate unique brand names that resonate with your vision"
+  },
+  {
+    icon: <Palette className="w-5 h-5" />,
+    title: "Brand Identity",
+    description: "Create cohesive visual identities with custom color palettes and typography"
+  },
+  {
+    icon: <Shapes className="w-5 h-5" />,
+    title: "Logo Studio",
+    description: "Design professional logos with our intelligent design system"
+  }
+];
 
 export default function Home() {
   const [generatedNames, setGeneratedNames] = useState<string[]>([]);
@@ -100,30 +124,62 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <h1 className="text-4xl font-bold text-center mb-8">AI Brand Name Generator</h1>
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
+      <div className="container mx-auto px-4 py-12">
+        <div className="text-center mb-16">
+          <Logo className="mx-auto mb-8" />
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+            Create Your Brand Identity
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
+            Transform your vision into a compelling brand identity with our AI-powered platform. Generate unique names, design professional logos, and craft cohesive visual styles.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {FEATURES.map((feature, index) => (
+              <motion.div
+                key={feature.title}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card>
+                  <CardContent className="p-6 text-center">
+                    <div className="bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+                      {feature.icon}
+                    </div>
+                    <h3 className="font-semibold mb-2">{feature.title}</h3>
+                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
 
-      <NameGeneratorForm
-        onGenerate={(data) => generateMutation.mutate(data)}
-        isGenerating={generateMutation.isPending}
-      />
-
-      {displayedNames.length > 0 && (
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Generated Names</h2>
-          <ResultsGrid
-            names={displayedNames}
-            onSave={(name) => saveMutation.mutate(name)}
+        <div className="max-w-4xl mx-auto">
+          <NameGeneratorForm
+            onGenerate={(data) => generateMutation.mutate(data)}
+            isGenerating={generateMutation.isPending}
           />
-          {generatedNames.length > displayedNames.length && (
-            <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-              <p className="text-muted-foreground">Scroll for more names...</p>
+
+          {displayedNames.length > 0 && (
+            <div className="mt-8">
+              <h2 className="text-2xl font-semibold mb-4">Generated Names</h2>
+              <ResultsGrid
+                names={displayedNames}
+                onSave={(name) => saveMutation.mutate(name)}
+              />
+              {generatedNames.length > displayedNames.length && (
+                <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+                  <p className="text-muted-foreground">Scroll for more names...</p>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
-      <SavedNames names={savedNames} onExport={handleExport} />
+          <SavedNames names={savedNames} onExport={handleExport} />
+        </div>
+      </div>
     </div>
   );
 }
