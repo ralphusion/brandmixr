@@ -43,6 +43,34 @@ export default function Generate() {
 
   const formData = sessionStorage.getItem('generatorFormData');
 
+  const { data: savedNames = [] } = useQuery<BrandName[]>({
+    queryKey: ["/api/names/saved"],
+  });
+
+  // Define applyFilters before useEffects
+  const applyFilters = useCallback((names: GeneratedName[]) => {
+    return names.filter(nameData => {
+      const name = typeof nameData === 'string' ? nameData : nameData.name;
+
+      if (startingWith !== "All") {
+        if (!name.toUpperCase().startsWith(startingWith)) {
+          return false;
+        }
+      }
+
+      if (name.length > nameLength) {
+        return false;
+      }
+
+      if (searchText && !name.toLowerCase().includes(searchText.toLowerCase())) {
+        return false;
+      }
+
+      return true;
+    });
+  }, [startingWith, nameLength, searchText]);
+
+  // Initial load effect
   useEffect(() => {
     const savedGeneratedNames = sessionStorage.getItem('generatedNames');
     const formData = sessionStorage.getItem('generatorFormData');
@@ -55,25 +83,22 @@ export default function Generate() {
     if (savedGeneratedNames) {
       const parsedNames = JSON.parse(savedGeneratedNames);
       setGeneratedNames(parsedNames);
-      setDisplayedNames(parsedNames.slice(0, NAMES_PER_PAGE));
+      const filtered = applyFilters(parsedNames);
+      setFilteredNames(filtered);
+      setDisplayedNames(filtered.slice(0, NAMES_PER_PAGE));
     } else {
       generateMutation.mutate(JSON.parse(formData));
     }
-  }, []);
+  }, [applyFilters]);
 
-  const { data: savedNames = [] } = useQuery<BrandName[]>({
-    queryKey: ["/api/names/saved"],
-  });
-
+  // Intersection observer effect
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isGenerating) {
-          const filtered = applyFilters(generatedNames);
-          if (displayedNames.length < filtered.length) {
+          if (displayedNames.length < filteredNames.length) {
             setPage((prev) => prev + 1);
-          } else if (displayedNames.length === filtered.length) {
-            // If we've shown all filtered results, generate more
+          } else {
             handleGenerateMore();
           }
         }
@@ -86,8 +111,9 @@ export default function Generate() {
     }
 
     return () => observer.disconnect();
-  }, [generatedNames.length, displayedNames.length, isGenerating, applyFilters]);
+  }, [displayedNames.length, filteredNames.length, isGenerating]);
 
+  // Update displayed names when filters or page changes
   useEffect(() => {
     const filtered = applyFilters(generatedNames);
     setFilteredNames(filtered);
@@ -103,8 +129,10 @@ export default function Generate() {
     },
     onSuccess: (data: GeneratedName[]) => {
       setGeneratedNames(prev => [...prev, ...data]);
+      const filtered = applyFilters([...generatedNames, ...data]);
+      setFilteredNames(filtered);
       const endIndex = page * NAMES_PER_PAGE;
-      setDisplayedNames(prev => [...prev, ...data].slice(0, endIndex));
+      setDisplayedNames(filtered.slice(0, endIndex));
       setIsGenerating(false);
       sessionStorage.setItem('generatedNames', JSON.stringify([...generatedNames, ...data]));
     },
@@ -173,35 +201,6 @@ export default function Generate() {
       generateMutation.mutate(JSON.parse(formData));
     }
   };
-
-  const applyFilters = useCallback((names: GeneratedName[]) => {
-    return names.filter(nameData => {
-      const name = typeof nameData === 'string' ? nameData : nameData.name;
-
-      if (startingWith !== "All") {
-        if (!name.toUpperCase().startsWith(startingWith)) {
-          return false;
-        }
-      }
-
-      if (name.length > nameLength) {
-        return false;
-      }
-
-      if (searchText && !name.toLowerCase().includes(searchText.toLowerCase())) {
-        return false;
-      }
-
-      return true;
-    });
-  }, [startingWith, nameLength, searchText]);
-
-  useEffect(() => {
-    const filtered = applyFilters(generatedNames);
-    setFilteredNames(filtered);
-    const endIndex = page * NAMES_PER_PAGE;
-    setDisplayedNames(filtered.slice(0, endIndex));
-  }, [page, generatedNames, applyFilters]);
 
   return (
     <div className="container mx-auto py-8 px-4">
