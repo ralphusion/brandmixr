@@ -1,10 +1,8 @@
 import type { Typography, IconCategory, IconStyle } from './types';
-import axios from 'axios';
+//import axios from 'axios'; // Removed as we are using local icons now.
 
-// Track used icons and fonts for the current session
-const usedIcons = new Set<string>();
+// Track used fonts for the current session
 const usedFontStyles = new Set<string>();
-const iconCache = new Map<string, string[]>();
 
 // Enhanced typography styles with design system fonts
 const TYPOGRAPHY_STYLES = [
@@ -40,45 +38,30 @@ const TYPOGRAPHY_STYLES = [
   }
 ];
 
+// Predefined industry-specific icon paths
+const INDUSTRY_ICONS = {
+  technology: [
+    "M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5",  // Circuit board
+    "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",  // Tech circle
+    "M4 6h16M4 12h16M4 18h16",  // Menu bars
+    "M13 10V3L4 14h7v7l9-11h-7z"  // Lightning bolt
+  ],
+  business: [
+    "M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 4h12",  // Building
+    "M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8v8m0 0v4m0-4h4m-4 0H8",  // Dollar sign
+    "M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7",  // Chart
+    "M3 3h18v18H3V3z"  // Box
+  ],
+  creative: [
+    "M21 12a9 9 0 11-18 0 9 9 0 0118 0z",  // Circle
+    "M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z",  // Pencil
+    "M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z",  // Image
+    "M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"  // Paint brush
+  ]
+};
+
 function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
-}
-
-async function fetchIconsFromSVGRepo(query: string): Promise<string[]> {
-  try {
-    // Updated API endpoint and parameters
-    const response = await axios.get('https://www.svgrepo.com/api/vectors/', {
-      params: {
-        term: query,
-        limit: 20,
-        type: 'line'
-      },
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-
-    if (response.data && Array.isArray(response.data.vectors)) {
-      return response.data.vectors.map((vector: any) => {
-        const svg = vector.svg;
-        // Extract the first path with a 'd' attribute
-        const pathMatch = svg.match(/<path[^>]*\sd="([^"]+)"[^>]*>/);
-        if (!pathMatch) return null;
-
-        // Clean up the path data
-        const pathData = pathMatch[1]
-          .replace(/[\n\r\t]/g, '')  // Remove newlines and tabs
-          .trim();
-
-        return pathData;
-      }).filter(Boolean);
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error fetching icons from SVGRepo:', error);
-    return [];
-  }
 }
 
 function generateUniqueFontStyle(category?: string): Typography {
@@ -110,48 +93,26 @@ export const iconService = {
 
   async getRandomIcon(industry: string): Promise<string> {
     const normalizedIndustry = industry.toLowerCase();
-    let searchQuery = normalizedIndustry;
+    let category: keyof typeof INDUSTRY_ICONS = 'technology';
 
-    // Enhance search query based on industry
-    if (normalizedIndustry.includes('tech')) {
-      searchQuery = `${searchQuery} technology digital`;
-    } else if (normalizedIndustry.includes('finance')) {
-      searchQuery = `${searchQuery} business money`;
+    // Map industry to icon category
+    if (normalizedIndustry.includes('tech') || normalizedIndustry.includes('software')) {
+      category = 'technology';
+    } else if (normalizedIndustry.includes('business') || normalizedIndustry.includes('finance')) {
+      category = 'business';
+    } else if (normalizedIndustry.includes('art') || normalizedIndustry.includes('design')) {
+      category = 'creative';
     }
 
-    // Check cache first
-    if (iconCache.has(searchQuery)) {
-      const cachedIcons = iconCache.get(searchQuery)!;
-      const availableIcons = cachedIcons.filter(icon => !usedIcons.has(icon));
-
-      if (availableIcons.length > 0) {
-        const icon = getRandomElement(availableIcons);
-        usedIcons.add(icon);
-        return icon;
-      }
-    }
-
-    // Fetch new icons if not in cache or all used
-    const icons = await fetchIconsFromSVGRepo(searchQuery);
-
-    if (icons.length === 0) {
-      return "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z";
-    }
-
-    // Update cache
-    iconCache.set(searchQuery, icons);
-
-    // Get a random unused icon
+    // Get random icon path for the category
+    const icons = INDUSTRY_ICONS[category];
     const icon = getRandomElement(icons);
-    usedIcons.add(icon);
 
     return icon;
   },
 
   clearUsedCache() {
-    usedIcons.clear();
     usedFontStyles.clear();
-    iconCache.clear();
   }
 };
 
