@@ -55,9 +55,18 @@ export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
   const colors = DEFAULT_COLORS[logoStyle];
 
   try {
-    const pathData = await iconService.getRandomIcon(industry);
+    const iconSvg = await iconService.getRandomIcon(industry);
     const primaryColor = getRandomElement(colors.primary);
     const accentColor = getRandomElement(colors.accent);
+
+    // Extract the path from the icon SVG
+    const pathMatch = iconSvg.match(/<path[^>]*\sd="([^"]+)"[^>]*>/);
+    if (!pathMatch) {
+      console.error('No path found in icon SVG:', iconSvg);
+      throw new Error('Invalid icon SVG format');
+    }
+
+    const pathData = pathMatch[1];
 
     return `
       <path 
@@ -76,9 +85,10 @@ export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
     const primaryColor = getRandomElement(colors.primary);
     const accentColor = getRandomElement(colors.accent);
 
+    // Fallback to a simple circle if icon generation fails
     return `
       <path 
-        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+        d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1z"
         fill="url(#gradient-${primaryColor.substring(1)})"
       />
       <defs>
