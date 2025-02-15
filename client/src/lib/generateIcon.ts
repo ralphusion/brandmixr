@@ -1,5 +1,4 @@
-type IconStyle = 'initials-simple' | 'initials-rounded' | 'initials-gradient' |
-                'geometric-circle' | 'geometric-square' | 'geometric-hexagon' | 'geometric-triangle' | 'geometric-diamond' |
+type IconStyle = 'initials-simple' | 'initials-gradient' |
                 'abstract-waves' | 'abstract-dots' | 'abstract-lines' | 'abstract-mesh' | 'abstract-swirl' |
                 'modern-minimal' | 'modern-tech' | 'modern-gradient' |
                 'decorative-floral' | 'decorative-vintage' | 'decorative-ornate';
@@ -8,34 +7,6 @@ type IconOptions = {
   style?: IconStyle;
   color?: string;
   backgroundColor?: string;
-};
-
-const shapes = {
-  circle: (size: number, color: string) => `
-    <circle cx="${size/2}" cy="${size/2}" r="${size/3}" fill="${color}" />
-  `,
-  square: (size: number, color: string) => `
-    <rect x="${size/6}" y="${size/6}" width="${size*2/3}" height="${size*2/3}" fill="${color}" />
-  `,
-  hexagon: (size: number, color: string) => {
-    const centerX = size / 2;
-    const centerY = size / 2;
-    const radius = size / 3;
-    const points = [];
-    for (let i = 0; i < 6; i++) {
-      const angle = (i * Math.PI) / 3;
-      points.push(`${centerX + radius * Math.cos(angle)},${centerY + radius * Math.sin(angle)}`);
-    }
-    return `<polygon points="${points.join(' ')}" fill="${color}" />`;
-  },
-  triangle: (size: number, color: string) => {
-    const h = size * 0.866; // height of equilateral triangle
-    return `<polygon points="${size/2},${size/6} ${size*5/6},${h*5/6} ${size/6},${h*5/6}" fill="${color}" />`;
-  },
-  diamond: (size: number, color: string) => {
-    const points = `${size/2},${size/6} ${size*5/6},${size/2} ${size/2},${size*5/6} ${size/6},${size/2}`;
-    return `<polygon points="${points}" fill="${color}" />`;
-  }
 };
 
 const abstractShapes = {
@@ -54,7 +25,7 @@ const abstractShapes = {
       for(let j = 0; j < numDots; j++) {
         const x = (size/numDots) * (i + 0.5);
         const y = (size/numDots) * (j + 0.5);
-        dots += `<circle cx="${x}" cy="${y}" r="${radius}" fill="${color}" />`;
+        dots += `<circle cx="${x}" cy="${y}" r="${radius}" fill="${color}" opacity="${0.5 + Math.random() * 0.5}" />`;
       }
     }
     return dots;
@@ -88,18 +59,34 @@ const abstractShapes = {
   }
 };
 
+// Modern font styles for sophisticated typography
+const FONT_STYLES = [
+  { family: 'Playfair Display', weight: '700', style: 'normal' },
+  { family: 'Montserrat', weight: '300', style: 'normal' },
+  { family: 'Roboto Slab', weight: '500', style: 'normal' },
+  { family: 'Poppins', weight: '600', style: 'normal' },
+  { family: 'Raleway', weight: '800', style: 'normal' },
+  { family: 'Open Sans', weight: '400', style: 'italic' },
+  { family: 'Lora', weight: '700', style: 'italic' },
+  { family: 'Source Sans Pro', weight: '300', style: 'normal' },
+  { family: 'DM Sans', weight: '500', style: 'normal' },
+  { family: 'Work Sans', weight: '600', style: 'normal' }
+];
+
 export const generateIconSvg = (brandName: string, options: IconOptions = {}): string => {
   const size = 100;
   const mainColor = options.color || '#000000';
   const backgroundColor = options.backgroundColor || '#FFFFFF';
-  const style = options.style || 'initials-simple';
+  const style = options.style || 'modern-minimal';
   const letter = brandName.charAt(0).toUpperCase();
 
   let content = '';
   const [category, subStyle] = style.split('-');
 
+  // Get random font style
+  const randomFont = FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)];
+
   if (category === 'initials') {
-    const radius = subStyle === 'rounded' ? 20 : 0;
     const gradient = subStyle === 'gradient' ? `
       <defs>
         <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -111,35 +98,56 @@ export const generateIconSvg = (brandName: string, options: IconOptions = {}): s
 
     content = `
       ${gradient}
-      <rect x="0" y="0" width="${size}" height="${size}" rx="${radius}" 
-            fill="${subStyle === 'gradient' ? 'url(#grad)' : mainColor}" />
       <text 
         x="50%" 
         y="50%" 
         dy=".3em"
         text-anchor="middle" 
-        fill="white" 
-        font-family="system-ui, sans-serif"
+        fill="${subStyle === 'gradient' ? 'url(#grad)' : mainColor}" 
+        font-family="${randomFont.family}, system-ui, sans-serif"
         font-size="${size/1.5}"
-        font-weight="bold"
+        font-weight="${randomFont.weight}"
+        font-style="${randomFont.style}"
+        letter-spacing="-0.02em"
       >
         ${letter}
       </text>
     `;
-  } else if (category === 'geometric' && shapes[subStyle]) {
-    content = shapes[subStyle](size, mainColor);
   } else if (category === 'abstract' && abstractShapes[subStyle]) {
     content = abstractShapes[subStyle](size, mainColor);
   } else if (category === 'modern') {
     if (subStyle === 'minimal') {
       content = `
-        <rect x="${size/4}" y="${size/4}" width="${size/2}" height="${size/2}" fill="${mainColor}" />
-        <circle cx="${size/2}" cy="${size/2}" r="${size/6}" fill="white" />
+        <text 
+          x="50%" 
+          y="50%" 
+          text-anchor="middle" 
+          fill="${mainColor}"
+          font-family="${randomFont.family}, system-ui, sans-serif"
+          font-size="${size/2}"
+          font-weight="${randomFont.weight}"
+          font-style="${randomFont.style}"
+          letter-spacing="0.2em"
+        >
+          ${brandName.toUpperCase()}
+        </text>
       `;
     } else if (subStyle === 'tech') {
       content = `
-        <rect x="10" y="10" width="80" height="80" fill="none" stroke="${mainColor}" stroke-width="4" />
-        <circle cx="50" cy="50" r="20" fill="${mainColor}" />
+        <line x1="10" y1="10" x2="90" y2="90" stroke="${mainColor}" stroke-width="4" />
+        <line x1="90" y1="10" x2="10" y2="90" stroke="${mainColor}" stroke-width="4" />
+        <text 
+          x="50%" 
+          y="75%" 
+          text-anchor="middle"
+          fill="${mainColor}"
+          font-family="${randomFont.family}, system-ui, sans-serif"
+          font-size="${size/3}"
+          font-weight="${randomFont.weight}"
+          font-style="${randomFont.style}"
+        >
+          ${brandName}
+        </text>
       `;
     } else if (subStyle === 'gradient') {
       content = `
@@ -149,20 +157,30 @@ export const generateIconSvg = (brandName: string, options: IconOptions = {}): s
             <stop offset="100%" style="stop-color:${mainColor};stop-opacity:0.4" />
           </linearGradient>
         </defs>
-        <path d="M10,10 L90,10 L90,90 L10,90 Z" fill="url(#modernGrad)" />
+        <text 
+          x="50%" 
+          y="50%" 
+          text-anchor="middle"
+          fill="url(#modernGrad)"
+          font-family="${randomFont.family}, system-ui, sans-serif"
+          font-size="${size/2}"
+          font-weight="${randomFont.weight}"
+          font-style="${randomFont.style}"
+          letter-spacing="0.1em"
+        >
+          ${brandName}
+        </text>
       `;
     }
   }
 
   return `
     <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-      <rect x="0" y="0" width="${size}" height="${size}" fill="${backgroundColor}" />
       ${content}
     </svg>
   `;
 };
 
-// Download function remains unchanged
 export const downloadIcon = async (svg: string, format: 'svg' | 'png', filename: string) => {
   if (format === 'svg') {
     const blob = new Blob([svg], { type: 'image/svg+xml' });
