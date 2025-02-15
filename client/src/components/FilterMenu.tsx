@@ -29,7 +29,7 @@ interface FilterMenuProps {
 
 export function FilterMenu({ onFilterChange }: FilterMenuProps) {
   const [nameLength, setNameLength] = useState<[number, number]>([3, 20]);
-  const [startingLetter, setStartingLetter] = useState<string>("");
+  const [startingLetter, setStartingLetter] = useState<string>("all");
   const [searchText, setSearchText] = useState("");
 
   // Generate alphabet array with "#" for numbers
@@ -38,7 +38,7 @@ export function FilterMenu({ onFilterChange }: FilterMenuProps) {
   useEffect(() => {
     onFilterChange({
       nameLength,
-      startingLetter,
+      startingLetter: startingLetter === "all" ? "" : startingLetter,
       searchText,
     });
   }, [nameLength, startingLetter, searchText]);
@@ -80,7 +80,7 @@ export function FilterMenu({ onFilterChange }: FilterMenuProps) {
                   <SelectValue placeholder="Any letter" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Any</SelectItem>
+                  <SelectItem value="all">Any</SelectItem>
                   {alphabet.map((letter) => (
                     <SelectItem key={letter} value={letter}>
                       {letter}
