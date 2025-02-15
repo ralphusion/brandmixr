@@ -636,11 +636,18 @@ export default function MoodBoard() {
                     </div>
                     <h3
                       className={`text-3xl ${selectedBackground?.text || ''}`}
-                      style={selectedFontStyle || (fonts?.primary ? {
+                      style={selectedFontStyle ? {
+                        fontFamily: selectedFontStyle.fontFamily,
+                        fontWeight: selectedFontStyle.fontWeight,
+                        fontStyle: selectedFontStyle.fontStyle,
+                        textTransform: selectedFontStyle.textTransform as React.CSSProperties['textTransform'],
+                        textDecoration: selectedFontStyle.textDecoration as React.CSSProperties['textDecoration'],
+                        letterSpacing: selectedFontStyle.letterSpacing as React.CSSProperties['letterSpacing'],
+                      } : fonts?.primary ? {
                         fontFamily: fonts.primary.family,
                         fontWeight: fonts.primary.weight,
                         fontStyle: fonts.primary.style,
-                      } : undefined)}
+                      } : undefined}
                     >
                       {brandName}
                     </h3>
