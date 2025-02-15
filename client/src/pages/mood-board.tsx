@@ -672,31 +672,6 @@ export default function MoodBoard() {
     fontStyle: any;
     onSelect: () => void;
   }) => {
-    const [selectedFont, setSelectedFont] = useState(() => {
-      try {
-        const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
-        return styles[index]?.fontFamily || FONT_FAMILIES[0].family;
-      } catch (error) {
-        console.error('Error loading font style:', error);
-        return FONT_FAMILIES[0].family;
-      }
-    });
-
-    const handleFontChange = useCallback((newValue: string) => {
-      try {
-        setSelectedFont(newValue);
-        const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
-        const newStyles = [...styles];
-        newStyles[index] = {
-          ...newStyles[index],
-          fontFamily: newValue,
-        };
-        sessionStorage.setItem('fontStyles', JSON.stringify(newStyles));
-      } catch (error) {
-        console.error('Error saving font style:', error);
-      }
-    }, [index]);
-
     return (
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
@@ -729,7 +704,7 @@ export default function MoodBoard() {
             <motion.h3
               className="text-3xl text-center text-white"
               style={{
-                fontFamily: selectedFont,
+                fontFamily: fontStyle?.fontFamily || 'Inter',
                 fontWeight: fontStyle?.fontWeight || '600',
                 fontStyle: 'normal',
                 textTransform: fontStyle?.textTransform || 'none',
@@ -742,26 +717,6 @@ export default function MoodBoard() {
               {brandName}
             </motion.h3>
           </CardContent>
-          <div 
-            className="p-4 bg-white/10 backdrop-blur-sm" 
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Select 
-              defaultValue={selectedFont}
-              onValueChange={handleFontChange}
-            >
-              <SelectTrigger className="bg-white/90">
-                <SelectValue placeholder="Select font" />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_FAMILIES.map((font) => (
-                  <SelectItem key={font.family} value={font.family}>
-                    <span style={{ fontFamily: font.family }}>{font.family}</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </Card>
       </motion.div>
     );
