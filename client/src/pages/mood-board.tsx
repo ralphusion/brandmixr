@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, SparkleIcon, Copy } from "lucide-react";
@@ -45,7 +45,6 @@ type RegenerationSection = {
   type: 'colors' | 'keywords' | 'mood' | 'image';
   index?: number;
 };
-
 
 const getRandomPleaseantColor = () => {
   return 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800';
@@ -188,28 +187,6 @@ type IconStyle =
   | 'decorative-vintage'
   | 'decorative-ornate';
 
-interface FontRecommendation {
-  primary: {
-    family: string;
-    weight: string;
-    style: string;
-  };
-  secondary: {
-    family: string;
-    weight: string;
-    style: string;
-  };
-  explanation: string;
-}
-
-interface FontStyle {
-  fontFamily: string;
-  fontWeight: string;
-  fontStyle: string;
-  textTransform: string;
-  letterSpacing: string;
-}
-
 
 const CARD_GRADIENTS = [
   'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800',
@@ -226,7 +203,6 @@ export default function MoodBoard() {
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
-  const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [regeneratingSection, setRegeneratingSection] = useState<RegenerationSection | null>(null);
@@ -253,17 +229,6 @@ export default function MoodBoard() {
     enabled: !!brandName && !!formData.industry && !!formData.style,
   });
 
-  const { data: fontRecommendations = [], isLoading: loadingFonts } = useQuery<FontRecommendation[]>({
-    queryKey: ['/api/font-recommendations', brandName],
-    queryFn: async () => {
-      const response = await apiRequest(
-        "GET",
-        `/api/font-recommendations?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}`
-      );
-      return response.json();
-    },
-    enabled: !!brandName,
-  });
 
   useEffect(() => {
     if (moodBoardData?.colors) {
@@ -475,23 +440,12 @@ export default function MoodBoard() {
 
   useEffect(() => {
     const savedConfig = sessionStorage.getItem('selectedLogoConfig');
-    const brandStudioFonts = sessionStorage.getItem('brandStudioFonts');
 
-    if (savedConfig || brandStudioFonts) {
+    if (savedConfig) {
       try {
-        if (savedConfig) {
-          const parsedConfig = JSON.parse(savedConfig);
-          setIconStyle(parsedConfig.iconStyle || 'initials-simple');
-          setLogoColor(parsedConfig.iconColor || '#000000');
-
-        }
-
-        if (brandStudioFonts) {
-          const parsedFonts = JSON.parse(brandStudioFonts);
-          if (parsedFonts?.primary?.family) {
-            loadFonts(parsedFonts);
-          }
-        }
+        const parsedConfig = JSON.parse(savedConfig);
+        setIconStyle(parsedConfig.iconStyle || 'initials-simple');
+        setLogoColor(parsedConfig.iconColor || '#000000');
       } catch (error) {
         console.error('Error loading configuration:', error);
       }
@@ -610,13 +564,17 @@ export default function MoodBoard() {
     }));
   };
 
+  const handleStyleChange = (value: string) => {
+    setIconStyle(value as IconStyle);
+  };
+
   const ColorInputs = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div className="space-y-2">
         <Label htmlFor="icon-style">Icon Options</Label>
         <Select
           value={iconStyle}
-          onValueChange={(value: string) => setIconStyle(value as IconStyle)}
+          onValueChange={handleStyleChange}
         >
           <SelectTrigger id="icon-style">
             <SelectValue placeholder="Select style" />
@@ -881,7 +839,7 @@ export default function MoodBoard() {
                           onClick={() => handleRegenerate('colors')}
                           disabled={regeneratingSection?.type === 'colors'}
                         >
-                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type=== 'colors' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Generate new colors</TooltipContent>
@@ -891,8 +849,7 @@ export default function MoodBoard() {
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      initial={{ opacity: 0 }}                      animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className="space-y-2"
                     >
@@ -1140,99 +1097,7 @@ export default function MoodBoard() {
           </p>
         )}
 
-        <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>AI-Recommended Font Combinations</DialogTitle>
-            </DialogHeader>
-
-            {loadingFonts ? (
-              <div className="space-y-4">
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-8 w-full" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-            ) : (
-              <div className="space-y-6">
-                {fontRecommendations.map((recommendation, index) => (
-                  <Card
-                    key={index}
-                    className={`cursor-pointer transition-all ${selectedFont === recommendation ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-                    onClick={() => setSelectedFont(recommendation)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="mb-4">
-                        <h3
-                          className="text-3xl mb-2"
-                          style={{
-                            fontFamily: recommendation.primary.family,
-                            fontWeight: recommendation.primary.weight,
-                            fontStyle: recommendation.primary.style,
-                          }}
-                        >
-                          {brandName}
-                        </h3>
-                        <p
-                          className="text-base"
-                          style={{
-                            fontFamily: recommendation.secondary.family,
-                            fontWeight: recommendation.secondary.weight,
-                            fontStyle: recommendation.secondary.style,
-                          }}
-                        >
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        </p>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
-                        <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
-                        <p className="mt-2">{recommendation.explanation}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-            <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
-              <Button
-                variant="outline"
-                onClick={() => setShowFontDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={async () => {
-                  if (selectedFont) {
-                    await loadFonts({
-                      primary: selectedFont.primary,
-                      secondary: selectedFont.secondary
-                    });
-                    setShowFontDialog(false);
-                  }
-                }}
-                disabled={!selectedFont}
-              >
-                Apply Font Combination
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
       </div>
     </TooltipProvider>
   );
-}
-
-interface FontRecommendation {
-  primary: {
-    family: string;
-    weight: string;
-    style: string;
-  };
-  secondary: {
-    family: string;
-    weight: string;
-    style: string;
-  };
-  explanation: string;
 }
