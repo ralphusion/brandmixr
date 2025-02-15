@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/generate-logo", async (req, res) => {
+app.post("/api/generate-logo", async (req, res) => {
     try {
       console.log("Received generate-logo request:", req.body);
       const { brandName, style, industry, isMore } = req.body;
@@ -56,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Brand name, style, and industry are required");
       }
 
-      const numberOfLogos = 4;
+      const numberOfLogos = 15; // Increased to generate 15 logos at once
       const currentLogos = isMore ? (req.body.currentLogos || []) : [];
       const startIndex = currentLogos.length;
 

@@ -31,6 +31,14 @@ const DEFAULT_COLORS = {
   }
 };
 
+// Function to generate a pastel color
+function generatePastelColor(): string {
+  const hue = Math.floor(Math.random() * 360);
+  const saturation = 25 + Math.floor(Math.random() * 25); // 25-50%
+  const lightness = 80 + Math.floor(Math.random() * 10); // 80-90%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+}
+
 function mapStyleToLogoStyle(style: string): LogoStyle {
   const styleMap: { [key: string]: LogoStyle } = {
     modern: 'modern',
@@ -82,8 +90,8 @@ function generateModernLogo(text: string, colors: any, industry: string, font: T
         <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
       </linearGradient>
     </defs>
-    <path d="${icon}" fill="url(#grad1)" transform="translate(50, 50) scale(1.8)" stroke="${accent}" stroke-width="0.5"/>
-    <text x="180" y="110" 
+    <path d="${icon}" fill="url(#grad1)" transform="translate(50, 50) scale(2.5)" stroke="${accent}" stroke-width="0.5"/>
+    <text x="180" y="130" 
           font-family="${font.family}, Arial, sans-serif" 
           font-size="42"
           font-weight="${weight}"
@@ -127,8 +135,8 @@ function generateIconicLogo(text: string, colors: any, industry: string, font: T
         <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
       </linearGradient>
     </defs>
-    <path d="${icon}" fill="url(#grad4)" transform="translate(50, 50) scale(2)" stroke="${primary}" stroke-width="0.5"/>
-    <text x="180" y="110" 
+    <path d="${icon}" fill="url(#grad4)" transform="translate(50, 50) scale(3)" stroke="${primary}" stroke-width="0.5"/>
+    <text x="180" y="130" 
           font-family="${font.family}, Arial, sans-serif" 
           font-size="42"
           font-weight="${weight}"
