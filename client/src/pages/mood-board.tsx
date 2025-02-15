@@ -216,16 +216,18 @@ export default function MoodBoard() {
     setImageLoadErrors([]);
 
     const loadImages = async () => {
+      const timestamp = Date.now();
       const imagePromises = moodBoardData.images.map((url, index) => {
         return new Promise((resolve, reject) => {
           const img = new Image();
           img.onload = () => resolve(index);
           img.onerror = () => {
+            console.error(`Failed to load image at index ${index}`);
             setImageLoadErrors(prev => [...prev, index]);
             reject(new Error(`Failed to load image at index ${index}`));
           };
           // Add timestamp to URL to prevent caching
-          img.src = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+          img.src = `${url}${url.includes('?') ? '&' : '?'}_t=${timestamp}`;
         });
       });
 
@@ -334,42 +336,57 @@ export default function MoodBoard() {
           break;
 
         case 'image':
-          if (typeof imageIndex !== 'number' || !moodBoardData) return;
+          if (typeof imageIndex !== 'number' || !moodBoardData) {
+            throw new Error('Invalid image index or missing mood board data');
+          }
 
           endpoint = `/api/mood-board/regenerate-image`;
-          response = await apiRequest("POST", endpoint, {
-            prompt: moodBoardData.imagePrompts[imageIndex],
-            style: formData.style,
-            index: imageIndex
-          });
 
-          if (!response.ok) {
-            throw new Error('Failed to regenerate image');
+          try {
+            response = await apiRequest("POST", endpoint, {
+              prompt: moodBoardData.imagePrompts[imageIndex],
+              style: formData.style,
+              index: imageIndex
+            });
+
+            if (!response.ok) {
+              throw new Error(`Failed to regenerate image: ${response.statusText}`);
+            }
+
+            updatedData = await response.json();
+
+            if (!updatedData.image) {
+              throw new Error('No image returned from server');
+            }
+
+            // Add cache-busting timestamp
+            const timestamp = Date.now();
+            const imageUrl = `${updatedData.image}${updatedData.image.includes('?') ? '&' : '?'}_t=${timestamp}`;
+
+            // Update query client with new image
+            queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
+              if (!oldData || !oldData.images) return oldData;
+
+              const newImages = [...oldData.images];
+              newImages[imageIndex] = imageUrl;
+
+              return {
+                ...oldData,
+                images: newImages,
+              };
+            });
+
+            // Reset loading states
+            setImagesLoaded(false);
+            setImageLoadErrors(prev => prev.filter(idx => idx !== imageIndex));
+
+            // Force a re-render of the images
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+          } catch (error) {
+            console.error('Image regeneration error:', error);
+            throw new Error(error instanceof Error ? error.message : 'Failed to regenerate image');
           }
-
-          updatedData = await response.json();
-
-          if (!updatedData.image) {
-            throw new Error('No image returned from server');
-          }
-
-          // Add timestamp to prevent browser caching
-          const imageUrl = `${updatedData.image}${updatedData.image.includes('?') ? '&' : '?'}_t=${Date.now()}`;
-
-          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
-            if (!oldData || !oldData.images) return oldData;
-
-            const newImages = [...oldData.images];
-            newImages[imageIndex] = imageUrl;
-            return {
-              ...oldData,
-              images: newImages,
-            };
-          });
-
-          // Force immediate image reload
-          setImagesLoaded(false);
-          setImageLoadErrors(prev => prev.filter(idx => idx !== imageIndex));
           break;
       }
 
@@ -825,7 +842,7 @@ export default function MoodBoard() {
                   </h2>
                   <div className="flex gap-2">
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                    <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
@@ -844,7 +861,7 @@ export default function MoodBoard() {
                           onClick={() => handleRegenerate('colors')}
                           disabled={regeneratingSection?.type === 'colors'}
                         >
-                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type=== 'colors' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Generate new colors</TooltipContent>
