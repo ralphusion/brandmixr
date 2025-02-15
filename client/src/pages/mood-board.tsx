@@ -85,6 +85,7 @@ const ICON_STYLES = {
 };
 
 const FONT_FAMILIES = [
+  // Modern Sans-Serif
   { family: 'Inter', style: 'normal', weight: '600' },
   { family: 'Montserrat', style: 'normal', weight: '700' },
   { family: 'Poppins', style: 'normal', weight: '700' },
@@ -92,7 +93,45 @@ const FONT_FAMILIES = [
   { family: 'Helvetica Neue', style: 'normal', weight: '600' },
   { family: 'Source Sans Pro', style: 'normal', weight: '600' },
   { family: 'Nunito Sans', style: 'normal', weight: '700' },
-  { family: 'Work Sans', style: 'normal', weight: '600' }
+  { family: 'Work Sans', style: 'normal', weight: '600' },
+  // Additional Professional Fonts
+  { family: 'Roboto', style: 'normal', weight: '700' },
+  { family: 'Open Sans', style: 'normal', weight: '600' },
+  { family: 'Raleway', style: 'normal', weight: '600' },
+  { family: 'Lato', style: 'normal', weight: '700' },
+  { family: 'Ubuntu', style: 'normal', weight: '500' },
+  { family: 'DM Sans', style: 'normal', weight: '500' },
+  { family: 'Manrope', style: 'normal', weight: '600' },
+  // Contemporary Sans
+  { family: 'Plus Jakarta Sans', style: 'normal', weight: '600' },
+  { family: 'Outfit', style: 'normal', weight: '600' },
+  { family: 'Albert Sans', style: 'normal', weight: '700' },
+  { family: 'Public Sans', style: 'normal', weight: '600' },
+  { family: 'Be Vietnam Pro', style: 'normal', weight: '600' },
+  // Geometric Sans
+  { family: 'Proxima Nova', style: 'normal', weight: '600' },
+  { family: 'Futura PT', style: 'normal', weight: '500' },
+  { family: 'Brandon Grotesque', style: 'normal', weight: '500' },
+  { family: 'Axiforma', style: 'normal', weight: '600' },
+  { family: 'Gilroy', style: 'normal', weight: '600' },
+  // Corporate/Business
+  { family: 'Articulat CF', style: 'normal', weight: '700' },
+  { family: 'Sharp Grotesk', style: 'normal', weight: '600' },
+  { family: 'Factor A', style: 'normal', weight: '600' },
+  { family: 'Circular Std', style: 'normal', weight: '500' },
+  { family: 'Sofia Pro', style: 'normal', weight: '600' },
+  // Tech/Modern
+  { family: 'Space Grotesk', style: 'normal', weight: '600' },
+  { family: 'JetBrains Mono', style: 'normal', weight: '600' },
+  { family: 'IBM Plex Sans', style: 'normal', weight: '600' },
+  { family: 'Geist', style: 'normal', weight: '600' },
+  { family: 'General Sans', style: 'normal', weight: '600' },
+  // Neutral/Versatile
+  { family: 'Supreme', style: 'normal', weight: '500' },
+  { family: 'Cabinet Grotesk', style: 'normal', weight: '700' },
+  { family: 'Satoshi', style: 'normal', weight: '700' },
+  { family: 'Switzer', style: 'normal', weight: '600' },
+  { family: 'Hauora Sans', style: 'normal', weight: '600' }
 ];
 
 const FONT_STYLES_ARRAY = [
@@ -806,7 +845,7 @@ export default function MoodBoard() {
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center">
+<div className="flex items-center">
             <Button
               variant="ghost"
               className="mr-4"
@@ -887,7 +926,7 @@ export default function MoodBoard() {
                     </Tooltip>
                   </div>
                 </div>
-                <AnimatePresence mode="wait>">
+                <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
                       initial={{ opacity: 0 }}
