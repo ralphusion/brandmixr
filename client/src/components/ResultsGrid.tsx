@@ -134,134 +134,123 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
   };
 
   return (
-    <TooltipProvider delayDuration={300}>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {names.map((nameData, index) => {
-          const name = typeof nameData === 'string' ? nameData : nameData.name;
-          const domain = typeof nameData === 'string' ? null : nameData.domain;
-          const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
-          const trademarkExists = typeof nameData === 'string' ? null : nameData.trademarkExists;
-          const colorSet = cardColors[index % cardColors.length];
-          const isSaved = savedNamesSet.has(name);
+    <div className="relative">
+      <TooltipProvider delayDuration={300}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {names.map((nameData, index) => {
+            const name = typeof nameData === 'string' ? nameData : nameData.name;
+            const domain = typeof nameData === 'string' ? null : nameData.domain;
+            const domainAvailable = typeof nameData === 'string' ? null : nameData.domainAvailable;
+            const trademarkExists = typeof nameData === 'string' ? null : nameData.trademarkExists;
+            const colorSet = cardColors[index % cardColors.length];
+            const isSaved = savedNamesSet.has(name);
 
-          return (
-            <Card 
-              key={index}
-              className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative shadow-lg dark:shadow-md dark:shadow-black/20`}
-              style={{ isolation: 'isolate' }}
-              onClick={() => handleCardClick(name)}
-            >
-              <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
-                {!readOnly && (
-                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 bg-white/90 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 shadow-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopy(name);
-                      }}
-                    >
-                      {copiedName === name ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 bg-white/90 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 shadow-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSave(nameData);
-                      }}
-                    >
-                      <Heart 
-                        className={`h-4 w-4 ${isSaved ? "fill-current text-red-500 dark:text-red-400" : ""}`} 
-                      />
-                    </Button>
-                  </div>
-                )}
-
-                <h3 className={`text-3xl text-center mb-6 ${colorSet.text} ${FONT_STYLES[index % FONT_STYLES.length]}`}>
-                  {name}
-                </h3>
-
-                <div className="absolute bottom-3 right-3 flex gap-2">
-                  {domain && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className={`rounded-full p-1.5 ${
-                          domainAvailable 
-                            ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300' 
-                            : 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300'
-                        }`}>
-                          <Globe className="h-4 w-4" />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent 
-                        side="bottom" 
-                        sideOffset={5} 
-                        className="z-[60]"
-                        portal={true}
-                      >
-                        <p>{domainAvailable ? "Domain name is available" : "Domain name is taken"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-
-                  {trademarkExists !== null && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className={`rounded-full p-1.5 ${
-                          !trademarkExists 
-                            ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300' 
-                            : 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300'
-                        }`}>
-                          <Shield className="h-4 w-4" />
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent 
-                        side="bottom" 
-                        sideOffset={5} 
-                        className="z-[60]"
-                        portal={true}
-                      >
-                        <p>{!trademarkExists ? "No similar trademarks found" : "Similar trademarks exist"}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-
-                <div className="absolute bottom-3 left-3">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+            return (
+              <Card 
+                key={index}
+                className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative shadow-lg dark:shadow-md dark:shadow-black/20`}
+                onClick={() => handleCardClick(name)}
+              >
+                <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
+                  {!readOnly && (
+                    <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Button
                         variant="ghost"
-                        size="sm"
-                        className="p-0 h-auto"
-                        onClick={(e) => handleInfoClick(e, name)}
+                        size="icon"
+                        className="h-8 w-8 bg-white/90 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCopy(name);
+                        }}
                       >
-                        <Info className="h-4 w-4 opacity-50 hover:opacity-75 dark:text-gray-300" />
+                        {copiedName === name ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
                       </Button>
-                    </TooltipTrigger>
-                    <TooltipContent 
-                      side="bottom" 
-                      sideOffset={5} 
-                      className="z-[60]"
-                      portal={true}
-                    >
-                      <p>Click for brand description</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 bg-white/90 hover:bg-white dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-100 shadow-sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSave(nameData);
+                        }}
+                      >
+                        <Heart 
+                          className={`h-4 w-4 ${isSaved ? "fill-current text-red-500 dark:text-red-400" : ""}`} 
+                        />
+                      </Button>
+                    </div>
+                  )}
+
+                  <h3 className={`text-3xl text-center mb-6 ${colorSet.text} ${FONT_STYLES[index % FONT_STYLES.length]}`}>
+                    {name}
+                  </h3>
+
+                  <div className="absolute bottom-3 right-3 flex gap-2">
+                    {domain && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className={`rounded-full p-1.5 ${
+                            domainAvailable 
+                              ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300' 
+                              : 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300'
+                          }`}>
+                            <Globe className="h-4 w-4" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{domainAvailable ? "Domain name is available" : "Domain name is taken"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+
+                    {trademarkExists !== null && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className={`rounded-full p-1.5 ${
+                            !trademarkExists 
+                              ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300' 
+                              : 'bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300'
+                          }`}>
+                            <Shield className="h-4 w-4" />
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{!trademarkExists ? "No similar trademarks found" : "Similar trademarks exist"}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+
+                  <div className="absolute bottom-3 left-3">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="p-0 h-auto"
+                          onClick={(e) => handleInfoClick(e, name)}
+                        >
+                          <Info className="h-4 w-4 opacity-50 hover:opacity-75 dark:text-gray-300" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Click for brand description</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+
+        {/* Render tooltips in a portal */}
+        <div id="tooltip-root" className="relative z-[9999]" />
+      </TooltipProvider>
 
       <Dialog open={!!selectedName} onOpenChange={() => setSelectedName(null)}>
         <DialogContent>
@@ -277,6 +266,6 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           </div>
         </DialogContent>
       </Dialog>
-    </TooltipProvider>
+    </div>
   );
 }

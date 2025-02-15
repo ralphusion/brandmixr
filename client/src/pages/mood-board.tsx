@@ -397,32 +397,30 @@ export default function MoodBoard() {
 
   useEffect(() => {
     const savedConfig = sessionStorage.getItem('selectedLogoConfig');
-    if (savedConfig) {
-      try {
-        const parsedConfig = JSON.parse(savedConfig);
-        // Set icon configuration
-        setIconStyle(parsedConfig.iconStyle);
-        setIconColor(parsedConfig.iconColor || '#000000'); // Ensure default color
-        setSelectedBackground(parsedConfig.selectedBackground);
+    const brandStudioFonts = sessionStorage.getItem('brandStudioFonts');
 
-        // Set font configuration
-        if (parsedConfig.fontStyle) {
-          const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
-          setSelectedFontStyle(fontStyle);
+    if (savedConfig || brandStudioFonts) {
+      try {
+        if (savedConfig) {
+          const parsedConfig = JSON.parse(savedConfig);
+          setIconStyle(parsedConfig.iconStyle || 'initials-simple');
+          setIconColor(parsedConfig.iconColor || '#000000');
+          setSelectedBackground(parsedConfig.selectedBackground);
+
+          if (parsedConfig.fontStyle) {
+            const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
+            setSelectedFontStyle(fontStyle);
+          }
         }
 
-        // Load fonts from brand studio if available
-        const brandStudioFonts = sessionStorage.getItem('brandStudioFonts');
         if (brandStudioFonts) {
-          try {
-            const parsedFonts = JSON.parse(brandStudioFonts);
+          const parsedFonts = JSON.parse(brandStudioFonts);
+          if (parsedFonts?.primary?.family) {
             loadFonts(parsedFonts);
-          } catch (error) {
-            console.error('Error parsing brand studio fonts:', error);
           }
         }
       } catch (error) {
-        console.error('Error loading saved configuration:', error);
+        console.error('Error loading configuration:', error);
       }
     }
   }, []);
@@ -433,14 +431,19 @@ export default function MoodBoard() {
         // Store current SVG as fallback
         const currentSvg = logoSvg;
 
-        // Generate new SVG with fallback color
+        // Validate inputs
+        if (!iconStyle || !iconColor) {
+          throw new Error('Invalid icon configuration');
+        }
+
+        // Generate new SVG
         const newSvg = generateIconSvg(brandName, {
           style: iconStyle as IconStyle,
-          color: iconColor || '#000000',
+          color: iconColor,
           backgroundColor: 'transparent'
         });
 
-        // Validate SVG before setting
+        // Validate SVG
         if (!newSvg || newSvg.trim() === '') {
           throw new Error('Generated SVG is empty or invalid');
         }
@@ -452,18 +455,14 @@ export default function MoodBoard() {
           throw new Error('Invalid SVG generated');
         }
 
-        // Only update if valid
+        // Convert to data URL
         const dataUrl = `data:image/svg+xml;base64,${btoa(newSvg)}`;
         setLogoSvg(dataUrl);
       } catch (error) {
         console.error('Error generating icon:', error);
-        // Only show error if we don't have a fallback
-        if (!logoSvg) {
-          toast({
-            title: "Icon generation failed",
-            description: "Failed to generate icon. Please try again.",
-            variant: "destructive",
-          });
+        // Revert to previous valid SVG if available
+        if (currentSvg) {
+          setLogoSvg(currentSvg);
         }
       }
     }
@@ -480,58 +479,49 @@ export default function MoodBoard() {
     const currentSvg = logoSvg;
 
     try {
-      // Get all available icon styles
+      // Get available icon styles
       const styles = Object.keys(ICON_STYLES)
         .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
         .map(style => style.value);
 
-      // Filter out current style and select random
-      const availableStyles = styles.filter(style => style !== iconStyle);
+      // Select new style
+      const availableStyles = styles.filter(style => style !== currentStyle);
       const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
-      // Generate new colors with validation
+      // Generate new color
       const hue = Math.floor(Math.random() * 360);
       const saturation = 60 + Math.floor(Math.random() * 20);
       const lightness = 45 + Math.floor(Math.random() * 15);
       const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
-      // Test icon generation before applying changes
+      // Test generation with new values
       const testSvg = generateIconSvg(brandName, {
-        style: newStyle as IconStyle,
+        style: newStyle,
         color: newIconColor,
         backgroundColor: 'transparent'
       });
 
-      if (!testSvg) {
+      if (!testSvg || testSvg.trim() === '') {
         throw new Error('Failed to generate test SVG');
       }
 
-      // Select random background
-      const randomBgIndex = Math.floor(Math.random() * BACKGROUNDS.length);
-      const newBackground = BACKGROUNDS[randomBgIndex];
+      // Only update if test was successful
+      setIconStyle(newStyle);
+      setIconColor(newIconColor);
+      setSelectedBackground(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]);
 
-      // Generate random font styling
+      // Update font style
       const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
-      const textTransform = TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)];
-      const fontStyle = FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)];
-      const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
-
-      // Create font style object
       const newFontStyle: FontStyle = {
         fontFamily: randomFont.family,
         fontWeight: randomFont.weight,
-        fontStyle,
-        textTransform,
-        letterSpacing: letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`,
+        fontStyle: FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)],
+        textTransform: TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)],
+        letterSpacing: LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
       };
-
-      // Update states only after successful generation
-      setIconStyle(newStyle);
-      setIconColor(newIconColor);
-      setSelectedBackground(newBackground);
       setSelectedFontStyle(newFontStyle);
 
-      // Load the font
+      // Update font settings
       const fontSettings: FontSettings = {
         primary: {
           family: randomFont.family,
@@ -544,13 +534,12 @@ export default function MoodBoard() {
           style: randomFont.style,
         }
       };
-      loadFonts(fontSettings);
 
-      // Store font settings in sessionStorage for persistence
+      loadFonts(fontSettings);
       sessionStorage.setItem('brandStudioFonts', JSON.stringify(fontSettings));
     } catch (error) {
       console.error('Error regenerating logo:', error);
-      // Revert to previous values if generation fails
+      // Revert all changes if anything fails
       setIconStyle(currentStyle);
       setIconColor(currentColor);
       setSelectedBackground(currentBackground);
@@ -565,16 +554,35 @@ export default function MoodBoard() {
   };
 
   const handleResetLogo = () => {
-    const savedConfig = sessionStorage.getItem('selectedLogoConfig');
-    if (savedConfig) {
-      const parsedConfig = JSON.parse(savedConfig);
-      setIconStyle(parsedConfig.iconStyle);
-      setIconColor(parsedConfig.iconColor);
-      setSelectedBackground(parsedConfig.selectedBackground);
-      if (parsedConfig.fontStyle) {
-        const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
-        setSelectedFontStyle(fontStyle);
+    try {
+      const savedConfig = sessionStorage.getItem('selectedLogoConfig');
+      const brandStudioFonts = sessionStorage.getItem('brandStudioFonts');
+
+      if (savedConfig) {
+        const parsedConfig = JSON.parse(savedConfig);
+        setIconStyle(parsedConfig.iconStyle || 'initials-simple');
+        setIconColor(parsedConfig.iconColor || '#000000');
+        setSelectedBackground(parsedConfig.selectedBackground);
+
+        if (parsedConfig.fontStyle) {
+          const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
+          setSelectedFontStyle(fontStyle);
+        }
       }
+
+      if (brandStudioFonts) {
+        const parsedFonts = JSON.parse(brandStudioFonts);
+        if (parsedFonts?.primary?.family) {
+          loadFonts(parsedFonts);
+        }
+      }
+    } catch (error) {
+      console.error('Error resetting logo:', error);
+      toast({
+        title: "Reset failed",
+        description: "Failed to reset logo to saved configuration.",
+        variant: "destructive",
+      });
     }
   };
 
