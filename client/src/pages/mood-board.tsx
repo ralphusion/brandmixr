@@ -46,6 +46,22 @@ const ICON_STYLES = {
   ],
 };
 
+type IconStyle = 'initials-simple' | 'initials-detailed' | 'abstract-geometric' | 'abstract-organic';
+
+const BACKGROUNDS = [
+  { bg: 'bg-blue-500 text-white', text: 'text-white' },
+  { bg: 'bg-red-500 text-white', text: 'text-white' },
+  { bg: 'bg-green-500 text-white', text: 'text-white' },
+  { bg: 'bg-yellow-500 text-black', text: 'text-black' },
+  { bg: 'bg-purple-500 text-white', text: 'text-white' },
+];
+
+const getRandomPleaseantColor = () => {
+    const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+    return BACKGROUNDS[randomIndex].bg;
+}
+
+
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
@@ -59,6 +75,8 @@ export default function MoodBoard() {
   const [logoSvg, setLogoSvg] = useState<string>("");
   const [iconStyle, setIconStyle] = useState<string>('initials-simple');
   const [iconColor, setIconColor] = useState("#000000");
+  const [selectedBackground, setSelectedBackground] = useState<typeof BACKGROUNDS[0] | null>(null);
+  const [selectedFontStyle, setSelectedFontStyle] = useState<string>('');
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -289,9 +307,20 @@ export default function MoodBoard() {
   };
 
   useEffect(() => {
+    const savedConfig = JSON.parse(sessionStorage.getItem('selectedLogoConfig') || 'null');
+    if (savedConfig) {
+      setIconStyle(savedConfig.iconStyle);
+      setIconColor(savedConfig.iconColor);
+      setSelectedBackground(savedConfig.selectedBackground);
+      setSelectedFontStyle(savedConfig.fontStyle);
+    }
+  }, []);
+
+
+  useEffect(() => {
     if (brandName) {
       const svg = generateIconSvg(brandName, {
-        style: iconStyle,
+        style: iconStyle as IconStyle,
         color: iconColor,
         backgroundColor: 'transparent'
       });
@@ -302,13 +331,33 @@ export default function MoodBoard() {
 
   const handleRegenerateLogo = () => {
     if (!brandName) return;
-    const newStyle = Object.keys(ICON_STYLES)
-      .flatMap(category => ICON_STYLES[category])
-      .map(style => style.value)
-      .filter(style => style !== iconStyle)[
-      Math.floor(Math.random() * (Object.keys(ICON_STYLES).length -1))
-    ];
+
+    // Get all available styles
+    const styles = Object.keys(ICON_STYLES)
+      .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
+      .map(style => style.value);
+
+    // Filter out current style and select random
+    const availableStyles = styles.filter(style => style !== iconStyle);
+    const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)];
+
+    // Generate new color
+    const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+    const newColor = BACKGROUNDS[randomIndex].bg;
     setIconStyle(newStyle);
+    setIconColor(newColor);
+    setSelectedBackground(BACKGROUNDS[randomIndex]);
+    setSelectedFontStyle('');
+  };
+
+  const handleResetLogo = () => {
+    const savedConfig = JSON.parse(sessionStorage.getItem('selectedLogoConfig') || 'null');
+    if (savedConfig) {
+      setIconStyle(savedConfig.iconStyle);
+      setIconColor(savedConfig.iconColor);
+      setSelectedBackground(savedConfig.selectedBackground);
+      setSelectedFontStyle(savedConfig.fontStyle);
+    }
   };
 
   if (!brandName) {
@@ -377,14 +426,23 @@ export default function MoodBoard() {
                       variant="ghost"
                       size="sm"
                       onClick={handleRegenerateLogo}
+                      title="Generate new logo variation"
                     >
                       <SparkleIcon className="h-4 w-4" />
                     </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleResetLogo}
+                      title="Reset to selected logo"
+                    >
+                      <ArrowLeft className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="flex items-center justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
                   <div className="flex flex-col items-center gap-6">
-                    <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+                    <div className="w-24 h-24 bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-sm">
                       {logoSvg && (
                         <img
                           src={logoSvg}
@@ -394,8 +452,8 @@ export default function MoodBoard() {
                       )}
                     </div>
                     <h3
-                      className="text-3xl"
-                      style={fonts?.primary ? {
+                      className={`text-3xl ${selectedBackground?.text || ''} ${selectedFontStyle || ''}`}
+                      style={fonts?.primary && !selectedFontStyle ? {
                         fontFamily: fonts.primary.family,
                         fontWeight: fonts.primary.weight,
                         fontStyle: fonts.primary.style,

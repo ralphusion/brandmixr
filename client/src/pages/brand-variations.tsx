@@ -169,6 +169,15 @@ export default function BrandVariations() {
 
   const handleCardSelect = (cardId: string) => {
     setSelectedCardId(cardId);
+    // Store the selected logo configuration
+    const selectedStyle = BACKGROUNDS[parseInt(cardId.split('-')[1])];
+    sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
+      iconStyle,
+      iconColor,
+      backgroundColor,
+      selectedBackground: selectedStyle,
+      fontStyle: FONT_STYLES[parseInt(cardId.split('-')[1]) % FONT_STYLES.length]
+    }));
   };
 
   const handleRefresh = () => {
