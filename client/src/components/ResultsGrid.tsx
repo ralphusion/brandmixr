@@ -202,7 +202,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{domainAvailable ? "Domain name is available" : "Domain name is taken"}</p>
+                          <p>{domainAvailable ? "Domain Available" : "Domain Taken"}</p>
                         </TooltipContent>
                       </Tooltip>
                     )}
@@ -219,7 +219,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                           </div>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>{!trademarkExists ? "No similar trademarks found" : "Similar trademarks exist"}</p>
+                          <p>{!trademarkExists ? "Not Trademarked" : "Trademarked"}</p>
                         </TooltipContent>
                       </Tooltip>
                     )}
