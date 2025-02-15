@@ -398,36 +398,73 @@ export default function MoodBoard() {
   useEffect(() => {
     const savedConfig = sessionStorage.getItem('selectedLogoConfig');
     if (savedConfig) {
-      const parsedConfig = JSON.parse(savedConfig);
-      setIconStyle(parsedConfig.iconStyle);
-      setIconColor(parsedConfig.iconColor);
-      setSelectedBackground(parsedConfig.selectedBackground);
-      // Remove textDecoration from the saved font style
-      if (parsedConfig.fontStyle) {
-        const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
-        setSelectedFontStyle(fontStyle);
+      try {
+        const parsedConfig = JSON.parse(savedConfig);
+        // Set icon configuration
+        setIconStyle(parsedConfig.iconStyle);
+        setIconColor(parsedConfig.iconColor || '#000000'); // Ensure default color
+        setSelectedBackground(parsedConfig.selectedBackground);
+
+        // Set font configuration
+        if (parsedConfig.fontStyle) {
+          const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
+          setSelectedFontStyle(fontStyle);
+        }
+
+        // Load fonts from brand studio if available
+        const brandStudioFonts = sessionStorage.getItem('brandStudioFonts');
+        if (brandStudioFonts) {
+          try {
+            const parsedFonts = JSON.parse(brandStudioFonts);
+            loadFonts(parsedFonts);
+          } catch (error) {
+            console.error('Error parsing brand studio fonts:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading saved configuration:', error);
       }
     }
   }, []);
 
-
   useEffect(() => {
     if (brandName) {
       try {
-        const svg = generateIconSvg(brandName, {
+        // Store current SVG as fallback
+        const currentSvg = logoSvg;
+
+        // Generate new SVG with fallback color
+        const newSvg = generateIconSvg(brandName, {
           style: iconStyle as IconStyle,
-          color: iconColor,
+          color: iconColor || '#000000',
           backgroundColor: 'transparent'
         });
-        const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+
+        // Validate SVG before setting
+        if (!newSvg || newSvg.trim() === '') {
+          throw new Error('Generated SVG is empty or invalid');
+        }
+
+        // Test SVG parsing
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(newSvg, 'image/svg+xml');
+        if (doc.getElementsByTagName('parsererror').length > 0) {
+          throw new Error('Invalid SVG generated');
+        }
+
+        // Only update if valid
+        const dataUrl = `data:image/svg+xml;base64,${btoa(newSvg)}`;
         setLogoSvg(dataUrl);
       } catch (error) {
         console.error('Error generating icon:', error);
-        toast({
-          title: "Icon generation failed",
-          description: "Failed to generate icon. Please try again.",
-          variant: "destructive",
-        });
+        // Only show error if we don't have a fallback
+        if (!logoSvg) {
+          toast({
+            title: "Icon generation failed",
+            description: "Failed to generate icon. Please try again.",
+            variant: "destructive",
+          });
+        }
       }
     }
   }, [brandName, iconStyle, iconColor]);
@@ -440,6 +477,7 @@ export default function MoodBoard() {
     const currentColor = iconColor;
     const currentBackground = selectedBackground;
     const currentFontStyle = selectedFontStyle;
+    const currentSvg = logoSvg;
 
     try {
       // Get all available icon styles
@@ -451,11 +489,22 @@ export default function MoodBoard() {
       const availableStyles = styles.filter(style => style !== iconStyle);
       const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
-      // Generate new colors
+      // Generate new colors with validation
       const hue = Math.floor(Math.random() * 360);
       const saturation = 60 + Math.floor(Math.random() * 20);
       const lightness = 45 + Math.floor(Math.random() * 15);
       const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+      // Test icon generation before applying changes
+      const testSvg = generateIconSvg(brandName, {
+        style: newStyle as IconStyle,
+        color: newIconColor,
+        backgroundColor: 'transparent'
+      });
+
+      if (!testSvg) {
+        throw new Error('Failed to generate test SVG');
+      }
 
       // Select random background
       const randomBgIndex = Math.floor(Math.random() * BACKGROUNDS.length);
@@ -496,6 +545,9 @@ export default function MoodBoard() {
         }
       };
       loadFonts(fontSettings);
+
+      // Store font settings in sessionStorage for persistence
+      sessionStorage.setItem('brandStudioFonts', JSON.stringify(fontSettings));
     } catch (error) {
       console.error('Error regenerating logo:', error);
       // Revert to previous values if generation fails
@@ -503,6 +555,7 @@ export default function MoodBoard() {
       setIconColor(currentColor);
       setSelectedBackground(currentBackground);
       setSelectedFontStyle(currentFontStyle);
+      setLogoSvg(currentSvg);
       toast({
         title: "Generation failed",
         description: "Failed to generate new logo variation. Previous style restored.",
@@ -938,7 +991,7 @@ export default function MoodBoard() {
               <motion.div
                 key={index}
                 initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity:1 }}
+                animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.2 }}
               >
                 <Card className="shadow-md">
@@ -989,7 +1042,7 @@ export default function MoodBoard() {
                         >
                           <img
                             src={imageUrl}
-                            alt={`Mood image ${index+ 1}`}
+                            alt={`Mood image ${index + 1}`}
                             className="w-full h-full object-contain"
                           />
                         </motion.div>

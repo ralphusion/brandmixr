@@ -147,7 +147,8 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           return (
             <Card 
               key={index}
-              className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative overflow-visible shadow-lg dark:shadow-md dark:shadow-black/20`}
+              className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative shadow-lg dark:shadow-md dark:shadow-black/20`}
+              style={{ isolation: 'isolate' }}
               onClick={() => handleCardClick(name)}
             >
               <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
@@ -200,7 +201,12 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                           <Globe className="h-4 w-4" />
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" sideOffset={5} className="z-50">
+                      <TooltipContent 
+                        side="bottom" 
+                        sideOffset={5} 
+                        className="z-[60]"
+                        portal={true}
+                      >
                         <p>{domainAvailable ? "Domain name is available" : "Domain name is taken"}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -217,7 +223,12 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                           <Shield className="h-4 w-4" />
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent side="bottom" sideOffset={5} className="z-50">
+                      <TooltipContent 
+                        side="bottom" 
+                        sideOffset={5} 
+                        className="z-[60]"
+                        portal={true}
+                      >
                         <p>{!trademarkExists ? "No similar trademarks found" : "Similar trademarks exist"}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -236,7 +247,12 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                         <Info className="h-4 w-4 opacity-50 hover:opacity-75 dark:text-gray-300" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="bottom" sideOffset={5} className="z-50">
+                    <TooltipContent 
+                      side="bottom" 
+                      sideOffset={5} 
+                      className="z-[60]"
+                      portal={true}
+                    >
                       <p>Click for brand description</p>
                     </TooltipContent>
                   </Tooltip>
