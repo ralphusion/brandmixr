@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
+import { generateIconSvg } from "@/lib/generateIcon";
 
 const STYLE_OPTIONS = [
   { value: "modern", label: "Modern" },
@@ -25,13 +26,58 @@ const COLOR_SCHEMES = [
   { name: "Natural", colors: ["#27AE60", "#2ECC71", "#F1C40F"] },
 ];
 
+const ICON_STYLES = {
+  initials: [
+    { value: 'initials-simple', label: 'Simple Initials' },
+    { value: 'initials-rounded', label: 'Rounded Initials' },
+    { value: 'initials-gradient', label: 'Gradient Initials' }
+  ],
+  geometric: [
+    { value: 'geometric-circle', label: 'Circle' },
+    { value: 'geometric-square', label: 'Square' },
+    { value: 'geometric-hexagon', label: 'Hexagon' }
+  ],
+  modern: [
+    { value: 'modern-minimal', label: 'Minimal' },
+    { value: 'modern-tech', label: 'Tech Style' },
+    { value: 'modern-gradient', label: 'Modern Gradient' }
+  ]
+};
+
 export default function LogoStudio() {
   const [, navigate] = useLocation();
   const [selectedStyle, setSelectedStyle] = useState<string>("modern");
   const [selectedColorScheme, setSelectedColorScheme] = useState<string>(COLOR_SCHEMES[0].name);
+  const [previewLogo, setPreviewLogo] = useState<string>("");
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
+
+  const generateLogoPreview = () => {
+    if (!brandName) return;
+
+    const colorScheme = COLOR_SCHEMES.find(scheme => scheme.name === selectedColorScheme);
+    if (!colorScheme) return;
+
+    const primaryColor = colorScheme.colors[0];
+    const style = Object.values(ICON_STYLES)
+      .flat()
+      .find(style => style.value.includes(selectedStyle.toLowerCase()))?.value || 'modern-minimal';
+
+    const svg = generateIconSvg(brandName, {
+      style,
+      color: primaryColor,
+      backgroundColor: 'white'
+    });
+
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+    setPreviewLogo(dataUrl);
+  };
+
+  const handleGenerateVariations = () => {
+    if (!brandName) return;
+    navigate(`/brand-variations?name=${encodeURIComponent(brandName)}`);
+  };
 
   if (!brandName) {
     navigate('/');
@@ -58,7 +104,7 @@ export default function LogoStudio() {
         <Card className="shadow-md">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold mb-6">Logo Designer</h2>
-            
+
             <div className="space-y-4">
               <div>
                 <Label htmlFor="brand-name">Brand Name</Label>
@@ -74,7 +120,10 @@ export default function LogoStudio() {
                 <Label htmlFor="style">Style Preference</Label>
                 <Select
                   value={selectedStyle}
-                  onValueChange={setSelectedStyle}
+                  onValueChange={(value) => {
+                    setSelectedStyle(value);
+                    generateLogoPreview();
+                  }}
                 >
                   <SelectTrigger id="style">
                     <SelectValue placeholder="Select style" />
@@ -99,7 +148,10 @@ export default function LogoStudio() {
                       className={`p-4 h-auto flex flex-col items-center gap-2 ${
                         selectedColorScheme === scheme.name ? 'ring-2 ring-primary' : ''
                       }`}
-                      onClick={() => setSelectedColorScheme(scheme.name)}
+                      onClick={() => {
+                        setSelectedColorScheme(scheme.name);
+                        generateLogoPreview();
+                      }}
                     >
                       <span className="text-sm font-medium">{scheme.name}</span>
                       <div className="flex gap-1">
@@ -116,7 +168,11 @@ export default function LogoStudio() {
                 </div>
               </div>
 
-              <Button className="w-full" size="lg">
+              <Button 
+                className="w-full" 
+                size="lg"
+                onClick={handleGenerateVariations}
+              >
                 Generate Logo Variations
               </Button>
             </div>
@@ -127,7 +183,18 @@ export default function LogoStudio() {
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold mb-6">Preview</h2>
             <div className="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
-              <p className="text-gray-500">Logo preview will appear here</p>
+              {previewLogo ? (
+                <motion.img
+                  src={previewLogo}
+                  alt="Logo Preview"
+                  className="w-32 h-32 object-contain"
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: "spring", stiffness: 200 }}
+                />
+              ) : (
+                <p className="text-gray-500">Logo preview will appear here</p>
+              )}
             </div>
           </CardContent>
         </Card>
