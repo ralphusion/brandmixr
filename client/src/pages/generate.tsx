@@ -47,7 +47,6 @@ export default function Generate() {
     queryKey: ["/api/names/saved"],
   });
 
-  // Define applyFilters before useEffects
   const applyFilters = useCallback((names: GeneratedName[]) => {
     return names.filter(nameData => {
       const name = typeof nameData === 'string' ? nameData : nameData.name;
@@ -70,7 +69,6 @@ export default function Generate() {
     });
   }, [startingWith, nameLength, searchText]);
 
-  // Initial load effect
   useEffect(() => {
     const savedGeneratedNames = sessionStorage.getItem('generatedNames');
     const formData = sessionStorage.getItem('generatorFormData');
@@ -91,7 +89,6 @@ export default function Generate() {
     }
   }, [applyFilters]);
 
-  // Intersection observer effect
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -113,7 +110,6 @@ export default function Generate() {
     return () => observer.disconnect();
   }, [displayedNames.length, filteredNames.length, isGenerating]);
 
-  // Update displayed names when filters or page changes
   useEffect(() => {
     const filtered = applyFilters(generatedNames);
     setFilteredNames(filtered);
@@ -233,21 +229,20 @@ export default function Generate() {
             maxLength={nameLength}
           />
 
-          {generateMutation.isPending && (
-            <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Generating more names...</p>
-            </div>
-          )}
-
           {displayedNames.length > 0 && (
             <div className="mt-8">
               <ResultsGrid
                 names={displayedNames}
                 onSave={(name) => saveMutation.mutate(name.name)}
               />
-              {!isGenerating && (
+              {!isGenerating && filteredNames.length > displayedNames.length && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
                   <p className="text-muted-foreground">Loading more names...</p>
+                </div>
+              )}
+              {isGenerating && (
+                <div className="h-20 flex items-center justify-center">
+                  <p className="text-muted-foreground">Generating more names...</p>
                 </div>
               )}
             </div>
