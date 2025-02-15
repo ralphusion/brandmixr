@@ -7,7 +7,7 @@ import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
 import { checkDomainAvailability } from "./utils/domain";
 import { checkTrademarkAvailability } from "./utils/trademark";
-import { generateLogoWithGemini, generateLogoPrompt } from "./gemini";
+import { generateSimpleLogo } from "./utils/logoGenerator";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -62,13 +62,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`Generating ${numberOfLogos} logos for ${brandName}`);
 
-      const logoPromises = Array(numberOfLogos).fill(null).map(async (_, index) => {
-        const prompt = generateLogoPrompt(brandName, style, industry, startIndex + index);
-        console.log(`Generating logo ${index + 1} with prompt:`, prompt);
-        return generateLogoWithGemini(prompt);
-      });
+      // Generate new logos using our SVG generator
+      const newLogos = Array(numberOfLogos).fill(null).map(() =>
+        generateSimpleLogo({ brandName, style, industry })
+      );
 
-      const newLogos = await Promise.all(logoPromises);
       console.log(`Successfully generated ${newLogos.length} new logos`);
 
       const logos = isMore ? [...currentLogos, ...newLogos] : newLogos;
@@ -173,23 +171,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log("Generated mood board content:", moodBoard);
 
-      // Generate images based on the prompts
-      const imagePromises = moodBoard.imagePrompts.map(async (prompt) => {
-        try {
-          const result = await generateLogoWithDalle(prompt, style as string);
-          // Fetch the image and convert to base64
-          const response = await fetch(result.url);
-          const buffer = await response.arrayBuffer();
-          const base64 = Buffer.from(buffer).toString('base64');
-          return `data:image/png;base64,${base64}`;
-        } catch (error) {
-          console.error("Error generating image:", error);
-          return null;
-        }
-      });
-
-      const imageResults = await Promise.all(imagePromises);
-      const images = imageResults.filter(Boolean) as string[];
+      // Since we're not using DALL-E anymore, we'll generate simple SVG images
+      const images = moodBoard.imagePrompts.map(() =>
+        generateSimpleLogo({
+          brandName: name as string,
+          style: style as string,
+          industry: industry as string
+        })
+      );
 
       console.log("Generated images:", images.length);
 
@@ -266,13 +255,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Missing required parameters" });
       }
 
-      const result = await generateLogoWithDalle(prompt, style as string);
-      const response = await fetch(result.url);
-      const buffer = await response.arrayBuffer();
-      const base64 = Buffer.from(buffer).toString('base64');
+      const result = await generateSimpleLogo({ brandName: prompt, style, industry: ""}); //Assuming industry isn't needed here
 
       res.json({
-        image: `data:image/png;base64,${base64}`
+        image: result
       });
     } catch (error) {
       console.error("Error regenerating image:", error);
