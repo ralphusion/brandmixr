@@ -474,7 +474,7 @@ export default function MoodBoard() {
     const svg = generateIconSvg(brandName, {
       style: iconStyle,
       color: logoColor,
-      backgroundColor: 'white' 
+      backgroundColor: 'white'
     });
     const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
     setLogoSvg(dataUrl);
@@ -608,12 +608,9 @@ export default function MoodBoard() {
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full h-10 p-0 relative overflow-hidden"
-              style={{ backgroundColor: logoColor }}
+              className="w-full h-10 p-0 flex items-center justify-center"
             >
-              <div className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference">
-                {logoColor}
-              </div>
+              <span className="text-foreground">{logoColor}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-3" onPointerDownOutside={(e) => e.preventDefault()}>
@@ -628,6 +625,90 @@ export default function MoodBoard() {
     </div>
   );
 
+  const LogoCard = ({ index, cardId, isSelected, background, fontStyle, onSelect }: {
+    index: number;
+    cardId: string;
+    isSelected: boolean;
+    background: string;
+    fontStyle: any;
+    onSelect: () => void;
+  }) => {
+    const [selectedFont, setSelectedFont] = useState(fontStyle?.fontFamily || FONT_FAMILIES[0].family);
+
+    const handleFontChange = (value: string) => {
+      setSelectedFont(value);
+      const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
+      styles[index] = {
+        ...styles[index],
+        fontFamily: value,
+      };
+      sessionStorage.setItem('fontStyles', JSON.stringify(styles));
+    };
+
+    return (
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: index * 0.05 }}
+        onClick={onSelect}
+      >
+        <Card
+          className={`${background} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+            isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+          }`}
+        >
+          <CardContent
+            className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
+            ref={isSelected ? selectedCardRef : null}
+          >
+            {logoSvg && (
+              <motion.div
+                className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-2 shadow-sm"
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
+                <img
+                  src={logoSvg}
+                  alt="Brand Icon"
+                  className="w-full h-full object-contain"
+                />
+              </motion.div>
+            )}
+            <motion.h3
+              className="text-3xl text-center text-white"
+              style={{
+                fontFamily: selectedFont,
+                fontWeight: fontStyle?.fontWeight,
+                fontStyle: 'normal',
+                textTransform: fontStyle?.textTransform,
+                letterSpacing: fontStyle?.letterSpacing,
+                color: 'white'
+              }}
+              whileHover={{ scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              {brandName}
+            </motion.h3>
+          </CardContent>
+          <div className="p-4 bg-white/10 backdrop-blur-sm">
+            <Select value={selectedFont} onValueChange={handleFontChange}>
+              <SelectTrigger className="bg-white/90">
+                <SelectValue placeholder="Select font" />
+              </SelectTrigger>
+              <SelectContent>
+                {FONT_FAMILIES.map((font) => (
+                  <SelectItem key={font.family} value={font.family}>
+                    <span style={{ fontFamily: font.family }}>{font.family}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </Card>
+      </motion.div>
+    );
+  };
+
   const CardGrid = () => {
     const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
 
@@ -639,53 +720,15 @@ export default function MoodBoard() {
           const fontStyle = fontStyles[index] || FONT_STYLES_ARRAY[index % FONT_STYLES_ARRAY.length];
 
           return (
-            <motion.div
+            <LogoCard
               key={cardId}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: index * 0.05 }}
-              onClick={() => handleCardSelect(cardId)}
-            >
-              <Card
-                className={`${cardBackgrounds[index]} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
-                  isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
-                }`}
-              >
-                <CardContent
-                  className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
-                  ref={isSelected ? selectedCardRef : null}
-                >
-                  {logoSvg && (
-                    <motion.div
-                      className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-2 shadow-sm"
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      <img
-                        src={logoSvg}
-                        alt="Brand Icon"
-                        className="w-full h-full object-contain"
-                      />
-                    </motion.div>
-                  )}
-                  <motion.h3
-                    className="text-3xl text-center text-white"
-                    style={{
-                      fontFamily: fontStyle?.fontFamily,
-                      fontWeight: fontStyle?.fontWeight,
-                      fontStyle: 'normal',
-                      textTransform: fontStyle?.textTransform,
-                      letterSpacing: fontStyle?.letterSpacing,
-                      color: 'white' 
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    {brandName}
-                  </motion.h3>
-                </CardContent>
-              </Card>
-            </motion.div>
+              index={index}
+              cardId={cardId}
+              isSelected={isSelected}
+              background={cardBackgrounds[index]}
+              fontStyle={fontStyle}
+              onSelect={() => handleCardSelect(cardId)}
+            />
           );
         })}
       </div>
@@ -844,7 +887,7 @@ export default function MoodBoard() {
                     </Tooltip>
                   </div>
                 </div>
-                <AnimatePresence mode="wait">
+                <AnimatePresence mode="wait>">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
                       initial={{ opacity: 0 }}
