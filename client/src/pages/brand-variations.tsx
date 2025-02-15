@@ -20,6 +20,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import html2canvas from 'html2canvas';
+import { useFonts } from "@/contexts/FontContext";
 
 const ICON_STYLES = {
   initials: [
@@ -133,6 +134,8 @@ export default function BrandVariations() {
   const selectedCardRef = useRef<HTMLDivElement>(null);
   const [showFontDialog, setShowFontDialog] = useState(false);
   const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
+
+  const { fonts, setFonts, loadFonts } = useFonts();
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -457,10 +460,9 @@ export default function BrandVariations() {
               Cancel
             </Button>
             <Button
-              onClick={() => {
+              onClick={async () => {
                 if (selectedFont) {
-                  // Apply selected font to variations
-                  // This will be implemented in the next iteration
+                  await loadFonts(selectedFont);
                   setShowFontDialog(false);
                 }
               }}

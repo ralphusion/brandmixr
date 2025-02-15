@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useFonts } from "@/contexts/FontContext";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
@@ -34,6 +35,8 @@ export default function MoodBoard() {
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
   const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
+
+  const { fonts } = useFonts();
 
   const { data: moodBoardData, isLoading } = useQuery<MoodBoardData>({
     queryKey: ['/api/mood-board', brandName],
@@ -173,7 +176,16 @@ export default function MoodBoard() {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold mb-6">Brand Mood Board: {brandName}</h1>
+        <h1 
+          className="text-3xl font-bold mb-6"
+          style={fonts?.primary ? {
+            fontFamily: fonts.primary.family,
+            fontWeight: fonts.primary.weight,
+            fontStyle: fonts.primary.style,
+          } : undefined}
+        >
+          Brand Mood Board: {brandName}
+        </h1>
 
         {isLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -186,7 +198,13 @@ export default function MoodBoard() {
               {/* Color Palette */}
               <Card className="shadow-md">
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
+                  <h2 className="text-xl font-semibold mb-4"
+                    style={fonts?.primary ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    } : undefined}
+                  >Color Palette</h2>
                   <ColorPaletteEditor
                     colors={colors}
                     onChange={setColors}
@@ -197,7 +215,16 @@ export default function MoodBoard() {
               {/* Keywords */}
               <Card className="shadow-md">
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
+                  <h2 
+                    className="text-xl font-semibold mb-4"
+                    style={fonts?.primary ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    } : undefined}
+                  >
+                    Brand Keywords
+                  </h2>
                   <div className="flex flex-wrap gap-3">
                     {moodBoardData.keywords.map((keyword, index) => (
                       <motion.span
@@ -206,6 +233,11 @@ export default function MoodBoard() {
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         transition={{ delay: index * 0.1 }}
+                        style={fonts?.secondary ? {
+                          fontFamily: fonts.secondary.family,
+                          fontWeight: fonts.secondary.weight,
+                          fontStyle: fonts.secondary.style,
+                        } : undefined}
                       >
                         {keyword}
                       </motion.span>
@@ -217,8 +249,24 @@ export default function MoodBoard() {
               {/* Description */}
               <Card className="shadow-md">
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4">Brand Mood</h2>
-                  <p className="text-muted-foreground leading-relaxed">
+                  <h2 
+                    className="text-xl font-semibold mb-4"
+                    style={fonts?.primary ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    } : undefined}
+                  >
+                    Brand Mood
+                  </h2>
+                  <p 
+                    className="text-muted-foreground leading-relaxed"
+                    style={fonts?.secondary ? {
+                      fontFamily: fonts.secondary.family,
+                      fontWeight: fonts.secondary.weight,
+                      fontStyle: fonts.secondary.style,
+                    } : undefined}
+                  >
                     {moodBoardData.moodDescription}
                   </p>
                 </CardContent>
