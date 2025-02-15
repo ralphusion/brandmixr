@@ -19,6 +19,7 @@ import { useFonts } from "@/contexts/FontContext";
 import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 
 interface FontSettings {
   primary: {
@@ -174,6 +175,7 @@ export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [imageLoadErrors, setImageLoadErrors] = useState<number[]>([]);
   const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -210,27 +212,37 @@ export default function MoodBoard() {
 
   useEffect(() => {
     if (!moodBoardData?.images?.length) return;
+    setImagesLoaded(false);
+    setImageLoadErrors([]);
 
     const loadImages = async () => {
-      const imagePromises = moodBoardData.images.map(url => {
+      const imagePromises = moodBoardData.images.map((url, index) => {
         return new Promise((resolve, reject) => {
           const img = new Image();
-          img.onload = () => resolve(true);
-          img.onerror = reject;
+          img.onload = () => resolve(index);
+          img.onerror = () => {
+            setImageLoadErrors(prev => [...prev, index]);
+            reject(new Error(`Failed to load image at index ${index}`));
+          };
           img.src = url;
         });
       });
 
       try {
-        await Promise.all(imagePromises);
+        await Promise.allSettled(imagePromises);
         setImagesLoaded(true);
       } catch (error) {
         console.error("Failed to load images:", error);
+        toast({
+          title: "Image Loading Error",
+          description: "Some images failed to load. You can try regenerating them.",
+          variant: "destructive"
+        });
       }
     };
 
     loadImages();
-  }, [moodBoardData?.images]);
+  }, [moodBoardData?.images, toast]);
 
   const handleCopyToClipboard = async (text: string, type: string) => {
     try {
@@ -327,10 +339,22 @@ export default function MoodBoard() {
           response = await apiRequest("POST", endpoint, {
             prompt: moodBoardData.imagePrompts[imageIndex],
             style: formData.style,
+            index: imageIndex
           });
+
+          if (!response.ok) {
+            throw new Error('Failed to regenerate image');
+          }
+
           updatedData = await response.json();
 
+          if (!updatedData.image) {
+            throw new Error('No image returned from server');
+          }
+
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
+            if (!oldData || !oldData.images) return oldData;
+
             const newImages = [...oldData.images];
             newImages[imageIndex] = updatedData.image;
             return {
@@ -338,6 +362,9 @@ export default function MoodBoard() {
               images: newImages,
             };
           });
+
+          setImagesLoaded(false);
+          setImageLoadErrors(prev => prev.filter(idx => idx !== imageIndex));
           break;
       }
 
@@ -346,9 +373,10 @@ export default function MoodBoard() {
         description: `Regenerated ${section} successfully`,
       });
     } catch (error) {
+      console.error('Regeneration error:', error);
       toast({
         title: "Regeneration failed",
-        description: "Failed to regenerate content",
+        description: error instanceof Error ? error.message : "Failed to regenerate content",
         variant: "destructive",
       });
     } finally {
@@ -821,8 +849,8 @@ export default function MoodBoard() {
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
-                      initial={{ opacity: 0 }}                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}                      exit={{ opacity: 0 }}
                       className="space-y-2"
                     >
                       <Skeleton className="h-12 w-full rounded-lg" />
