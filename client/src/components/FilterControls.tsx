@@ -2,7 +2,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card } from "@/components/ui/card";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Filter } from "lucide-react";
 
 interface FilterControlsProps {
   onStartingWithChange: (value: string) => void;
@@ -29,45 +31,61 @@ export function FilterControls({
   const alphanumericOptions = generateAlphanumericOptions();
 
   return (
-    <Card className="p-4 mb-6">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="space-y-2">
-          <Label>Starting With</Label>
-          <Select onValueChange={onStartingWithChange} defaultValue="All">
-            <SelectTrigger>
-              <SelectValue placeholder="Select starting character" />
-            </SelectTrigger>
-            <SelectContent>
-              {alphanumericOptions.map((option) => (
-                <SelectItem key={option} value={option}>
-                  {option}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+    <div className="flex justify-end mb-6">
+      <Sheet>
+        <SheetTrigger asChild>
+          <Button variant="outline" size="icon">
+            <Filter className="h-4 w-4" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Filter Options</SheetTitle>
+          </SheetHeader>
+          <div className="space-y-6 mt-6">
+            <div className="space-y-2">
+              <Label>Starting With</Label>
+              <Select onValueChange={onStartingWithChange} defaultValue="All">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select starting character" />
+                </SelectTrigger>
+                <SelectContent>
+                  {alphanumericOptions.map((option) => (
+                    <SelectItem key={option} value={option}>
+                      {option}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className="space-y-2">
-          <Label>Brand Name Length: {maxLength}</Label>
-          <Slider
-            defaultValue={[maxLength]}
-            max={20}
-            min={1}
-            step={1}
-            onValueChange={onLengthChange}
-            className="mt-2"
-          />
-        </div>
+            <div className="space-y-2">
+              <Label>Brand Name Length</Label>
+              <div className="pt-2">
+                <Slider
+                  defaultValue={[maxLength]}
+                  max={20}
+                  min={1}
+                  step={1}
+                  onValueChange={onLengthChange}
+                />
+                <div className="text-right mt-1 text-sm text-muted-foreground">
+                  Max length: <span className="font-medium">{maxLength}</span>
+                </div>
+              </div>
+            </div>
 
-        <div className="space-y-2">
-          <Label>Filter by</Label>
-          <Input
-            type="text"
-            placeholder="Enter text to filter"
-            onChange={(e) => onSearchChange(e.target.value)}
-          />
-        </div>
-      </div>
-    </Card>
+            <div className="space-y-2">
+              <Label>Filter by</Label>
+              <Input
+                type="text"
+                placeholder="Enter text to filter"
+                onChange={(e) => onSearchChange(e.target.value)}
+              />
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+    </div>
   );
 }

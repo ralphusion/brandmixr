@@ -68,8 +68,14 @@ export default function Generate() {
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isGenerating && generatedNames.length > displayedNames.length) {
-          setPage((prev) => prev + 1);
+        if (entries[0].isIntersecting && !isGenerating) {
+          const filtered = applyFilters(generatedNames);
+          if (displayedNames.length < filtered.length) {
+            setPage((prev) => prev + 1);
+          } else if (displayedNames.length === filtered.length) {
+            // If we've shown all filtered results, generate more
+            handleGenerateMore();
+          }
         }
       },
       { threshold: 0.5 }
@@ -80,13 +86,14 @@ export default function Generate() {
     }
 
     return () => observer.disconnect();
-  }, [generatedNames.length, displayedNames.length, isGenerating]);
+  }, [generatedNames.length, displayedNames.length, isGenerating, applyFilters]);
 
   useEffect(() => {
+    const filtered = applyFilters(generatedNames);
+    setFilteredNames(filtered);
     const endIndex = page * NAMES_PER_PAGE;
-    const newNames = generatedNames.slice(0, endIndex);
-    setDisplayedNames(newNames);
-  }, [page, generatedNames]);
+    setDisplayedNames(filtered.slice(0, endIndex));
+  }, [page, generatedNames, applyFilters]);
 
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
@@ -162,7 +169,7 @@ export default function Generate() {
   };
 
   const handleGenerateMore = () => {
-    if (formData) {
+    if (formData && !isGenerating) {
       generateMutation.mutate(JSON.parse(formData));
     }
   };
@@ -224,8 +231,9 @@ export default function Generate() {
             onLengthChange={(values) => setNameLength(values[0])}
             onSearchChange={setSearchText}
             minLength={1}
-            maxLength={20}
+            maxLength={nameLength}
           />
+
           {generateMutation.isPending && (
             <div className="text-center py-12">
               <p className="text-lg text-muted-foreground">Generating more names...</p>
@@ -238,19 +246,9 @@ export default function Generate() {
                 names={displayedNames}
                 onSave={(name) => saveMutation.mutate(name.name)}
               />
-              {filteredNames.length > displayedNames.length && !isGenerating && (
+              {!isGenerating && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
                   <p className="text-muted-foreground">Loading more names...</p>
-                </div>
-              )}
-              {displayedNames.length === generatedNames.length && (
-                <div className="mt-8 flex justify-center">
-                  <Button
-                    onClick={handleGenerateMore}
-                    disabled={isGenerating}
-                  >
-                    Generate More Names
-                  </Button>
                 </div>
               )}
             </div>
@@ -259,6 +257,13 @@ export default function Generate() {
           {displayedNames.length === 0 && !generateMutation.isPending && (
             <div className="text-center py-12">
               <p className="text-lg text-muted-foreground">No names match your filters</p>
+              <Button
+                onClick={handleGenerateMore}
+                className="mt-4"
+                disabled={isGenerating}
+              >
+                Generate More Names
+              </Button>
             </div>
           )}
         </TabsContent>
