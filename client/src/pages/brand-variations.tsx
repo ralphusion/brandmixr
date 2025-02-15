@@ -95,29 +95,12 @@ const ICON_STYLES = {
     { value: 'initials-rounded', label: 'Rounded Initials' },
     { value: 'initials-gradient', label: 'Gradient Initials' }
   ],
-  geometric: [
-    { value: 'geometric-circle', label: 'Circle' },
-    { value: 'geometric-square', label: 'Square' },
-    { value: 'geometric-hexagon', label: 'Hexagon' },
-    { value: 'geometric-triangle', label: 'Triangle' },
-    { value: 'geometric-diamond', label: 'Diamond' }
-  ],
   abstract: [
     { value: 'abstract-waves', label: 'Waves' },
     { value: 'abstract-dots', label: 'Dots Pattern' },
     { value: 'abstract-lines', label: 'Line Pattern' },
     { value: 'abstract-mesh', label: 'Mesh Pattern' },
     { value: 'abstract-swirl', label: 'Swirl Pattern' }
-  ],
-  modern: [
-    { value: 'modern-minimal', label: 'Minimal' },
-    { value: 'modern-tech', label: 'Tech Style' },
-    { value: 'modern-gradient', label: 'Modern Gradient' }
-  ],
-  decorative: [
-    { value: 'decorative-floral', label: 'Floral Pattern' },
-    { value: 'decorative-vintage', label: 'Vintage Style' },
-    { value: 'decorative-ornate', label: 'Ornate Design' }
   ]
 };
 
