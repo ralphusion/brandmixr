@@ -45,7 +45,9 @@ export default function Generate() {
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
-  const formData = sessionStorage.getItem('generatorFormData');
+  const { data: savedNames = [] } = useQuery<BrandName[]>({
+    queryKey: ["/api/names/saved"],
+  });
 
   useEffect(() => {
     const savedGeneratedNames = sessionStorage.getItem('generatedNames');
@@ -134,7 +136,7 @@ export default function Generate() {
       const res = await apiRequest("POST", "/api/generate", data);
       return res.json();
     },
-    onSuccess: (data: GeneratedName[]) => {
+    onSuccess: (data) => {
       setGeneratedNames(prev => [...prev, ...data]);
       const endIndex = page * NAMES_PER_PAGE;
       setDisplayedNames(prev => [...prev, ...data].slice(0, endIndex));
@@ -155,6 +157,7 @@ export default function Generate() {
 
   const saveMutation = useMutation({
     mutationFn: async (name: string) => {
+      const formData = sessionStorage.getItem('generatorFormData');
       const res = await apiRequest("POST", "/api/names", {
         name,
         industry: JSON.parse(formData || '{}').industry || "",
@@ -204,6 +207,7 @@ export default function Generate() {
   };
 
   const handleGenerateMore = () => {
+    const formData = sessionStorage.getItem('generatorFormData');
     if (formData) {
       generateMutation.mutate(JSON.parse(formData));
     }
