@@ -204,7 +204,11 @@ export default function MoodBoard() {
   const [logoSvg, setLogoSvg] = useState<string>("");
   const [iconStyle, setIconStyle] = useState<IconStyle>('initials-simple');
   const [iconColor, setIconColor] = useState("#000000");
-  const [cardBackground, setCardBackground] = useState("#FFFFFF");
+  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>([
+    'bg-gradient-to-br from-blue-50 to-indigo-100',
+    'bg-gradient-to-br from-emerald-50 to-teal-100',
+    'bg-gradient-to-br from-rose-50 to-pink-100'
+  ]);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
 
@@ -453,7 +457,7 @@ export default function MoodBoard() {
           const parsedConfig = JSON.parse(savedConfig);
           setIconStyle(parsedConfig.iconStyle || 'initials-simple');
           setIconColor(parsedConfig.iconColor || '#000000');
-          setCardBackground(parsedConfig.cardBackground || '#FFFFFF');
+          //setCardBackground(parsedConfig.cardBackground || '#FFFFFF');
 
         }
 
@@ -473,7 +477,7 @@ export default function MoodBoard() {
     if (brandName) {
       generateLogo();
     }
-  }, [brandName, iconStyle, iconColor, cardBackground]);
+  }, [brandName, iconStyle, iconColor]);
 
 
   const generateLogo = () => {
@@ -520,8 +524,25 @@ export default function MoodBoard() {
         };
       });
 
+      // Generate new background gradients
+      const newBackgrounds = Array(3).fill(null).map(() => {
+        const gradients = [
+          'bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900',
+          'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900',
+          'bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950 dark:to-yellow-900',
+          'bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900',
+          'bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-950 dark:to-purple-900',
+          'bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900',
+          'bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900'
+        ];
+        return gradients[Math.floor(Math.random() * gradients.length)];
+      });
+
       // Store font styles in session
       sessionStorage.setItem('fontStyles', JSON.stringify(newFontStyles));
+
+      // Update backgrounds
+      setCardBackgrounds(newBackgrounds);
 
     } catch (error) {
       console.error('Error regenerating logo:', error);
@@ -570,7 +591,7 @@ export default function MoodBoard() {
     sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
       iconStyle,
       iconColor,
-      cardBackground
+      //cardBackground
     }));
   };
 
@@ -601,12 +622,12 @@ export default function MoodBoard() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="card-background">Card Background</Label>
+        <Label htmlFor="icon-color">Icon Color</Label>
         <Input
-          id="card-background"
+          id="icon-color"
           type="color"
-          value={cardBackground}
-          onChange={(e) => setCardBackground(e.target.value)}
+          value={iconColor}
+          onChange={(e) => setIconColor(e.target.value)}
           className="h-10"
         />
       </div>
@@ -633,12 +654,9 @@ export default function MoodBoard() {
               onClick={() => handleCardSelect(cardId)}
             >
               <Card
-                className={`transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                className={`${cardBackgrounds[index]} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
                   isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
                 }`}
-                style={{
-                  background: cardBackground
-                }}
               >
                 <CardContent
                   className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
@@ -846,7 +864,7 @@ export default function MoodBoard() {
                     </motion.div>
                   ) : (
                     <motion.div
-                      initial={{ opacity: 0 }}
+                      initial={{ opacity:0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
@@ -905,7 +923,8 @@ export default function MoodBoard() {
                   {regeneratingSection?.type === 'keywords' ? (
                     <motion.div
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}                      exit={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       className="flex flex-wrap gap-3"
                     >
                       {Array(5).fill(0).map((_, index) => (
