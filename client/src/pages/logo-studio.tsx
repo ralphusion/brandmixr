@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion, AnimatePresence } from "framer-motion";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useFonts } from "@/contexts/FontContext";
 
 const STYLE_OPTIONS = [
   { value: "minimalist", label: "Minimalist & Clean" },
@@ -32,13 +33,37 @@ const INDUSTRY_OPTIONS = [
   { value: "travel", label: "Travel & Hospitality" }
 ];
 
-// Generate a pastel color
-const generatePastelColor = () => {
-  const hue = Math.floor(Math.random() * 360);
-  const saturation = 25 + Math.floor(Math.random() * 25); // 25-50%
-  const lightness = 80 + Math.floor(Math.random() * 10); // 80-90%
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-};
+// Font styles from brand variations
+const FONT_STYLES = [
+  'font-serif italic tracking-wide font-medium',
+  'font-sans uppercase tracking-[0.2em] font-black',
+  'font-mono uppercase tracking-tight font-bold',
+  'font-serif normal-case tracking-normal font-light',
+  'font-sans small-caps tracking-widest font-extrabold',
+  'font-mono lowercase tracking-tight font-semibold',
+  'font-serif uppercase tracking-[0.15em] font-bold italic',
+  'font-sans normal-case tracking-wide font-thin',
+  'font-mono small-caps tracking-normal font-medium',
+  'font-serif uppercase tracking-[0.25em] font-black',
+  'font-sans italic tracking-wider font-extrabold',
+  'font-mono normal-case tracking-[0.1em] font-bold'
+];
+
+// Backgrounds from brand variations
+const BACKGROUNDS = [
+  {
+    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
+    text: "text-emerald-800 dark:text-emerald-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-slate-800 to-gray-900",
+    text: "text-gray-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900",
+    text: "text-blue-800 dark:text-blue-100"
+  }
+];
 
 export default function LogoStudio() {
   const [, navigate] = useLocation();
@@ -48,6 +73,7 @@ export default function LogoStudio() {
   const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const { toast } = useToast();
+  const { fonts } = useFonts();
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -59,7 +85,6 @@ export default function LogoStudio() {
 
   const handleGenerateLogo = async (isMore = false) => {
     if (!isMore) {
-      // Clear the icon and font cache when generating a new set
       await apiRequest("POST", "/api/clear-icon-cache");
     }
 
@@ -131,124 +156,132 @@ export default function LogoStudio() {
         </div>
       </div>
 
-      {/* Logo Generator Section */}
-      <Card className="mb-8 shadow-md">
-        <CardContent className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Logo Generator</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div>
-              <Label htmlFor="style">Style Preference</Label>
-              <Select value={selectedStyle} onValueChange={setSelectedStyle}>
-                <SelectTrigger id="style">
-                  <SelectValue placeholder="Select style" />
-                </SelectTrigger>
-                <SelectContent>
-                  {STYLE_OPTIONS.map((style) => (
-                    <SelectItem key={style.value} value={style.value}>
-                      {style.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+      <div className="mb-8">
+        <h1
+          className="text-3xl font-bold mb-6"
+          style={fonts?.primary ? {
+            fontFamily: fonts.primary.family,
+            fontWeight: fonts.primary.weight,
+            fontStyle: fonts.primary.style,
+          } : undefined}
+        >
+          Logo Studio: {brandName}
+        </h1>
 
-            <div>
-              <Label htmlFor="industry">Industry</Label>
-              <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
-                <SelectTrigger id="industry">
-                  <SelectValue placeholder="Select industry" />
-                </SelectTrigger>
-                <SelectContent>
-                  {INDUSTRY_OPTIONS.map((industry) => (
-                    <SelectItem key={industry.value} value={industry.value}>
-                      {industry.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={() => handleGenerateLogo(false)}
-                disabled={isGenerating}
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  'Generate AI Logo'
-                )}
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Generated Logos Section */}
-      <Card className="shadow-md mb-8">
-        <CardContent className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Generated Logos</h2>
-          {generatedLogos.length > 0 ? (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-                {generatedLogos.map((logo, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Card
-                      className="overflow-hidden"
-                      style={{ backgroundColor: generatePastelColor() }}
-                    >
-                      <CardContent className="p-4">
-                        <img
-                          src={logo}
-                          alt={`Generated logo ${index + 1}`}
-                          className="w-full aspect-square object-contain mb-4"
-                        />
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => handleDownload(logo, index)}
-                        >
-                          <Download className="h-4 w-4 mr-2" />
-                          Download
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+        {/* Controls Section */}
+        <Card className="mb-8 shadow-md">
+          <CardContent className="p-6">
+            <h2 className="text-2xl font-bold mb-6">Logo Generator</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div>
+                <Label htmlFor="style">Style Preference</Label>
+                <Select value={selectedStyle} onValueChange={setSelectedStyle}>
+                  <SelectTrigger id="style">
+                    <SelectValue placeholder="Select style" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STYLE_OPTIONS.map((style) => (
+                      <SelectItem key={style.value} value={style.value}>
+                        {style.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              {hasMore && (
+
+              <div>
+                <Label htmlFor="industry">Industry</Label>
+                <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+                  <SelectTrigger id="industry">
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDUSTRY_OPTIONS.map((industry) => (
+                      <SelectItem key={industry.value} value={industry.value}>
+                        {industry.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-end">
                 <Button
                   className="w-full"
-                  variant="outline"
-                  onClick={() => handleGenerateLogo(true)}
+                  size="lg"
+                  onClick={() => handleGenerateLogo(false)}
                   disabled={isGenerating}
                 >
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating More...
+                      Generating...
                     </>
                   ) : (
-                    <>
-                      <SparkleIcon className="mr-2 h-4 w-4" />
-                      Generate More Variations
-                    </>
+                    'Generate AI Logo'
                   )}
                 </Button>
-              )}
-            </>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Generated Logos Section */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+        >
+          {generatedLogos.length > 0 ? (
+            generatedLogos.map((logo, index) => {
+              const style = BACKGROUNDS[index % BACKGROUNDS.length];
+              const fontStyle = FONT_STYLES[index % FONT_STYLES.length];
+
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: index * 0.05 }}
+                >
+                  <Card className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer`}>
+                    <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
+                      <motion.div
+                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <img
+                          src={logo}
+                          alt={`Generated logo ${index + 1}`}
+                          className="w-full h-full object-contain"
+                        />
+                      </motion.div>
+                      <motion.h3
+                        className={`text-3xl text-center ${style.text} ${fontStyle}`}
+                        whileHover={{ scale: 1.05 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        {brandName}
+                      </motion.h3>
+                      <Button
+                        variant="outline"
+                        className="mt-4"
+                        onClick={() => handleDownload(logo, index)}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Download
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })
           ) : (
-            <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
+            <div className="col-span-full flex flex-col items-center justify-center h-[400px] text-muted-foreground">
               {isGenerating ? (
                 <Loader2 className="h-8 w-8 animate-spin mb-4" />
               ) : (
@@ -259,28 +292,29 @@ export default function LogoStudio() {
               )}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </motion.div>
+      </AnimatePresence>
 
-      {/* Generate More Button */}
-      <Button
-        className="w-full mb-8"
-        size="lg"
-        onClick={() => handleGenerateLogo(true)}
-        disabled={isGenerating}
-      >
-        {isGenerating ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Generating More Logos...
-          </>
-        ) : (
-          <>
-            <SparkleIcon className="mr-2 h-4 w-4" />
-            Generate More Logo Variations
-          </>
-        )}
-      </Button>
+      {hasMore && generatedLogos.length > 0 && (
+        <Button
+          className="w-full mt-8"
+          variant="outline"
+          onClick={() => handleGenerateLogo(true)}
+          disabled={isGenerating}
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating More...
+            </>
+          ) : (
+            <>
+              <SparkleIcon className="mr-2 h-4 w-4" />
+              Generate More Variations
+            </>
+          )}
+        </Button>
+      )}
     </div>
   );
 }
