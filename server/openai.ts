@@ -60,6 +60,10 @@ export async function generateApiKey(name: string, rateLimit: number = 100): Pro
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
 export async function generateNames(request: GenerateNameRequest): Promise<string[]> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured");
+  }
+
   const styleGuide = {
     real: "Use real, meaningful words that relate directly to the industry and business description. Focus on clarity and relevance.",
     alternate: "Take real words and create unique spellings while keeping similar pronunciation (e.g., Lyft, Tumblr, Fiverr). Replace vowels or consonants creatively.",
@@ -69,7 +73,8 @@ export async function generateNames(request: GenerateNameRequest): Promise<strin
     auto: "Mix different styles to create a diverse set of names."
   }[request.style];
 
-  const prompt = `Generate 50 creative brand names based on the following criteria:
+  try {
+    const prompt = `Generate 50 creative brand names based on the following criteria:
 Industry: ${request.industry}
 Business Description: ${request.description}
 Keywords: ${request.keywords.join(", ")}
@@ -88,15 +93,19 @@ ${styleGuide}
 Please respond with a JSON array of strings containing only the generated names.
 Format the response as: {"names": ["name1", "name2", ..., "name50"]}`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" }
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
 
-  const content = response.choices[0].message.content || '{"names": []}';
-  const result = JSON.parse(content) as { names: string[] };
-  return result.names;
+    const content = response.choices[0].message.content || '{"names": []}';
+    const result = JSON.parse(content) as { names: string[] };
+    return result.names;
+  } catch (error) {
+    console.error('Error generating names:', error);
+    throw new Error(`Failed to generate names: ${error.message}`);
+  }
 }
 
 export async function generateDescription(

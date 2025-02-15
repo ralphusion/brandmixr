@@ -17,32 +17,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/generate", async (req, res) => {
     try {
       const data = generateNameSchema.parse(req.body);
+      console.log("Generating names with params:", {
+        industry: data.industry,
+        style: data.style,
+        description: data.description?.substring(0, 50) + "..."
+      });
+
       const names = await generateNames(data);
+      console.log(`Successfully generated ${names.length} names`);
 
       // Check domain and trademark availability for each name
       const namesWithChecks = await Promise.all(
         names.map(async (name) => {
-          const [domainCheck, trademarkCheck] = await Promise.all([
-            checkDomainAvailability(name),
-            checkTrademarkAvailability(name)
-          ]);
+          try {
+            const [domainCheck, trademarkCheck] = await Promise.all([
+              checkDomainAvailability(name),
+              checkTrademarkAvailability(name)
+            ]);
 
-          return {
-            name,
-            domain: domainCheck.domain,
-            domainAvailable: domainCheck.available,
-            trademarkExists: trademarkCheck.exists,
-            similarTrademarks: trademarkCheck.similarMarks
-          };
+            return {
+              name,
+              domain: domainCheck.domain,
+              domainAvailable: domainCheck.available,
+              trademarkExists: trademarkCheck.exists,
+              similarTrademarks: trademarkCheck.similarMarks
+            };
+          } catch (error) {
+            console.error(`Error checking availability for name ${name}:`, error);
+            return {
+              name,
+              domain: name.toLowerCase().replace(/\s+/g, '') + '.com',
+              domainAvailable: false,
+              trademarkExists: false,
+              similarTrademarks: []
+            };
+          }
         })
       );
 
       res.json(namesWithChecks);
     } catch (error) {
-      if (error instanceof ZodError || error instanceof Error) {
-        res.status(400).json({ error: error.message });
+      console.error("Error in name generation:", error);
+
+      if (error instanceof ZodError) {
+        res.status(400).json({ error: "Invalid input data", details: error.errors });
+      } else if (error instanceof Error && error.message.includes("API key")) {
+        res.status(500).json({ error: "API configuration error. Please try again later." });
       } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
+        res.status(500).json({ error: "Failed to generate names. Please try again." });
       }
     }
   });
