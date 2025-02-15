@@ -978,10 +978,11 @@ export default function MoodBoard() {
                   Apply Font Combination
                 </Button>
               </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </TooltipProvider>
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </TooltipProvider>
     );
 }
 
