@@ -2,13 +2,12 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { ResultsGrid } from "@/components/ResultsGrid";
-import { SavedNames } from "@/components/SavedNames";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 import { type GenerateNameRequest, type BrandName } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { FilterControls } from "@/components/FilterControls";
@@ -69,6 +68,7 @@ export default function Generate() {
     });
   }, [startingWith, nameLength, searchText]);
 
+  // Initial load effect
   useEffect(() => {
     const savedGeneratedNames = sessionStorage.getItem('generatedNames');
     const formData = sessionStorage.getItem('generatorFormData');
@@ -89,37 +89,44 @@ export default function Generate() {
     }
   }, [applyFilters]);
 
-  // Intersection observer for infinite scroll
+  // Intersection observer effect
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isGenerating) {
-          if (displayedNames.length < filteredNames.length) {
-            // Load more filtered names
-            setPage((prev) => prev + 1);
-          } else if (displayedNames.length === filteredNames.length) {
-            // Generate more names when we've shown all filtered results
-            handleGenerateMore();
-          }
+    const loadMore = async (entries: IntersectionObserverEntry[]) => {
+      if (entries[0].isIntersecting && !isGenerating) {
+        const filtered = applyFilters(generatedNames);
+        const currentDisplayed = displayedNames.length;
+        const totalFiltered = filtered.length;
+
+        if (currentDisplayed < totalFiltered) {
+          // Load more filtered names from the current set
+          const nextPage = page + 1;
+          setPage(nextPage);
+          const endIndex = nextPage * NAMES_PER_PAGE;
+          setDisplayedNames(filtered.slice(0, endIndex));
+        } else if (formData) {
+          // Generate new names when we've displayed all filtered results
+          generateMutation.mutate(JSON.parse(formData));
         }
-      },
-      { threshold: 0.5 }
-    );
+      }
+    };
+
+    const observer = new IntersectionObserver(loadMore, { threshold: 0.5 });
 
     if (loadMoreRef.current) {
       observer.observe(loadMoreRef.current);
     }
 
     return () => observer.disconnect();
-  }, [displayedNames.length, filteredNames.length, isGenerating]);
+  }, [displayedNames.length, generatedNames, isGenerating, page, applyFilters, formData]);
 
   // Update filtered and displayed names when filters change
   useEffect(() => {
     const filtered = applyFilters(generatedNames);
     setFilteredNames(filtered);
-    const endIndex = page * NAMES_PER_PAGE;
-    setDisplayedNames(filtered.slice(0, endIndex));
-  }, [page, generatedNames, applyFilters]);
+    // Reset page when filters change
+    setPage(1);
+    setDisplayedNames(filtered.slice(0, NAMES_PER_PAGE));
+  }, [generatedNames, applyFilters, startingWith, nameLength, searchText]);
 
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
@@ -128,13 +135,15 @@ export default function Generate() {
       return res.json();
     },
     onSuccess: (data: GeneratedName[]) => {
-      setGeneratedNames(prev => [...prev, ...data]);
-      const filtered = applyFilters([...generatedNames, ...data]);
+      const newNames = [...generatedNames, ...data];
+      setGeneratedNames(newNames);
+      const filtered = applyFilters(newNames);
       setFilteredNames(filtered);
+      // Keep the current page's worth of names and add new ones
       const endIndex = page * NAMES_PER_PAGE;
       setDisplayedNames(filtered.slice(0, endIndex));
       setIsGenerating(false);
-      sessionStorage.setItem('generatedNames', JSON.stringify([...generatedNames, ...data]));
+      sessionStorage.setItem('generatedNames', JSON.stringify(newNames));
     },
     onError: () => {
       setIsGenerating(false);
@@ -181,21 +190,6 @@ export default function Generate() {
     },
   });
 
-  const handleExport = () => {
-    const csvContent = savedNames
-      .map((name) => `${name.name},${name.industry},${name.style}`)
-      .join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "saved-names.csv";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
   const handleGenerateMore = () => {
     if (formData && !isGenerating) {
       generateMutation.mutate(JSON.parse(formData));
@@ -241,14 +235,13 @@ export default function Generate() {
                 names={displayedNames}
                 onSave={(name) => saveMutation.mutate(name.name)}
               />
-              {!isGenerating && filteredNames.length > displayedNames.length && (
+              {/* Loading indicator */}
+              {(isGenerating || displayedNames.length < filteredNames.length) && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
-                  <p className="text-muted-foreground">Loading more names...</p>
-                </div>
-              )}
-              {isGenerating && (
-                <div className="h-20 flex items-center justify-center">
-                  <p className="text-muted-foreground">Generating more names...</p>
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <p>{isGenerating ? "Generating more names..." : "Loading more names..."}</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -262,7 +255,14 @@ export default function Generate() {
                 className="mt-4"
                 disabled={isGenerating}
               >
-                Generate More Names
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Generating...
+                  </>
+                ) : (
+                  'Generate More Names'
+                )}
               </Button>
             </div>
           )}
