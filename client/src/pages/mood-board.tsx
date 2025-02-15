@@ -200,6 +200,7 @@ export default function MoodBoard() {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -473,7 +474,7 @@ export default function MoodBoard() {
     const svg = generateIconSvg(brandName, {
       style: iconStyle,
       color: logoColor,
-      backgroundColor: 'white' // Always use white background for icon
+      backgroundColor: 'white' 
     });
     const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
     setLogoSvg(dataUrl);
@@ -603,7 +604,7 @@ export default function MoodBoard() {
 
       <div className="space-y-2">
         <Label htmlFor="logo-color">Logo Color</Label>
-        <Popover>
+        <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
@@ -615,8 +616,12 @@ export default function MoodBoard() {
               </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-3">
-            <HexColorPicker color={logoColor} onChange={setLogoColor} />
+          <PopoverContent className="w-auto p-3" onPointerDownOutside={(e) => e.preventDefault()}>
+            <HexColorPicker
+              color={logoColor}
+              onChange={setLogoColor}
+              style={{ width: '200px', height: '200px' }}
+            />
           </PopoverContent>
         </Popover>
       </div>
@@ -664,14 +669,14 @@ export default function MoodBoard() {
                     </motion.div>
                   )}
                   <motion.h3
-                    className="text-3xl text-center"
+                    className="text-3xl text-center text-white"
                     style={{
                       fontFamily: fontStyle?.fontFamily,
                       fontWeight: fontStyle?.fontWeight,
                       fontStyle: 'normal',
                       textTransform: fontStyle?.textTransform,
                       letterSpacing: fontStyle?.letterSpacing,
-                      color: logoColor
+                      color: 'white' 
                     }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
