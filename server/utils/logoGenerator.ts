@@ -1,5 +1,6 @@
-import type { LogoStyle } from '@shared/types';
-import { iconService, Typography } from '@/lib/iconService';
+import type { LogoStyle } from '../../shared/types';
+import { iconService } from '../lib/iconService';
+import type { Typography } from '../lib/iconService';
 
 interface LogoConfig {
   brandName: string;
@@ -32,14 +33,14 @@ const DEFAULT_COLORS = {
 
 function mapStyleToLogoStyle(style: string): LogoStyle {
   const styleMap: { [key: string]: LogoStyle } = {
-    'brandable': 'modern',
-    'modern': 'modern',
-    'classic': 'classic',
-    'minimal': 'minimal',
-    'bold': 'bold',
-    'professional': 'classic',
-    'playful': 'bold',
-    'elegant': 'minimal'
+    modern: 'modern',
+    classic: 'classic',
+    minimal: 'minimal',
+    bold: 'bold',
+    professional: 'classic',
+    playful: 'bold',
+    elegant: 'minimal',
+    tech: 'modern'
   };
 
   return styleMap[style.toLowerCase()] || 'modern';
