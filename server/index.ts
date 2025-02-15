@@ -37,28 +37,63 @@ app.use((req, res, next) => {
   next();
 });
 
-(async () => {
-  // Register routes before setting up Vite or static serving
-  const server = await registerRoutes(app);
+const startServer = async (port: number) => {
+  try {
+    // Register routes before setting up Vite or static serving
+    const server = await registerRoutes(app);
 
-  // Global error handler
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    // Global error handler
+    app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+      const status = err.status || err.statusCode || 500;
+      const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    console.error(err); // Log the error instead of throwing
-  });
+      res.status(status).json({ message });
+      console.error(err);
+    });
 
-  // Set up static file serving or Vite after all API routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
+    // Set up static file serving or Vite after all API routes
+    if (app.get("env") === "development") {
+      await setupVite(app, server);
+    } else {
+      serveStatic(app);
+    }
+
+    return new Promise((resolve, reject) => {
+      server.listen(port, "0.0.0.0", () => {
+        log(`Server running on port ${port}`);
+        resolve(server);
+      }).on('error', (error: any) => {
+        if (error.code === 'EADDRINUSE') {
+          reject(new Error(`Port ${port} is in use`));
+        } else {
+          reject(error);
+        }
+      });
+    });
+  } catch (error) {
+    throw error;
   }
+};
 
-  const PORT = 5000;
-  server.listen(PORT, "0.0.0.0", () => {
-    log(`Server running on port ${PORT}`);
-  });
-})();
+const tryPorts = async () => {
+  const ports = [5000, 5001, 5002, 5003];
+
+  for (const port of ports) {
+    try {
+      await startServer(port);
+      return;
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('Port')) {
+        log(`Port ${port} is in use, trying next port...`);
+        continue;
+      }
+      throw error;
+    }
+  }
+  throw new Error('All ports in use. Please free up a port and try again.');
+};
+
+tryPorts().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
