@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
+import html2canvas from 'html2canvas';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
 import {
@@ -363,13 +364,16 @@ export default function MoodBoard() {
   const handleDownloadLogo = async () => {
     if (!brandName) return;
 
-    const logoElement = document.querySelector('.logo-container') as HTMLElement;
+    const logoElement = document.querySelector('.logo-container');
     if (!logoElement) return;
 
     try {
       const canvas = await html2canvas(logoElement, {
         backgroundColor: null,
         scale: 2,
+        logging: false,
+        useCORS: true,
+        allowTaint: true,
       });
 
       const dataUrl = canvas.toDataURL('image/png');
@@ -391,7 +395,9 @@ export default function MoodBoard() {
 
   const handleResetPalette = () => {
     if (moodBoardData?.colors) {
-      setColors(moodBoardData.colors);
+      // Deep clone the original colors to ensure we're not sharing references
+      const resetColors = JSON.parse(JSON.stringify(moodBoardData.colors));
+      setColors(resetColors);
       toast({
         title: "Colors Reset",
         description: "Color palette has been reset to original",
@@ -466,6 +472,19 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          onClick={handleResetLogo}
+                          title="Reset to selected logo"
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Reset to selected logo</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={handleDownloadLogo}
                           title="Download logo as PNG"
                         >
@@ -482,18 +501,10 @@ export default function MoodBoard() {
                     >
                       <SparkleIcon className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleResetLogo}
-                      title="Reset to selected logo"
-                    >
-                      <RotateCcw className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
                 <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
-                  <div className="flex flex-col items-center gap-6 logo-container">
+                  <div className="flex flex-col items-center gap-6 logo-container bg-transparent">
                     <div className="w-24 h-24 bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-sm">
                       {logoSvg && (
                         <img
