@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription, generateLogoWithDalle, generateMoodBoard } from "./openai";
+import { generateNames, generateDescription, generateLogoWithDalle, generateMoodBoard, generateFontRecommendations } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
@@ -187,6 +187,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/font-recommendations", async (req, res) => {
+    try {
+      const { name, industry, style } = req.query;
+
+      if (!name || !industry || !style) {
+        return res.status(400).json({ 
+          error: "Missing required parameters",
+          details: {
+            name: !name ? "missing" : "present",
+            industry: !industry ? "missing" : "present",
+            style: !style ? "missing" : "present"
+          }
+        });
+      }
+
+      const recommendations = await generateFontRecommendations(
+        name as string,
+        industry as string,
+        style as string
+      );
+
+      res.json(recommendations);
+    } catch (error) {
+      console.error("Error generating font recommendations:", error);
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

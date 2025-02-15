@@ -148,3 +148,62 @@ Style guidance: ${style}`;
 
   return { url: response.data[0].url || '' };
 }
+
+export interface FontRecommendation {
+  primary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  secondary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  explanation: string;
+}
+
+export async function generateFontRecommendations(
+  brandName: string,
+  industry: string,
+  style: string
+): Promise<FontRecommendation[]> {
+  const prompt = `Generate font combinations for the brand "${brandName}" in the ${industry} industry.
+The brand style is: ${style}
+
+Please provide 5 different font combinations in JSON format. Each combination should have:
+1. A primary font (for headings and brand name)
+2. A secondary font (for body text and supporting content)
+3. A brief explanation of why this combination works well for the brand
+
+Use web-safe fonts and Google Fonts. Include specific weights and styles.
+
+Response format:
+{
+  "recommendations": [
+    {
+      "primary": {
+        "family": "font name",
+        "weight": "weight",
+        "style": "normal/italic"
+      },
+      "secondary": {
+        "family": "font name",
+        "weight": "weight",
+        "style": "normal/italic"
+      },
+      "explanation": "explanation text"
+    }
+  ]
+}`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" }
+  });
+
+  const content = response.choices[0].message.content || '{"recommendations": []}';
+  const result = JSON.parse(content);
+  return result.recommendations;
+}
