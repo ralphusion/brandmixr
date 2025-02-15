@@ -1,15 +1,16 @@
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download } from "lucide-react";
+import { ArrowLeft, Download, RefreshCw } from "lucide-react";
 import { Logo } from "@/components/Logo";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { generateIconSvg, downloadIcon } from "@/lib/generateIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import html2canvas from 'html2canvas';
 
 const ICON_STYLES = {
   initials: [
@@ -61,41 +62,41 @@ const FONT_STYLES = [
 ];
 
 const BACKGROUNDS = [
-  { 
-    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900", 
-    text: "text-emerald-800 dark:text-emerald-100" 
+  {
+    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
+    text: "text-emerald-800 dark:text-emerald-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900", 
-    text: "text-blue-800 dark:text-blue-100" 
+  {
+    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900",
+    text: "text-blue-800 dark:text-blue-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950 dark:to-yellow-900", 
-    text: "text-amber-800 dark:text-amber-100" 
+  {
+    bg: "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950 dark:to-yellow-900",
+    text: "text-amber-800 dark:text-amber-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900", 
-    text: "text-rose-800 dark:text-rose-100" 
+  {
+    bg: "bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900",
+    text: "text-rose-800 dark:text-rose-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-950 dark:to-purple-900", 
-    text: "text-violet-800 dark:text-violet-100" 
+  {
+    bg: "bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-950 dark:to-purple-900",
+    text: "text-violet-800 dark:text-violet-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950 dark:to-gray-900", 
-    text: "text-slate-800 dark:text-slate-100" 
+  {
+    bg: "bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950 dark:to-gray-900",
+    text: "text-slate-800 dark:text-slate-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900", 
-    text: "text-lime-800 dark:text-lime-100" 
+  {
+    bg: "bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900",
+    text: "text-lime-800 dark:text-lime-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900", 
-    text: "text-sky-800 dark:text-sky-100" 
+  {
+    bg: "bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900",
+    text: "text-sky-800 dark:text-sky-100"
   },
-  { 
-    bg: "bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900", 
-    text: "text-orange-800 dark:text-orange-100" 
+  {
+    bg: "bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900",
+    text: "text-orange-800 dark:text-orange-100"
   }
 ];
 
@@ -105,6 +106,8 @@ export default function BrandVariations() {
   const [iconStyle, setIconStyle] = useState<string>('initials-simple');
   const [iconColor, setIconColor] = useState(getRandomPleaseantColor());
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
+  const selectedCardRef = useRef<HTMLDivElement>(null);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -128,14 +131,52 @@ export default function BrandVariations() {
     setLogoSvg(dataUrl);
   };
 
+  const handleCardSelect = (cardId: string) => {
+    setSelectedCardId(cardId);
+  };
+
+  const handleRefresh = () => {
+    setIconColor(getRandomPleaseantColor());
+    setSelectedCardId(null);
+  };
+
   const handleDownload = async (format: 'svg' | 'png') => {
-    if (!brandName || !logoSvg) return;
-    const svg = generateIconSvg(brandName, {
-      style: iconStyle,
-      color: iconColor,
-      backgroundColor
-    });
-    await downloadIcon(svg, format, brandName.toLowerCase().replace(/\s+/g, '-'));
+    if (!brandName || !selectedCardRef.current) return;
+
+    if (format === 'png') {
+      const canvas = await html2canvas(selectedCardRef.current, {
+        backgroundColor: null,
+        scale: 2, // Higher quality
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-brand.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // For SVG, we need to capture the entire card content
+      const cardContent = selectedCardRef.current.innerHTML;
+      const svgContent = `
+        <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+          <foreignObject width="100%" height="100%">
+            ${cardContent}
+          </foreignObject>
+        </svg>
+      `;
+
+      const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-brand.svg`;
+      link.href = url;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
   };
 
   if (!brandName) {
@@ -158,11 +199,23 @@ export default function BrandVariations() {
           <Logo />
         </div>
         <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh Designs
+          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                className="flex items-center gap-2"
+                disabled={!selectedCardId}
+              >
                 <Download className="h-4 w-4" />
-                Download
+                Download {selectedCardId ? 'Selected' : ''}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -229,48 +282,59 @@ export default function BrandVariations() {
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           {BACKGROUNDS.map((style, bgIndex) => (
-            FONT_STYLES.map((fontStyle, fontIndex) => (
-              <motion.div
-                key={`${bgIndex}-${fontIndex}`}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: (bgIndex * FONT_STYLES.length + fontIndex) * 0.05 }}
-              >
-                <Card 
-                  className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
+            FONT_STYLES.map((fontStyle, fontIndex) => {
+              const cardId = `${bgIndex}-${fontIndex}`;
+              const isSelected = selectedCardId === cardId;
+
+              return (
+                <motion.div
+                  key={cardId}
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: (bgIndex * FONT_STYLES.length + fontIndex) * 0.05 }}
+                  onClick={() => handleCardSelect(cardId)}
                 >
-                  <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
-                    {logoSvg && (
-                      <motion.div 
-                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm"
-                        whileHover={{ scale: 1.1 }}
+                  <Card
+                    className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                      isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+                    }`}
+                  >
+                    <CardContent
+                      className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
+                      ref={isSelected ? selectedCardRef : null}
+                    >
+                      {logoSvg && (
+                        <motion.div
+                          className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm"
+                          whileHover={{ scale: 1.1 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          <img
+                            src={logoSvg}
+                            alt="Brand Icon"
+                            className="w-full h-full object-contain"
+                          />
+                        </motion.div>
+                      )}
+                      <motion.h3
+                        className={`text-3xl text-center ${style.text} ${fontStyle}`}
+                        whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
-                        <img 
-                          src={logoSvg} 
-                          alt="Brand Icon" 
-                          className="w-full h-full object-contain"
-                        />
-                      </motion.div>
-                    )}
-                    <motion.h3 
-                      className={`text-3xl text-center ${style.text} ${fontStyle}`}
-                      whileHover={{ scale: 1.05 }}
-                      transition={{ type: "spring", stiffness: 300 }}
-                    >
-                      {brandName}
-                    </motion.h3>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))
+                        {brandName}
+                      </motion.h3>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              );
+            })
           ))}
         </motion.div>
       </AnimatePresence>
