@@ -131,8 +131,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { name, industry, style } = req.query;
 
       if (!name || !industry || !style) {
-        throw new Error("Missing required parameters");
+        console.error("Missing parameters:", { name, industry, style });
+        return res.status(400).json({ 
+          error: "Missing required parameters",
+          details: {
+            name: !name ? "missing" : "present",
+            industry: !industry ? "missing" : "present",
+            style: !style ? "missing" : "present"
+          }
+        });
       }
+
+      console.log("Generating mood board for:", { name, industry, style });
 
       // Generate mood board content
       const moodBoard = await generateMoodBoard(
@@ -140,6 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         industry as string,
         style as string
       );
+
+      console.log("Generated mood board content:", moodBoard);
 
       // Generate images based on the prompts
       const imagePromises = moodBoard.imagePrompts.map(prompt =>
@@ -149,11 +161,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imageResults = await Promise.all(imagePromises);
       const images = imageResults.map(result => result.url);
 
+      console.log("Generated images:", images.length);
+
       res.json({
         ...moodBoard,
         images
       });
     } catch (error) {
+      console.error("Error generating mood board:", error);
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {

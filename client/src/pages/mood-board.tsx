@@ -7,6 +7,7 @@ import { Logo } from "@/components/Logo";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiRequest } from "@/lib/queryClient";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
@@ -24,7 +25,11 @@ export default function MoodBoard() {
 
   const { data: moodBoardData, isLoading } = useQuery<MoodBoardData>({
     queryKey: ['/api/mood-board', brandName],
-    enabled: !!brandName,
+    queryFn: async () => {
+      const response = await apiRequest("GET", `/api/mood-board?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}`);
+      return response.json();
+    },
+    enabled: !!brandName && !!formData.industry && !!formData.style,
   });
 
   if (!brandName) {
@@ -135,7 +140,7 @@ export default function MoodBoard() {
         </div>
       ) : (
         <p className="text-center text-muted-foreground">
-          Failed to load mood board data.
+          Failed to load mood board data. Please make sure you have selected a brand name and style.
         </p>
       )}
     </div>
