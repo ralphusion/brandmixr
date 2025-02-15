@@ -7,6 +7,10 @@ import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
 import { checkDomainAvailability } from "./utils/domain";
 import { checkTrademarkAvailability } from "./utils/trademark";
+import OpenAI from "openai";
+
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -48,13 +52,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/generate-logo", async (req, res) => {
     try {
-      const { brandName, style } = req.body;
-      if (!brandName) {
-        throw new Error("Brand name is required");
+      const { brandName, style, industry } = req.body;
+      if (!brandName || !style || !industry) {
+        throw new Error("Brand name, style, and industry are required");
       }
-      const result = await generateLogoWithDalle(brandName, style);
-      res.json(result);
+
+      // Generate multiple logo variations using DALL-E 3
+      const prompts = [
+        `Create a professional ${style.toLowerCase()} style logo for a ${industry.toLowerCase()} brand named "${brandName}". The logo should be minimal, elegant, and memorable. Use a clean design with strong typography and simple shapes. The logo should work well at different sizes and in both color and monochrome. Create the logo against a pure white background.`,
+        `Design a unique ${style.toLowerCase()} logo for "${brandName}", a ${industry.toLowerCase()} company. Focus on creating a distinctive icon or symbol that represents the brand's identity. The design should be modern and versatile. Place the logo on a white background.`,
+        `Generate a ${style.toLowerCase()} logo design for "${brandName}" in the ${industry.toLowerCase()} sector. The logo should be innovative and impactful, combining contemporary design elements with timeless appeal. Ensure the logo is presented on a white background.`
+      ];
+
+      const logoPromises = prompts.map(async (prompt) => {
+        const response = await openai.images.generate({
+          model: "dall-e-3",
+          prompt: prompt,
+          n: 1,
+          size: "1024x1024",
+          quality: "standard",
+          style: "natural",
+        });
+
+        return response.data[0].url;
+      });
+
+      const logos = await Promise.all(logoPromises);
+
+      res.json({ logos });
     } catch (error) {
+      console.error("Error generating logo:", error);
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {

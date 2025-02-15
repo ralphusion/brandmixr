@@ -4,85 +4,97 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Download, Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { generateIconSvg } from "@/lib/generateIcon";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const STYLE_OPTIONS = [
-  { value: "modern", label: "Modern" },
-  { value: "classic", label: "Classic" },
-  { value: "playful", label: "Playful" },
-  { value: "sophisticated", label: "Sophisticated" },
-  { value: "minimalist", label: "Minimalist" },
+  { value: "minimalist", label: "Minimalist & Clean" },
+  { value: "modern", label: "Modern & Professional" },
+  { value: "playful", label: "Playful & Creative" },
+  { value: "luxury", label: "Luxury & Elegant" },
+  { value: "tech", label: "Tech & Digital" },
+  { value: "organic", label: "Organic & Natural" },
+  { value: "vintage", label: "Vintage & Retro" },
+  { value: "abstract", label: "Abstract & Artistic" }
 ];
 
-const COLOR_SCHEMES = [
-  { name: "Professional", colors: ["#2C3E50", "#E74C3C", "#ECF0F1"] },
-  { name: "Creative", colors: ["#FF6B6B", "#4ECDC4", "#45B7D1"] },
-  { name: "Elegant", colors: ["#2C3E50", "#BDC3C7", "#E0E0E0"] },
-  { name: "Vibrant", colors: ["#9B59B6", "#3498DB", "#E74C3C"] },
-  { name: "Natural", colors: ["#27AE60", "#2ECC71", "#F1C40F"] },
+const INDUSTRY_OPTIONS = [
+  { value: "technology", label: "Technology" },
+  { value: "fashion", label: "Fashion & Lifestyle" },
+  { value: "food", label: "Food & Beverage" },
+  { value: "health", label: "Health & Wellness" },
+  { value: "finance", label: "Finance & Business" },
+  { value: "entertainment", label: "Entertainment & Media" },
+  { value: "education", label: "Education & Learning" },
+  { value: "travel", label: "Travel & Hospitality" }
 ];
-
-const ICON_STYLES = {
-  initials: [
-    { value: 'initials-simple', label: 'Simple Initials' },
-    { value: 'initials-rounded', label: 'Rounded Initials' },
-    { value: 'initials-gradient', label: 'Gradient Initials' }
-  ],
-  geometric: [
-    { value: 'geometric-circle', label: 'Circle' },
-    { value: 'geometric-square', label: 'Square' },
-    { value: 'geometric-hexagon', label: 'Hexagon' }
-  ],
-  modern: [
-    { value: 'modern-minimal', label: 'Minimal' },
-    { value: 'modern-tech', label: 'Tech Style' },
-    { value: 'modern-gradient', label: 'Modern Gradient' }
-  ]
-};
 
 export default function LogoStudio() {
   const [, navigate] = useLocation();
+  const [brandName, setBrandName] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("modern");
-  const [selectedColorScheme, setSelectedColorScheme] = useState<string>(COLOR_SCHEMES[0].name);
-  const [previewLogo, setPreviewLogo] = useState<string>("");
+  const [selectedIndustry, setSelectedIndustry] = useState<string>("technology");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
+  const { toast } = useToast();
 
-  const params = new URLSearchParams(window.location.search);
-  const brandName = params.get('name');
+  const handleGenerateLogo = async () => {
+    if (!brandName.trim()) {
+      toast({
+        title: "Brand name required",
+        description: "Please enter a brand name to generate logos",
+        variant: "destructive"
+      });
+      return;
+    }
 
-  const generateLogoPreview = () => {
-    if (!brandName) return;
+    setIsGenerating(true);
+    try {
+      const response = await apiRequest("POST", "/api/generate-logo", {
+        brandName,
+        style: selectedStyle,
+        industry: selectedIndustry
+      });
 
-    const colorScheme = COLOR_SCHEMES.find(scheme => scheme.name === selectedColorScheme);
-    if (!colorScheme) return;
-
-    const primaryColor = colorScheme.colors[0];
-    const style = Object.values(ICON_STYLES)
-      .flat()
-      .find(style => style.value.includes(selectedStyle.toLowerCase()))?.value || 'modern-minimal';
-
-    const svg = generateIconSvg(brandName, {
-      style,
-      color: primaryColor,
-      backgroundColor: 'white'
-    });
-
-    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
-    setPreviewLogo(dataUrl);
+      const data = await response.json();
+      if (data.logos) {
+        setGeneratedLogos(data.logos);
+      }
+    } catch (error) {
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate logos. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
-  const handleGenerateVariations = () => {
-    if (!brandName) return;
-    navigate(`/brand-variations?name=${encodeURIComponent(brandName)}`);
+  const handleDownload = async (imageUrl: string, index: number) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-logo-${index + 1}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Failed to download the logo",
+        variant: "destructive"
+      });
+    }
   };
-
-  if (!brandName) {
-    navigate('/');
-    return null;
-  }
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -91,40 +103,34 @@ export default function LogoStudio() {
           <Button
             variant="ghost"
             className="mr-4"
-            onClick={() => navigate(`/mood-board?name=${encodeURIComponent(brandName)}`)}
+            onClick={() => navigate('/')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Mood Board
+            Back to Home
           </Button>
           <Logo />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card className="shadow-md">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <Card className="lg:col-span-1 shadow-md">
           <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Logo Designer</h2>
-
+            <h2 className="text-2xl font-bold mb-6">Logo Generator</h2>
             <div className="space-y-4">
               <div>
                 <Label htmlFor="brand-name">Brand Name</Label>
                 <Input
                   id="brand-name"
                   value={brandName}
-                  readOnly
+                  onChange={(e) => setBrandName(e.target.value)}
+                  placeholder="Enter your brand name"
                   className="mt-1"
                 />
               </div>
 
               <div>
                 <Label htmlFor="style">Style Preference</Label>
-                <Select
-                  value={selectedStyle}
-                  onValueChange={(value) => {
-                    setSelectedStyle(value);
-                    generateLogoPreview();
-                  }}
-                >
+                <Select value={selectedStyle} onValueChange={setSelectedStyle}>
                   <SelectTrigger id="style">
                     <SelectValue placeholder="Select style" />
                   </SelectTrigger>
@@ -139,65 +145,88 @@ export default function LogoStudio() {
               </div>
 
               <div>
-                <Label>Color Scheme</Label>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  {COLOR_SCHEMES.map((scheme) => (
-                    <Button
-                      key={scheme.name}
-                      variant="outline"
-                      className={`p-4 h-auto flex flex-col items-center gap-2 ${
-                        selectedColorScheme === scheme.name ? 'ring-2 ring-primary' : ''
-                      }`}
-                      onClick={() => {
-                        setSelectedColorScheme(scheme.name);
-                        generateLogoPreview();
-                      }}
-                    >
-                      <span className="text-sm font-medium">{scheme.name}</span>
-                      <div className="flex gap-1">
-                        {scheme.colors.map((color) => (
-                          <div
-                            key={color}
-                            className="w-6 h-6 rounded"
-                            style={{ backgroundColor: color }}
-                          />
-                        ))}
-                      </div>
-                    </Button>
-                  ))}
-                </div>
+                <Label htmlFor="industry">Industry</Label>
+                <Select value={selectedIndustry} onValueChange={setSelectedIndustry}>
+                  <SelectTrigger id="industry">
+                    <SelectValue placeholder="Select industry" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {INDUSTRY_OPTIONS.map((industry) => (
+                      <SelectItem key={industry.value} value={industry.value}>
+                        {industry.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <Button 
                 className="w-full" 
                 size="lg"
-                onClick={handleGenerateVariations}
+                onClick={handleGenerateLogo}
+                disabled={isGenerating}
               >
-                Generate Logo Variations
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  'Generate AI Logo'
+                )}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="shadow-md">
-          <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-6">Preview</h2>
-            <div className="aspect-square rounded-lg border-2 border-dashed border-gray-200 flex items-center justify-center">
-              {previewLogo ? (
-                <motion.img
-                  src={previewLogo}
-                  alt="Logo Preview"
-                  className="w-32 h-32 object-contain"
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 200 }}
-                />
+        <div className="lg:col-span-2">
+          <Card className="shadow-md h-full">
+            <CardContent className="p-6">
+              <h2 className="text-2xl font-bold mb-6">Generated Logos</h2>
+              {generatedLogos.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {generatedLogos.map((logo, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <Card className="overflow-hidden">
+                        <CardContent className="p-4">
+                          <img
+                            src={logo}
+                            alt={`Generated logo ${index + 1}`}
+                            className="w-full aspect-square object-contain mb-4"
+                          />
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => handleDownload(logo, index)}
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Download
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
+                </div>
               ) : (
-                <p className="text-gray-500">Logo preview will appear here</p>
+                <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
+                  {isGenerating ? (
+                    <Loader2 className="h-8 w-8 animate-spin mb-4" />
+                  ) : (
+                    <>
+                      <p className="text-lg mb-2">No logos generated yet</p>
+                      <p className="text-sm">Fill in the details and click Generate to create your logos</p>
+                    </>
+                  )}
+                </div>
               )}
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
