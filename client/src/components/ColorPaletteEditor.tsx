@@ -5,8 +5,21 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
-import { Download, RefreshCw } from "lucide-react";
+import { Download, Edit, RefreshCw } from "lucide-react";
 import { parseToHsla, adjustHue } from 'color2k';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface Color {
   hex: string;
@@ -67,6 +80,8 @@ function generateHarmonies(baseColor: string): ColorHarmony[] {
 
 export function ColorPaletteEditor({ colors, onChange }: ColorPaletteEditorProps) {
   const [harmonies, setHarmonies] = useState<ColorHarmony[]>([]);
+  const [selectedColor, setSelectedColor] = useState<{ color: Color; index: number } | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const updateColor = (index: number, hex: string) => {
     const newColors = [...colors];
@@ -74,8 +89,8 @@ export function ColorPaletteEditor({ colors, onChange }: ColorPaletteEditorProps
     onChange(newColors);
   };
 
-  const showHarmonies = (baseColor: string) => {
-    setHarmonies(generateHarmonies(baseColor));
+  const showHarmonies = (color: Color) => {
+    setHarmonies(generateHarmonies(color.hex));
   };
 
   const exportPalette = (format: 'css' | 'scss' | 'figma') => {
@@ -105,87 +120,150 @@ export function ColorPaletteEditor({ colors, onChange }: ColorPaletteEditorProps
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">Export</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => exportPalette('css')}>
+                Export CSS
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportPalette('scss')}>
+                Export SCSS
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportPalette('figma')}>
+                Export Figma
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-5 gap-4">
         {colors.map((color, index) => {
           const accessibility = getAccessibilityScore(color.hex);
           return (
-            <Card key={index} className="relative group">
-              <CardContent className="p-4 space-y-4">
-                <div
-                  className="w-full h-20 rounded-md cursor-pointer transition-transform transform group-hover:scale-105"
-                  style={{ backgroundColor: color.hex }}
-                  onClick={() => showHarmonies(color.hex)}
-                />
-                <div className="space-y-2">
-                  <Input
-                    type="color"
-                    value={color.hex}
-                    onChange={(e) => updateColor(index, e.target.value)}
-                    className="w-full h-8"
-                  />
-                  <Input
-                    type="text"
-                    value={color.hex}
-                    onChange={(e) => updateColor(index, e.target.value)}
-                    className="w-full"
-                  />
-                  <Label>{color.name}</Label>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <Badge variant={accessibility.level === 'Fail' ? 'destructive' : 'default'}>
-                        {accessibility.level} ({accessibility.score})
-                      </Badge>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Contrast ratio with white/black text</p>
-                    </TooltipContent>
-                  </Tooltip>
+            <Dialog key={index} open={editDialogOpen && selectedColor?.index === index} onOpenChange={(open) => {
+              if (!open) {
+                setEditDialogOpen(false);
+                setSelectedColor(null);
+              }
+            }}>
+              <DialogTrigger asChild>
+                <Card className="relative group cursor-pointer hover:shadow-lg transition-all">
+                  <CardContent className="p-4">
+                    <div
+                      className="w-full aspect-square rounded-md cursor-pointer transition-transform transform group-hover:scale-105"
+                      style={{ backgroundColor: color.hex }}
+                      onClick={() => {
+                        setSelectedColor({ color, index });
+                        setEditDialogOpen(true);
+                        showHarmonies(color);
+                      }}
+                    />
+                    <div className="mt-2 text-center">
+                      <p className="font-medium text-sm truncate">{color.name}</p>
+                      <p className="text-xs text-muted-foreground">{color.hex}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => {
+                        setSelectedColor({ color, index });
+                        setEditDialogOpen(true);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </DialogTrigger>
+
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Edit Color</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Color</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="color"
+                        value={color.hex}
+                        onChange={(e) => updateColor(index, e.target.value)}
+                        className="w-full h-10"
+                      />
+                      <Input
+                        type="text"
+                        value={color.hex}
+                        onChange={(e) => updateColor(index, e.target.value)}
+                        className="w-full font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Name</Label>
+                    <Input
+                      value={color.name}
+                      onChange={(e) => {
+                        const newColors = [...colors];
+                        newColors[index] = { ...color, name: e.target.value };
+                        onChange(newColors);
+                      }}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      Accessibility
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <Badge variant={accessibility.level === 'Fail' ? 'destructive' : 'default'}>
+                            {accessibility.level} ({accessibility.score})
+                          </Badge>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Contrast ratio with white/black text</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </Label>
+                  </div>
+
+                  {harmonies.length > 0 && (
+                    <div className="space-y-2">
+                      <Label>Color Harmonies</Label>
+                      <div className="space-y-3">
+                        {harmonies.map((harmony, hIndex) => (
+                          <div key={hIndex} className="space-y-2">
+                            <p className="text-sm text-muted-foreground">{harmony.name}</p>
+                            <div className="flex gap-2">
+                              {harmony.colors.map((harmonicColor, colorIndex) => (
+                                <div
+                                  key={colorIndex}
+                                  className="w-12 h-12 rounded-md cursor-pointer transition-transform hover:scale-105"
+                                  style={{ backgroundColor: harmonicColor }}
+                                  onClick={() => {
+                                    const newColors = [...colors];
+                                    newColors[index] = { ...color, hex: harmonicColor };
+                                    onChange(newColors);
+                                  }}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
+              </DialogContent>
+            </Dialog>
           );
         })}
-      </div>
-
-      {harmonies.length > 0 && (
-        <Card>
-          <CardContent className="p-4">
-            <h3 className="text-lg font-semibold mb-4">Color Harmonies</h3>
-            <div className="space-y-4">
-              {harmonies.map((harmony, index) => (
-                <div key={index} className="space-y-2">
-                  <Label>{harmony.name}</Label>
-                  <div className="flex gap-2">
-                    {harmony.colors.map((color, colorIndex) => (
-                      <div
-                        key={colorIndex}
-                        className="w-12 h-12 rounded-md cursor-pointer transition-transform hover:scale-105"
-                        style={{ backgroundColor: color }}
-                        onClick={() => {
-                          const newColors = [...colors];
-                          newColors.push({ hex: color, name: `${harmony.name} ${colorIndex + 1}` });
-                          onChange(newColors.slice(0, 5));
-                        }}
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <div className="flex gap-2">
-        <Button variant="outline" onClick={() => exportPalette('css')}>
-          Export CSS
-        </Button>
-        <Button variant="outline" onClick={() => exportPalette('scss')}>
-          Export SCSS
-        </Button>
-        <Button variant="outline" onClick={() => exportPalette('figma')}>
-          Export Figma
-        </Button>
       </div>
     </div>
   );
