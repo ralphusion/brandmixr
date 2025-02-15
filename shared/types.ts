@@ -5,9 +5,3 @@ export interface IconOptions {
   color?: string;
   backgroundColor?: string;
 }
-
-export interface LogoConfig {
-  brandName: string;
-  style: string;
-  industry: string;
-}
