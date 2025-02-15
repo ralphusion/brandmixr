@@ -1,10 +1,15 @@
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw } from "lucide-react";
+import { ArrowLeft, RefreshCw, Download } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useState, useEffect } from "react";
-import { generateIconSvg } from "@/lib/generateIcon";
+import { generateIconSvg, downloadIcon } from "@/lib/generateIcon";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { motion, AnimatePresence } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 const FONT_STYLES = [
   'uppercase tracking-wider font-bold',
@@ -57,6 +62,10 @@ const BACKGROUNDS = [
 export default function BrandVariations() {
   const [, navigate] = useLocation();
   const [logoSvg, setLogoSvg] = useState<string>("");
+  const [iconStyle, setIconStyle] = useState<'geometric' | 'initials' | 'abstract'>('geometric');
+  const [iconColor, setIconColor] = useState("#000000");
+  const [backgroundColor, setBackgroundColor] = useState("transparent");
+
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
 
@@ -66,13 +75,27 @@ export default function BrandVariations() {
       return;
     }
     generateLogo();
-  }, [brandName]);
+  }, [brandName, iconStyle, iconColor, backgroundColor]);
 
   const generateLogo = () => {
     if (!brandName) return;
-    const svg = generateIconSvg(brandName);
+    const svg = generateIconSvg(brandName, {
+      style: iconStyle,
+      color: iconColor,
+      backgroundColor
+    });
     const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
     setLogoSvg(dataUrl);
+  };
+
+  const handleDownload = async (format: 'svg' | 'png') => {
+    if (!brandName || !logoSvg) return;
+    const svg = generateIconSvg(brandName, {
+      style: iconStyle,
+      color: iconColor,
+      backgroundColor
+    });
+    await downloadIcon(svg, format, brandName.toLowerCase().replace(/\s+/g, '-'));
   };
 
   if (!brandName) {
@@ -94,43 +117,114 @@ export default function BrandVariations() {
           </Button>
           <Logo />
         </div>
-        <Button
-          variant="outline"
-          onClick={generateLogo}
-          className="flex items-center gap-2"
+        <div className="flex items-center gap-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Download
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleDownload('svg')}>
+                Download SVG
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload('png')}>
+                Download PNG
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          </div>
+      </div>
+
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold mb-6">Brand Variations: {brandName}</h1>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div>
+            <Label htmlFor="icon-style">Icon Style</Label>
+            <Select value={iconStyle} onValueChange={(value: any) => setIconStyle(value)}>
+              <SelectTrigger id="icon-style">
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="geometric">Geometric</SelectItem>
+                <SelectItem value="initials">Initials</SelectItem>
+                <SelectItem value="abstract">Abstract</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="icon-color">Icon Color</Label>
+            <Input
+              id="icon-color"
+              type="color"
+              value={iconColor}
+              onChange={(e) => setIconColor(e.target.value)}
+              className="h-10"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="background-color">Background Color</Label>
+            <Input
+              id="background-color"
+              type="color"
+              value={backgroundColor}
+              onChange={(e) => setBackgroundColor(e.target.value)}
+              className="h-10"
+            />
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div 
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
-          <RefreshCw className="h-4 w-4" />
-          Refresh Icon
-        </Button>
-      </div>
-
-      <h1 className="text-3xl font-bold mb-6">Brand Variations: {brandName}</h1>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {BACKGROUNDS.map((style, bgIndex) => (
-          FONT_STYLES.map((fontStyle, fontIndex) => (
-            <Card 
-              key={`${bgIndex}-${fontIndex}`}
-              className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
-            >
-              <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
-                {logoSvg && (
-                  <div className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm">
-                    <img 
-                      src={logoSvg} 
-                      alt="Brand Icon" 
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                )}
-                <h3 className={`text-3xl text-center ${style.text} ${fontStyle}`}>
-                  {brandName}
-                </h3>
-              </CardContent>
-            </Card>
-          ))
-        ))}
-      </div>
+          {BACKGROUNDS.map((style, bgIndex) => (
+            FONT_STYLES.map((fontStyle, fontIndex) => (
+              <motion.div
+                key={`${bgIndex}-${fontIndex}`}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: (bgIndex * FONT_STYLES.length + fontIndex) * 0.05 }}
+              >
+                <Card 
+                  className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
+                >
+                  <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
+                    {logoSvg && (
+                      <motion.div 
+                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm"
+                        whileHover={{ scale: 1.1 }}
+                        transition={{ type: "spring", stiffness: 300 }}
+                      >
+                        <img 
+                          src={logoSvg} 
+                          alt="Brand Icon" 
+                          className="w-full h-full object-contain"
+                        />
+                      </motion.div>
+                    )}
+                    <motion.h3 
+                      className={`text-3xl text-center ${style.text} ${fontStyle}`}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      {brandName}
+                    </motion.h3>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))
+          ))}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
