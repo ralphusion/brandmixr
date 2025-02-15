@@ -308,59 +308,57 @@ export default function BrandVariations() {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
-          {BACKGROUNDS.map((style, bgIndex) => (
-            FONT_STYLES.map((fontStyle, fontIndex) => {
-              const cardId = `${bgIndex}-${fontIndex}`;
-              const isSelected = selectedCardId === cardId;
+          {BACKGROUNDS.map((style, index) => {
+            const cardId = `variation-${index}`;
+            const isSelected = selectedCardId === cardId;
 
-              return (
-                <motion.div
-                  key={cardId}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: (bgIndex * FONT_STYLES.length + fontIndex) * 0.05 }}
-                  onClick={() => handleCardSelect(cardId)}
+            return (
+              <motion.div
+                key={cardId}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.05 }}
+                onClick={() => handleCardSelect(cardId)}
+              >
+                <Card
+                  className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                    isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+                  }`}
                 >
-                  <Card
-                    className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
-                      isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
-                    }`}
+                  <CardContent
+                    className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
+                    ref={isSelected ? selectedCardRef : null}
                   >
-                    <CardContent
-                      className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
-                      ref={isSelected ? selectedCardRef : null}
-                    >
-                      {logoSvg && (
-                        <motion.div
-                          className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm"
-                          whileHover={{ scale: 1.1 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                        >
-                          <img
-                            src={logoSvg}
-                            alt="Brand Icon"
-                            className="w-full h-full object-contain"
-                          />
-                        </motion.div>
-                      )}
-                      <motion.h3
-                        className={`text-3xl text-center ${style.text} ${fontStyle}`}
-                        whileHover={{ scale: 1.05 }}
+                    {logoSvg && (
+                      <motion.div
+                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm"
+                        whileHover={{ scale: 1.1 }}
                         transition={{ type: "spring", stiffness: 300 }}
-                        style={fonts?.primary ? {
-                          fontFamily: fonts.primary.family,
-                          fontWeight: fonts.primary.weight,
-                          fontStyle: fonts.primary.style,
-                        } : undefined}
                       >
-                        {brandName}
-                      </motion.h3>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })
-          ))}
+                        <img
+                          src={logoSvg}
+                          alt="Brand Icon"
+                          className="w-full h-full object-contain"
+                        />
+                      </motion.div>
+                    )}
+                    <motion.h3
+                      className={`text-3xl text-center ${style.text}`}
+                      whileHover={{ scale: 1.05 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                      style={fonts?.primary ? {
+                        fontFamily: fonts.primary.family,
+                        fontWeight: fonts.primary.weight,
+                        fontStyle: fonts.primary.style,
+                      } : undefined}
+                    >
+                      {brandName}
+                    </motion.h3>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            );
+          })}
         </motion.div>
       </AnimatePresence>
     </div>
