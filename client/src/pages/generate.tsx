@@ -196,6 +196,24 @@ export default function Generate() {
     }
   };
 
+  const handleExport = () => {
+    // Add headers to the CSV
+    const headers = "Name,Industry,Style,Description\n";
+    const csvContent = headers + savedNames
+      .map((name) => `"${name.name}","${name.industry || ''}","${name.style || ''}","${name.description || ''}"`)
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "saved-names.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-8">
