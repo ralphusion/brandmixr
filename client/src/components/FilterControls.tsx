@@ -12,6 +12,8 @@ interface FilterControlsProps {
   onSearchChange: (value: string) => void;
   minLength: number;
   maxLength: number;
+  currentStartingWith: string;
+  currentSearchText: string;
 }
 
 // Generate A-Z, 0-9 options
@@ -27,6 +29,8 @@ export function FilterControls({
   onSearchChange,
   minLength,
   maxLength,
+  currentStartingWith,
+  currentSearchText,
 }: FilterControlsProps) {
   const alphanumericOptions = generateAlphanumericOptions();
 
@@ -45,7 +49,7 @@ export function FilterControls({
           <div className="space-y-6 mt-6">
             <div className="space-y-2">
               <Label>Starting With</Label>
-              <Select onValueChange={onStartingWithChange} defaultValue="All">
+              <Select onValueChange={onStartingWithChange} value={currentStartingWith}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select starting character" />
                 </SelectTrigger>
@@ -80,6 +84,7 @@ export function FilterControls({
               <Input
                 type="text"
                 placeholder="Enter text to filter"
+                value={currentSearchText}
                 onChange={(e) => onSearchChange(e.target.value)}
               />
             </div>

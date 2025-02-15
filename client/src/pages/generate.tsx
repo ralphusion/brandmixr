@@ -89,13 +89,16 @@ export default function Generate() {
     }
   }, [applyFilters]);
 
+  // Intersection observer for infinite scroll
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && !isGenerating) {
           if (displayedNames.length < filteredNames.length) {
+            // Load more filtered names
             setPage((prev) => prev + 1);
-          } else {
+          } else if (displayedNames.length === filteredNames.length) {
+            // Generate more names when we've shown all filtered results
             handleGenerateMore();
           }
         }
@@ -110,6 +113,7 @@ export default function Generate() {
     return () => observer.disconnect();
   }, [displayedNames.length, filteredNames.length, isGenerating]);
 
+  // Update filtered and displayed names when filters change
   useEffect(() => {
     const filtered = applyFilters(generatedNames);
     setFilteredNames(filtered);
@@ -227,6 +231,8 @@ export default function Generate() {
             onSearchChange={setSearchText}
             minLength={1}
             maxLength={nameLength}
+            currentStartingWith={startingWith}
+            currentSearchText={searchText}
           />
 
           {displayedNames.length > 0 && (
