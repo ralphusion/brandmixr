@@ -36,6 +36,7 @@ export default function Generate() {
   const [startingWith, setStartingWith] = useState("All");
   const [nameLength, setNameLength] = useState(20);
   const [searchText, setSearchText] = useState("");
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [, navigate] = useLocation();
@@ -70,13 +71,12 @@ export default function Generate() {
 
   // Initial load effect
   useEffect(() => {
-    const savedGeneratedNames = sessionStorage.getItem('generatedNames');
-    const formData = sessionStorage.getItem('generatorFormData');
-
     if (!formData) {
       navigate('/');
       return;
     }
+
+    const savedGeneratedNames = sessionStorage.getItem('generatedNames');
 
     if (savedGeneratedNames) {
       const parsedNames = JSON.parse(savedGeneratedNames);
@@ -84,46 +84,46 @@ export default function Generate() {
       const filtered = applyFilters(parsedNames);
       setFilteredNames(filtered);
       setDisplayedNames(filtered.slice(0, NAMES_PER_PAGE));
+      setIsInitialLoad(false);
     } else {
       generateMutation.mutate(JSON.parse(formData));
     }
   }, [applyFilters]);
 
-  // Intersection observer effect
+  // Intersection observer effect for lazy loading
   useEffect(() => {
-    const loadMore = async (entries: IntersectionObserverEntry[]) => {
-      if (entries[0].isIntersecting && !isGenerating) {
-        const filtered = applyFilters(generatedNames);
-        const currentDisplayed = displayedNames.length;
-        const totalFiltered = filtered.length;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isGenerating) {
+          const currentDisplayed = displayedNames.length;
+          const totalFiltered = filteredNames.length;
 
-        if (currentDisplayed < totalFiltered) {
-          // Load more filtered names from the current set
-          const nextPage = page + 1;
-          setPage(nextPage);
-          const endIndex = nextPage * NAMES_PER_PAGE;
-          setDisplayedNames(filtered.slice(0, endIndex));
-        } else if (formData) {
-          // Generate new names when we've displayed all filtered results
-          generateMutation.mutate(JSON.parse(formData));
+          if (currentDisplayed < totalFiltered) {
+            // Load more from filtered results
+            const nextPage = page + 1;
+            const endIndex = nextPage * NAMES_PER_PAGE;
+            setPage(nextPage);
+            setDisplayedNames(prev => [...prev, ...filteredNames.slice(currentDisplayed, endIndex)]);
+          } else if (currentDisplayed === totalFiltered && formData) {
+            // Generate more when we've shown all filtered results
+            handleGenerateMore();
+          }
         }
-      }
-    };
-
-    const observer = new IntersectionObserver(loadMore, { threshold: 0.5 });
+      },
+      { threshold: 0.1, rootMargin: '100px' }
+    );
 
     if (loadMoreRef.current) {
       observer.observe(loadMoreRef.current);
     }
 
     return () => observer.disconnect();
-  }, [displayedNames.length, generatedNames, isGenerating, page, applyFilters, formData]);
+  }, [displayedNames.length, filteredNames.length, isGenerating, page, formData]);
 
-  // Update filtered and displayed names when filters change
+  // Update filtered names when filters change
   useEffect(() => {
     const filtered = applyFilters(generatedNames);
     setFilteredNames(filtered);
-    // Reset page when filters change
     setPage(1);
     setDisplayedNames(filtered.slice(0, NAMES_PER_PAGE));
   }, [generatedNames, applyFilters, startingWith, nameLength, searchText]);
@@ -139,14 +139,14 @@ export default function Generate() {
       setGeneratedNames(newNames);
       const filtered = applyFilters(newNames);
       setFilteredNames(filtered);
-      // Keep the current page's worth of names and add new ones
-      const endIndex = page * NAMES_PER_PAGE;
-      setDisplayedNames(filtered.slice(0, endIndex));
+      setDisplayedNames(prev => [...prev, ...filtered.slice(prev.length, prev.length + NAMES_PER_PAGE)]);
       setIsGenerating(false);
+      setIsInitialLoad(false);
       sessionStorage.setItem('generatedNames', JSON.stringify(newNames));
     },
     onError: () => {
       setIsGenerating(false);
+      setIsInitialLoad(false);
       toast({
         title: "Error",
         description: "Failed to generate names. Please try again.",
@@ -197,7 +197,6 @@ export default function Generate() {
   };
 
   const handleExport = () => {
-    // Add headers to the CSV
     const headers = "Name,Industry,Style,Description\n";
     const csvContent = headers + savedNames
       .map((name) => `"${name.name}","${name.industry || ''}","${name.style || ''}","${name.description || ''}"`)
@@ -213,6 +212,18 @@ export default function Generate() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   };
+
+  // Show loading state for initial generation
+  if (isInitialLoad) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+          <p className="text-lg text-muted-foreground">Generating brand names...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -253,9 +264,10 @@ export default function Generate() {
                 names={displayedNames}
                 onSave={(name) => saveMutation.mutate(name.name)}
               />
-              {/* Loading indicator */}
+
+              {/* Loading/Generation Indicator */}
               {(isGenerating || displayedNames.length < filteredNames.length) && (
-                <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
+                <div ref={loadMoreRef} className="h-20 flex items-center justify-center mt-8">
                   <div className="flex items-center gap-2 text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     <p>{isGenerating ? "Generating more names..." : "Loading more names..."}</p>
