@@ -200,6 +200,12 @@ export default function BrandVariations() {
         </div>
         <div className="flex items-center gap-4">
           <Button
+            variant="secondary"
+            onClick={() => navigate(`/mood-board?name=${encodeURIComponent(brandName || '')}`)}
+          >
+            View Mood Board
+          </Button>
+          <Button
             variant="outline"
             onClick={handleRefresh}
             className="flex items-center gap-2"

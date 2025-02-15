@@ -6,6 +6,45 @@ import crypto from "crypto";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+export async function generateMoodBoard(
+  brandName: string,
+  industry: string,
+  style: string
+): Promise<{
+  colors: Array<{ hex: string; name: string }>;
+  keywords: string[];
+  moodDescription: string;
+  imagePrompts: string[];
+}> {
+  const prompt = `Create a brand mood board for "${brandName}" in the ${industry} industry.
+Please provide the following elements in JSON format:
+
+1. A color palette (5 colors) that reflects the brand's personality
+2. Keywords that capture the brand's essence (5-7 words)
+3. A short mood description (2-3 sentences)
+4. Image generation prompts (3 prompts) for DALL-E to create mood images
+
+The brand style is: ${style}
+
+Response format:
+{
+  "colors": [{"hex": "#......", "name": "color name"}],
+  "keywords": ["word1", "word2", ...],
+  "moodDescription": "description here",
+  "imagePrompts": ["prompt1", "prompt2", "prompt3"]
+}`;
+
+  const response = await openai.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+    response_format: { type: "json_object" }
+  });
+
+  const content = response.choices[0].message.content || '{}';
+  return JSON.parse(content);
+}
+
 export async function generateApiKey(name: string, rateLimit: number = 100): Promise<string> {
   const key = `bng_${crypto.randomBytes(32).toString('hex')}`;
   const [apiKey] = await db.insert(apiKeys)

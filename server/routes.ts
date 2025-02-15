@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription, generateLogoWithDalle } from "./openai";
+import { generateNames, generateDescription, generateLogoWithDalle, generateMoodBoard } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
@@ -125,6 +125,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const names = await storage.getSavedNames();
     res.json(names);
   });
+
+  app.get("/api/mood-board", async (req, res) => {
+    try {
+      const { name, industry, style } = req.query;
+
+      if (!name || !industry || !style) {
+        throw new Error("Missing required parameters");
+      }
+
+      // Generate mood board content
+      const moodBoard = await generateMoodBoard(
+        name as string,
+        industry as string,
+        style as string
+      );
+
+      // Generate images based on the prompts
+      const imagePromises = moodBoard.imagePrompts.map(prompt =>
+        generateLogoWithDalle(prompt, style as string)
+      );
+
+      const imageResults = await Promise.all(imagePromises);
+      const images = imageResults.map(result => result.url);
+
+      res.json({
+        ...moodBoard,
+        images
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        res.status(400).json({ error: error.message });
+      } else {
+        res.status(500).json({ error: "An unexpected error occurred" });
+      }
+    }
+  });
+
 
   const httpServer = createServer(app);
   return httpServer;
