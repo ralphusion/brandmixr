@@ -1,11 +1,7 @@
-// Server-side implementation of icon service
-// We'll use SVG path data directly instead of React components
+// Server-side implementation of icon service with professional icon libraries
+import type { Typography } from './types';
 
-export type Typography = {
-  family: string;
-  weights: string[];
-  styles: string[];
-};
+export type IconStyle = 'modern' | 'classic' | 'minimal' | 'bold';
 
 // Extended typography styles
 const EXTENDED_TYPOGRAPHY = [
@@ -16,43 +12,64 @@ const EXTENDED_TYPOGRAPHY = [
   { family: 'Raleway', weights: ['100', '200', '300', '400', '500', '600', '700', '800', '900'], styles: ['normal', 'italic'] }
 ];
 
-// Pre-defined SVG paths for different industries
-const INDUSTRY_ICONS = {
+// Professional icon paths from various libraries
+const PROFESSIONAL_ICONS = {
+  technology: {
+    modern: [
+      'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', // Network
+      'M20 4L8.12 15.88M14.47 14.48L20 20M8.12 8.12L12 12', // Cursor
+      'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6', // Circuit
+      'M13 2L3 14h9l-1 8 10-12h-9l1-8z', // Flash
+      'M21 12a9 9 0 0 1-9 9m9-9a9 9 0 0 0-9-9m9 9h-0.01', // Loading
+      'M4 6h16M4 12h16M4 18h16', // Menu
+    ],
+    minimal: [
+      'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z', // Cube
+      'M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z', // Circle
+      'M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z', // Square
+      'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', // Layers
+    ]
+  },
+  business: {
+    modern: [
+      'M16 8v8M12 8v8M8 8v8M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z', // Chart
+      'M18 8a6 6 0 0 1-7.743 5.743L10 14l-2 1-6 3M6 16l2-1 1.367-.684', // Graph
+      'M21 21H3v-7l9-9 9 9v7z M9 21v-6h6v6', // Building
+      'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', // Network
+    ],
+    minimal: [
+      'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5', // Abstract
+      'M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4', // Document
+      'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5', // Forward
+    ]
+  },
+  creative: {
+    modern: [
+      'M12 19l7-7 3 3-7 7-3-3z', // Pen
+      'M20 7h-7m0 0V1h7a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2z', // Plugin
+      'M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z', // Star
+    ],
+    minimal: [
+      'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z', // Eye
+      'M12 19l7-7 3 3-7 7-3-3z', // Edit
+      'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z', // Box
+    ]
+  }
+};
+
+// Material Design icons (SVG paths)
+const MATERIAL_ICONS = {
   technology: [
-    'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',  // Network
-    'M13 2L3 14h9l-1 8 10-12h-9l1-8z',  // Lightning
-    'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z',  // Cube
-    'M18.31 6c-.628 2.59-2.782 4.5-5.31 4.5C10.472 10.5 8.318 8.59 7.69 6H4v14c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V6h-1.69z',  // Database
-    'M6 2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z M12 17v.01 M12 13v.01 M12 9v.01',  // Server
-    'M20 7h-7m0 0V1h7a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2z M13 7H6a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h7m0-6v6',  // Plugin
-    'M9.25 9a6.5 6.5 0 0 1 13 0c0 3.5-2.5 6.5-6 7.5V22h-2v-5.5c-3.5-1-6-4-6-7.5z',  // Idea
-    'M22 12h-4l-3 9L9 3l-3 9H2',  // Signal
-  ],
-  finance: [
-    'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',  // Dollar
-    'M2 8h20M6 4h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',  // Credit card
-    'M16 8v8M12 8v8M8 8v8M4 4h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z',  // Bank
-    'M21 21H3v-7l9-9 9 9v7z M9 21v-6h6v6',  // Investment
-    'M2 20h20v-8H2v8z M12 4v8 M8 8v4 M16 8v4',  // Chart
-    'M12 8c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4z M8 8l-4-4 M8 8h8',  // Stats
-  ],
-  health: [
-    'M8 2h8M12 2v6m-4 0h8M8 14h8M12 14v6M12 2v20M2 12h20',  // Medical cross
-    'M7 10h2v4H7v-4z M15 10h2v4h-2v-4z M11 2h2v4h-2V2z M11 18h2v4h-2v-4z',  // Health monitoring
-    'M12 2a3 3 0 0 0-3 3v7h6V5a3 3 0 0 0-3-3z',  // Medicine
-    'M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M14.83 9.17l4.24-4.24M14.83 9.17l3.53-3.53',  // DNA
-    'M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z',  // Healthcare
-    'M12 22c6.23-.05 11.25-7.3 11.25-13.5 0-2.08-.45-4.84-3-4.84-2.54 0-3.5 3.15-3.5 3.15s-.97-3.15-3.5-3.15c-2.55 0-3 2.76-3 4.84C10.25 14.7 15.27 21.95 21.5 22',  // Heart
+    'M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6C7.8 12.16 7 10.63 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z',
+    'M15 9H9v6h6V9zm-2 4h-2v-2h2v2zm8-2V9h-2V7c0-1.1-.9-2-2-2h-2V3h-2v2h-2V3H9v2H7c-1.1 0-2 .9-2 2v2H3v2h2v2H3v2h2v2c0 1.1.9 2 2 2h2v2h2v-2h2v2h2v-2h2c1.1 0 2-.9 2-2v-2h2v-2h-2v-2h2zm-4 6H7V7h10v10z',
   ],
   business: [
-    'M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z',  // Business development
-    'M18 8a6 6 0 0 1-7.743 5.743L10 14l-2 1-6 3M6 16l2-1 1.367-.684',  // Growth
-    'M21 21H3v-7l9-9 9 9v7z M9 21v-6h6v6',  // Office building
-    'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2',  // Team
-    'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',  // Strategy
-    'M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4',  // Documents
-    'M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5',  // Meeting
-    'M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z',  // Target
+    'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z',
+    'M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z',
+  ],
+  creative: [
+    'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z',
+    'M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.86 0-7-3.14-7-7s3.14-7 7-7 7 3.14 7 7-3.14 7-7 7z',
   ]
 };
 
@@ -66,17 +83,15 @@ export const iconService = {
 
   getRandomIcon(industry: string): string {
     const normalizedIndustry = industry.toLowerCase();
-    let categoryKey: string;
+    let categoryKey: keyof typeof PROFESSIONAL_ICONS = 'technology';
 
     // Match industry to closest category
-    if (normalizedIndustry.includes('tech')) {
+    if (normalizedIndustry.includes('tech') || normalizedIndustry.includes('digital')) {
       categoryKey = 'technology';
-    } else if (normalizedIndustry.includes('finan')) {
-      categoryKey = 'finance';
-    } else if (normalizedIndustry.includes('health')) {
-      categoryKey = 'health';
-    } else {
+    } else if (normalizedIndustry.includes('business') || normalizedIndustry.includes('finance')) {
       categoryKey = 'business';
+    } else {
+      categoryKey = 'creative';
     }
 
     // Initialize set of used icons for this category if not exists
@@ -84,7 +99,8 @@ export const iconService = {
       usedIcons[categoryKey] = new Set();
     }
 
-    const availableIcons = INDUSTRY_ICONS[categoryKey].filter(
+    const styleKey = Math.random() > 0.5 ? 'modern' : 'minimal';
+    const availableIcons = PROFESSIONAL_ICONS[categoryKey][styleKey].filter(
       icon => !usedIcons[categoryKey].has(icon)
     );
 
@@ -99,6 +115,21 @@ export const iconService = {
     usedIcons[categoryKey].add(icon);
 
     return icon;
+  },
+
+  getMaterialIcon(industry: string): string {
+    const normalizedIndustry = industry.toLowerCase();
+    let categoryKey: keyof typeof MATERIAL_ICONS = 'technology';
+
+    if (normalizedIndustry.includes('tech') || normalizedIndustry.includes('digital')) {
+      categoryKey = 'technology';
+    } else if (normalizedIndustry.includes('business') || normalizedIndustry.includes('finance')) {
+      categoryKey = 'business';
+    } else {
+      categoryKey = 'creative';
+    }
+
+    return MATERIAL_ICONS[categoryKey][Math.floor(Math.random() * MATERIAL_ICONS[categoryKey].length)];
   }
 };
 
