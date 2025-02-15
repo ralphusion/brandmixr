@@ -1,9 +1,11 @@
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Copy, Download, Type, RotateCcw } from "lucide-react";
-import { SparkleIcon } from "@/components/SparkleIcon";
+import { ArrowLeft, Copy, Download, Type, SparkleIcon } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,24 +45,57 @@ interface MoodBoardData {
   images: string[];
 }
 
-// Update the regeneration section type to include 'colors'
 type RegenerationSection = {
   type: 'colors' | 'keywords' | 'mood' | 'image';
   index?: number;
 };
 
+const BACKGROUNDS = [
+  { bg: 'bg-blue-500 text-white', text: 'text-white' },
+  { bg: 'bg-red-500 text-white', text: 'text-white' },
+  { bg: 'bg-green-500 text-white', text: 'text-white' },
+  { bg: 'bg-yellow-500 text-black', text: 'text-black' },
+  { bg: 'bg-purple-500 text-white', text: 'text-white' },
+];
+
+const getRandomPleaseantColor = () => {
+  const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+  return BACKGROUNDS[randomIndex].bg;
+}
+
+
 const ICON_STYLES = {
   initials: [
     { value: 'initials-simple', label: 'Simple Initials' },
-    { value: 'initials-detailed', label: 'Detailed Initials' },
+    { value: 'initials-rounded', label: 'Rounded Initials' },
+    { value: 'initials-gradient', label: 'Gradient Initials' }
+  ],
+  geometric: [
+    { value: 'geometric-circle', label: 'Circle' },
+    { value: 'geometric-square', label: 'Square' },
+    { value: 'geometric-hexagon', label: 'Hexagon' },
+    { value: 'geometric-triangle', label: 'Triangle' },
+    { value: 'geometric-diamond', label: 'Diamond' }
   ],
   abstract: [
-    { value: 'abstract-geometric', label: 'Geometric Abstract' },
-    { value: 'abstract-organic', label: 'Organic Abstract' },
+    { value: 'abstract-waves', label: 'Waves' },
+    { value: 'abstract-dots', label: 'Dots Pattern' },
+    { value: 'abstract-lines', label: 'Line Pattern' },
+    { value: 'abstract-mesh', label: 'Mesh Pattern' },
+    { value: 'abstract-swirl', label: 'Swirl Pattern' }
   ],
+  modern: [
+    { value: 'modern-minimal', label: 'Minimal' },
+    { value: 'modern-tech', label: 'Tech Style' },
+    { value: 'modern-gradient', label: 'Modern Gradient' }
+  ],
+  decorative: [
+    { value: 'decorative-floral', label: 'Floral Pattern' },
+    { value: 'decorative-vintage', label: 'Vintage Style' },
+    { value: 'decorative-ornate', label: 'Ornate Design' }
+  ]
 };
 
-// Update font families with more diverse options
 const FONT_FAMILIES = [
   { family: 'Playfair Display', style: 'normal', weight: '700' },
   { family: 'Montserrat', style: 'normal', weight: '600' },
@@ -91,6 +126,21 @@ const TEXT_TRANSFORMS = [
   'none'
 ];
 
+const FONT_STYLES_ARRAY = [
+  'font-serif italic tracking-wide font-medium',
+  'font-sans uppercase tracking-[0.2em] font-black',
+  'font-mono uppercase tracking-tight font-bold',
+  'font-serif normal-case tracking-normal font-light',
+  'font-sans small-caps tracking-widest font-extrabold',
+  'font-mono lowercase tracking-tight font-semibold',
+  'font-serif uppercase tracking-[0.15em] font-bold italic',
+  'font-sans normal-case tracking-wide font-thin',
+  'font-mono small-caps tracking-normal font-medium',
+  'font-serif uppercase tracking-[0.25em] font-black',
+  'font-sans italic tracking-wider font-extrabold',
+  'font-mono normal-case tracking-[0.1em] font-bold'
+];
+
 const FONT_STYLES = [
   'normal',
   'italic'
@@ -110,7 +160,26 @@ const LETTER_SPACING = [
   'tighter'
 ];
 
-type IconStyle = 'initials-simple' | 'initials-detailed' | 'abstract-geometric' | 'abstract-organic';
+type IconStyle = 
+  | 'initials-simple' 
+  | 'initials-rounded' 
+  | 'initials-gradient' 
+  | 'geometric-circle' 
+  | 'geometric-square' 
+  | 'geometric-hexagon' 
+  | 'geometric-triangle' 
+  | 'geometric-diamond' 
+  | 'abstract-waves' 
+  | 'abstract-dots' 
+  | 'abstract-lines' 
+  | 'abstract-mesh' 
+  | 'abstract-swirl' 
+  | 'modern-minimal' 
+  | 'modern-tech' 
+  | 'modern-gradient' 
+  | 'decorative-floral' 
+  | 'decorative-vintage' 
+  | 'decorative-ornate';
 
 interface FontRecommendation {
   primary: {
@@ -126,26 +195,12 @@ interface FontRecommendation {
   explanation: string;
 }
 
-// Update FontStyle interface
 interface FontStyle {
   fontFamily: string;
   fontWeight: string;
   fontStyle: string;
   textTransform: string;
   letterSpacing: string;
-}
-
-const BACKGROUNDS = [
-  { bg: 'bg-blue-500 text-white', text: 'text-white' },
-  { bg: 'bg-red-500 text-white', text: 'text-white' },
-  { bg: 'bg-green-500 text-white', text: 'text-white' },
-  { bg: 'bg-yellow-500 text-black', text: 'text-black' },
-  { bg: 'bg-purple-500 text-white', text: 'text-white' },
-];
-
-const getRandomPleaseantColor = () => {
-  const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
-  return BACKGROUNDS[randomIndex].bg;
 }
 
 
@@ -162,10 +217,11 @@ export default function MoodBoard() {
   const [logoSvg, setLogoSvg] = useState<string>("");
   const [iconStyle, setIconStyle] = useState<string>('initials-simple');
   const [iconColor, setIconColor] = useState("#000000");
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [selectedBackground, setSelectedBackground] = useState<typeof BACKGROUNDS[0] | null>(null);
   const [selectedFontStyle, setSelectedFontStyle] = useState<FontStyle | null>(null);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null); // Added state for selected card
-
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null); 
+  const selectedCardRef = useRef<HTMLDivElement>(null);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -268,25 +324,31 @@ export default function MoodBoard() {
 
     try {
       let endpoint = '';
-      let updatedData;
+      let response;
+      let updatedData: {
+        colors?: Array<{ hex: string; name: string }>;
+        keywords?: string[];
+        moodDescription?: string;
+        image?: string;
+      } = {};
 
       switch (section) {
         case 'colors':
           endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
-          const colorsResponse = await apiRequest("POST", endpoint);
-          updatedData = await colorsResponse.json();
+          response = await apiRequest("POST", endpoint);
+          updatedData = await response.json();
 
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
             ...oldData,
             colors: updatedData.colors,
           }));
-          setColors(updatedData.colors);
+          setColors(updatedData.colors || []);
           break;
 
         case 'keywords':
           endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
-          const keywordsResponse = await apiRequest("POST", endpoint);
-          updatedData = await keywordsResponse.json();
+          response = await apiRequest("POST", endpoint);
+          updatedData = await response.json();
 
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
             ...oldData,
@@ -296,8 +358,8 @@ export default function MoodBoard() {
 
         case 'mood':
           endpoint = `/api/mood-board/regenerate-mood?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
-          const moodResponse = await apiRequest("POST", endpoint);
-          updatedData = await moodResponse.json();
+          response = await apiRequest("POST", endpoint);
+          updatedData = await response.json();
 
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
             ...oldData,
@@ -309,11 +371,11 @@ export default function MoodBoard() {
           if (typeof imageIndex !== 'number' || !moodBoardData) return;
 
           endpoint = `/api/mood-board/regenerate-image`;
-          const imageResponse = await apiRequest("POST", endpoint, {
+          response = await apiRequest("POST", endpoint, {
             prompt: moodBoardData.imagePrompts[imageIndex],
             style: formData.style,
           });
-          updatedData = await imageResponse.json();
+          updatedData = await response.json();
 
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
             const newImages = [...oldData.images];
@@ -405,6 +467,7 @@ export default function MoodBoard() {
           const parsedConfig = JSON.parse(savedConfig);
           setIconStyle(parsedConfig.iconStyle || 'initials-simple');
           setIconColor(parsedConfig.iconColor || '#000000');
+          setBackgroundColor(parsedConfig.backgroundColor || '#FFFFFF');
           setSelectedBackground(parsedConfig.selectedBackground);
 
           if (parsedConfig.fontStyle) {
@@ -428,89 +491,75 @@ export default function MoodBoard() {
   useEffect(() => {
     if (brandName) {
       try {
-        // Store current SVG as fallback
         const currentSvg = logoSvg;
 
-        // Validate inputs
         if (!iconStyle || !iconColor) {
           throw new Error('Invalid icon configuration');
         }
 
-        // Generate new SVG
         const newSvg = generateIconSvg(brandName, {
           style: iconStyle as IconStyle,
           color: iconColor,
-          backgroundColor: 'transparent'
+          backgroundColor: backgroundColor
         });
 
-        // Validate SVG
         if (!newSvg || newSvg.trim() === '') {
           throw new Error('Generated SVG is empty or invalid');
         }
 
-        // Test SVG parsing
         const parser = new DOMParser();
         const doc = parser.parseFromString(newSvg, 'image/svg+xml');
         if (doc.getElementsByTagName('parsererror').length > 0) {
           throw new Error('Invalid SVG generated');
         }
 
-        // Convert to data URL
         const dataUrl = `data:image/svg+xml;base64,${btoa(newSvg)}`;
         setLogoSvg(dataUrl);
       } catch (error) {
         console.error('Error generating icon:', error);
-        // Revert to previous valid SVG if available
         if (currentSvg) {
           setLogoSvg(currentSvg);
         }
       }
     }
-  }, [brandName, iconStyle, iconColor]);
+  }, [brandName, iconStyle, iconColor, backgroundColor]);
 
   const handleRegenerateLogo = () => {
     if (!brandName) return;
 
-    // Store current values as fallback
     const currentStyle = iconStyle;
     const currentColor = iconColor;
-    const currentBackground = selectedBackground;
+    const currentBackground = backgroundColor;
     const currentFontStyle = selectedFontStyle;
     const currentSvg = logoSvg;
 
     try {
-      // Get available icon styles
       const styles = Object.keys(ICON_STYLES)
         .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
         .map(style => style.value);
 
-      // Select new style
       const availableStyles = styles.filter(style => style !== currentStyle);
       const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
-      // Generate new color
       const hue = Math.floor(Math.random() * 360);
       const saturation = 60 + Math.floor(Math.random() * 20);
       const lightness = 45 + Math.floor(Math.random() * 15);
       const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
-      // Test generation with new values
       const testSvg = generateIconSvg(brandName, {
         style: newStyle,
         color: newIconColor,
-        backgroundColor: 'transparent'
+        backgroundColor: currentBackground
       });
 
       if (!testSvg || testSvg.trim() === '') {
         throw new Error('Failed to generate test SVG');
       }
 
-      // Only update if test was successful
       setIconStyle(newStyle);
       setIconColor(newIconColor);
-      setSelectedBackground(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)]);
+      setBackgroundColor(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].bg);
 
-      // Update font style
       const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
       const newFontStyle: FontStyle = {
         fontFamily: randomFont.family,
@@ -521,7 +570,6 @@ export default function MoodBoard() {
       };
       setSelectedFontStyle(newFontStyle);
 
-      // Update font settings
       const fontSettings: FontSettings = {
         primary: {
           family: randomFont.family,
@@ -539,10 +587,9 @@ export default function MoodBoard() {
       sessionStorage.setItem('brandStudioFonts', JSON.stringify(fontSettings));
     } catch (error) {
       console.error('Error regenerating logo:', error);
-      // Revert all changes if anything fails
       setIconStyle(currentStyle);
       setIconColor(currentColor);
-      setSelectedBackground(currentBackground);
+      setBackgroundColor(currentBackground);
       setSelectedFontStyle(currentFontStyle);
       setLogoSvg(currentSvg);
       toast({
@@ -553,38 +600,6 @@ export default function MoodBoard() {
     }
   };
 
-  const handleResetLogo = () => {
-    try {
-      const savedConfig = sessionStorage.getItem('selectedLogoConfig');
-      const brandStudioFonts = sessionStorage.getItem('brandStudioFonts');
-
-      if (savedConfig) {
-        const parsedConfig = JSON.parse(savedConfig);
-        setIconStyle(parsedConfig.iconStyle || 'initials-simple');
-        setIconColor(parsedConfig.iconColor || '#000000');
-        setSelectedBackground(parsedConfig.selectedBackground);
-
-        if (parsedConfig.fontStyle) {
-          const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
-          setSelectedFontStyle(fontStyle);
-        }
-      }
-
-      if (brandStudioFonts) {
-        const parsedFonts = JSON.parse(brandStudioFonts);
-        if (parsedFonts?.primary?.family) {
-          loadFonts(parsedFonts);
-        }
-      }
-    } catch (error) {
-      console.error('Error resetting logo:', error);
-      toast({
-        title: "Reset failed",
-        description: "Failed to reset logo to saved configuration.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleDownloadLogo = async () => {
     if (!brandName) return;
@@ -620,18 +635,17 @@ export default function MoodBoard() {
 
   const handleCardSelect = (cardId: string) => {
     setSelectedCardId(cardId);
-    // Store the selected logo configuration
     const selectedStyle = BACKGROUNDS[parseInt(cardId.split('-')[1])];
     sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
       iconStyle,
       iconColor,
+      backgroundColor,
       selectedBackground: selectedStyle,
       fontStyle: selectedFontStyle
     }));
   };
 
   const handleExport = () => {
-    //Implementation to export color palette
     const a = document.createElement('a');
     a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(colors));
     a.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-palette.json`;
@@ -639,6 +653,14 @@ export default function MoodBoard() {
     a.click();
     document.body.removeChild(a);
   }
+
+  const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIconColor(e.target.value);
+  };
+
+  const handleBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBackgroundColor(e.target.value);
+  };
 
   if (!brandName) {
     navigate('/');
@@ -707,19 +729,6 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={handleResetLogo}
-                          title="Reset to selected logo"
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Reset to selected logo</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
                           onClick={handleDownloadLogo}
                           title="Download logo as PNG"
                         >
@@ -743,34 +752,102 @@ export default function MoodBoard() {
                     </Tooltip>
                   </div>
                 </div>
-                <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
-                  <div className="flex flex-col items-center gap-6 logo-container bg-transparent">
-                    <div className="w-24 h-24 bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-sm">
-                      {logoSvg && (
-                        <img
-                          src={logoSvg}
-                          alt="Brand Logo"
-                          className="w-full h-full object-contain"
-                        />
-                      )}
-                    </div>
-                    <h3
-                      className={`text-3xl ${selectedBackground?.text || ''}`}
-                      style={selectedFontStyle ? {
-                        fontFamily: selectedFontStyle.fontFamily,
-                        fontWeight: selectedFontStyle.fontWeight,
-                        fontStyle: selectedFontStyle.fontStyle,
-                        textTransform: selectedFontStyle.textTransform as React.CSSProperties['textTransform'],
-                        letterSpacing: selectedFontStyle.letterSpacing as React.CSSProperties['letterSpacing'],
-                      } : fonts?.primary ? {
-                        fontFamily: fonts.primary.family,
-                        fontWeight: fonts.primary.weight,
-                        fontStyle: fonts.primary.style,
-                      } : undefined}
-                    >
-                      {brandName}
-                    </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className="space-y-2">
+                    <Label htmlFor="icon-style">Icon Options</Label>
+                    <Select value={iconStyle} onValueChange={setIconStyle}>
+                      <SelectTrigger id="icon-style">
+                        <SelectValue placeholder="Select style" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ICON_STYLES).map(([category, styles]) => (
+                          <div key={category}>
+                            <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </div>
+                            {styles.map((style) => (
+                              <SelectItem key={style.value} value={style.value}>
+                                {style.label}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="icon-color">Icon Color</Label>
+                    <Input
+                      id="icon-color"
+                      type="color"
+                      value={iconColor}
+                      onChange={handleColorChange}
+                      className="h-10"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="background-color">Background Color</Label>
+                    <Input
+                      id="background-color"
+                      type="color"
+                      value={backgroundColor}
+                      onChange={handleBackgroundColorChange}
+                      className="h-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {BACKGROUNDS.slice(0, 3).map((style, index) => {
+                    const cardId = `variation-${index}`;
+                    const isSelected = selectedCardId === cardId;
+                    const fontStyle = FONT_STYLES_ARRAY[index % FONT_STYLES_ARRAY.length];
+
+                    return (
+                      <motion.div
+                        key={cardId}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => handleCardSelect(cardId)}
+                      >
+                        <Card
+                          className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                            isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+                          }`}
+                        >
+                          <CardContent
+                            className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
+                            ref={isSelected ? selectedCardRef : null}
+                          >
+                            {logoSvg && (
+                              <motion.div
+                                className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
+                                whileHover={{ scale: 1.1 }}
+                                transition={{ type: "spring", stiffness: 300 }}
+                              >
+                                <img
+                                  src={logoSvg}
+                                  alt="Brand Icon"
+                                  className="w-full h-full object-contain"
+                                />
+                              </motion.div>
+                            )}
+                            <motion.h3
+                              className={`text-3xl text-center ${style.text} ${fontStyle}`}
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ type: "spring", stiffness: 300 }}
+                            >
+                              {brandName}
+                            </motion.h3>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
