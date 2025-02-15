@@ -286,7 +286,14 @@ export default function MoodBoard() {
   };
 
   const handleRegenerate = async (section: RegenerationSection['type'], imageIndex?: number) => {
-    if (!brandName || !formData.industry || !formData.style) return;
+    if (!brandName || !formData.industry || !formData.style) {
+      toast({
+        title: "Missing Information",
+        description: "Required information is missing for regeneration",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setRegeneratingSection({ type: section, index: imageIndex });
 
@@ -303,8 +310,19 @@ export default function MoodBoard() {
       switch (section) {
         case 'colors':
           endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          console.log('Regenerating colors with endpoint:', endpoint);
+
           response = await apiRequest("POST", endpoint);
+
+          if (!response.ok) {
+            throw new Error(`Failed to regenerate colors: ${response.statusText}`);
+          }
+
           updatedData = await response.json();
+
+          if (!updatedData.colors || !Array.isArray(updatedData.colors)) {
+            throw new Error('Invalid color data received from server');
+          }
 
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
             ...oldData,
@@ -775,13 +793,35 @@ export default function MoodBoard() {
   );
 
   const handleExport = () => {
-    const a = document.createElement('a');
-    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(colors));
-    a.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-palette.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  }
+    try {
+      if (!colors || colors.length === 0) {
+        throw new Error('No colors available to export');
+      }
+
+      const colorData = JSON.stringify(colors, null, 2);
+      const blob = new Blob([colorData], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-palette.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Success",
+        description: "Color palette exported successfully",
+      });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export failed",
+        description: error instanceof Error ? error.message : "Failed to export color palette",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setLogoColor(e.target.value);
@@ -809,12 +849,13 @@ export default function MoodBoard() {
           </div>
         </div>
 
-        <h1 className="text-3xl font-bold mb-6"
+        <h1
+          className="text-3xl font-bold mb-6"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
             fontWeight: fonts.primary.weight,
             fontStyle: fonts.primary.style,
-          } : undefined}
+          } :undefined}
         >
           Brand Mood Board: {brandName}
         </h1>
@@ -842,11 +883,11 @@ export default function MoodBoard() {
                   </h2>
                   <div className="flex gap-2">
                     <Tooltip>
-                    <TooltipTrigger asChild>
+                      <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleExport()}
+                          onClick={handleExport}
                         >
                           <Download className="h-4 w-4" />
                         </Button>
@@ -868,6 +909,7 @@ export default function MoodBoard() {
                     </Tooltip>
                   </div>
                 </div>
+
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
@@ -893,7 +935,6 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
-
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -975,7 +1016,6 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
-
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
