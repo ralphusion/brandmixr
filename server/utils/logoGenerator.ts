@@ -31,6 +31,69 @@ const DEFAULT_COLORS = {
   }
 };
 
+function mapStyleToLogoStyle(style: string): LogoStyle {
+  const styleMap: { [key: string]: LogoStyle } = {
+    modern: 'modern',
+    classic: 'classic',
+    minimal: 'minimal',
+    bold: 'bold',
+    professional: 'classic',
+    playful: 'bold',
+    elegant: 'minimal',
+    tech: 'modern'
+  };
+
+  return styleMap[style.toLowerCase()] || 'modern';
+}
+
+function getRandomElement<T>(array: T[]): T {
+  return array[Math.floor(Math.random() * array.length)];
+}
+
+export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
+  const { brandName, style, industry } = config;
+  const logoStyle = mapStyleToLogoStyle(style);
+  const colors = DEFAULT_COLORS[logoStyle];
+
+  try {
+    // Get icon SVG and colors
+    const iconSvg = await iconService.getRandomIcon(industry);
+    const primaryColor = getRandomElement(colors.primary);
+    const accentColor = getRandomElement(colors.accent);
+
+    // Extract the path data from the SVG content
+    const pathMatch = iconSvg.match(/<path[^>]*d="([^"]*)"[^>]*>/);
+    if (!pathMatch) {
+      throw new Error('No path found in SVG');
+    }
+
+    const pathData = pathMatch[1];
+
+    // Return the SVG path with styling
+    return `
+      <path 
+        d="${pathData}"
+        fill="url(#gradient-${primaryColor.substring(1)})"
+      />
+      <defs>
+        <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
+        </linearGradient>
+      </defs>
+    `;
+  } catch (error) {
+    console.error('Error generating logo:', error);
+    // Return a fallback simple shape if icon generation fails
+    return `
+      <path 
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+        fill="url(#gradient-${getRandomElement(colors.primary).substring(1)})"
+      />
+    `;
+  }
+}
+
 const TEXT_EFFECTS = {
   modern: {
     letterSpacing: '0.05em',
@@ -52,47 +115,3 @@ const TEXT_EFFECTS = {
     fontVariationSettings: "'wght' 800"
   }
 };
-
-function mapStyleToLogoStyle(style: string): LogoStyle {
-  const styleMap: { [key: string]: LogoStyle } = {
-    modern: 'modern',
-    classic: 'classic',
-    minimal: 'minimal',
-    bold: 'bold',
-    professional: 'classic',
-    playful: 'bold',
-    elegant: 'minimal',
-    tech: 'modern'
-  };
-
-  return styleMap[style.toLowerCase()] || 'modern';
-}
-
-function getRandomElement<T>(array: T[]): T {
-  return array[Math.floor(Math.random() * array.length)];
-}
-
-export function generateSimpleLogo(config: LogoConfig): string {
-  const { brandName, style, industry } = config;
-  const logoStyle = mapStyleToLogoStyle(style);
-  const colors = DEFAULT_COLORS[logoStyle];
-
-  // Get icon path and colors
-  const iconPath = iconService.getRandomIcon(industry);
-  const primaryColor = getRandomElement(colors.primary);
-  const accentColor = getRandomElement(colors.accent);
-
-  // Return the SVG path with styling
-  return `
-    <path 
-      d="${iconPath}"
-      fill="url(#gradient-${primaryColor.substring(1)})"
-    />
-    <defs>
-      <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
-      </linearGradient>
-    </defs>
-  `;
-}
