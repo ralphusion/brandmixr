@@ -154,12 +154,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("Generated mood board content:", moodBoard);
 
       // Generate images based on the prompts
-      const imagePromises = moodBoard.imagePrompts.map(prompt =>
-        generateLogoWithDalle(prompt, style as string)
-      );
+      const imagePromises = moodBoard.imagePrompts.map(async (prompt) => {
+        try {
+          const result = await generateLogoWithDalle(prompt, style as string);
+          // Fetch the image and convert to base64
+          const response = await fetch(result.url);
+          const buffer = await response.arrayBuffer();
+          const base64 = Buffer.from(buffer).toString('base64');
+          return `data:image/png;base64,${base64}`;
+        } catch (error) {
+          console.error("Error generating image:", error);
+          return null;
+        }
+      });
 
       const imageResults = await Promise.all(imagePromises);
-      const images = imageResults.map(result => result.url);
+      const images = imageResults.filter(Boolean) as string[];
 
       console.log("Generated images:", images.length);
 

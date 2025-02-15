@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, RefreshCw } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/queryClient";
 import html2canvas from 'html2canvas';
@@ -21,7 +21,7 @@ interface MoodBoardData {
   keywords: string[];
   moodDescription: string;
   imagePrompts: string[];
-  images?: string[];
+  images: string[];
 }
 
 export default function MoodBoard() {
@@ -49,10 +49,9 @@ export default function MoodBoard() {
       const imagePromises = moodBoardData.images.map(url => {
         return new Promise((resolve, reject) => {
           const img = new Image();
-          img.crossOrigin = "anonymous";
           img.onload = () => resolve(true);
           img.onerror = reject;
-          img.src = url;
+          img.src = url; // Base64 images don't need crossOrigin
         });
       });
 
@@ -81,7 +80,6 @@ export default function MoodBoard() {
       const canvas = await html2canvas(moodBoardRef.current, {
         scale: 2, // Higher quality
         backgroundColor: null,
-        useCORS: true, // Handle cross-origin images
         logging: true, // Enable logging for debugging
         allowTaint: true,
         foreignObjectRendering: true,
@@ -240,7 +238,6 @@ export default function MoodBoard() {
                     src={imageUrl}
                     alt={`Mood image ${index + 1}`}
                     className="w-full h-48 object-cover rounded-lg"
-                    crossOrigin="anonymous"
                   />
                 </CardContent>
               </Card>
