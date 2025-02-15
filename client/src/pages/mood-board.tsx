@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, RefreshCw } from "lucide-react";
+import { ArrowLeft, Download, Type } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
@@ -27,16 +34,33 @@ interface MoodBoardData {
   images: string[];
 }
 
+interface FontRecommendation {
+  primary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  secondary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  explanation: string;
+}
+
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
+  const [showFontDialog, setShowFontDialog] = useState(false);
+  const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
+
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
   const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
 
-  const { fonts } = useFonts();
+  const { fonts, loadFonts } = useFonts();
 
   const { data: moodBoardData, isLoading } = useQuery<MoodBoardData>({
     queryKey: ['/api/mood-board', brandName],
@@ -45,6 +69,18 @@ export default function MoodBoard() {
       return response.json();
     },
     enabled: !!brandName && !!formData.industry && !!formData.style,
+  });
+
+  const { data: fontRecommendations = [], isLoading: loadingFonts } = useQuery<FontRecommendation[]>({
+    queryKey: ['/api/font-recommendations', brandName],
+    queryFn: async () => {
+      const response = await apiRequest(
+        "GET",
+        `/api/font-recommendations?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}`
+      );
+      return response.json();
+    },
+    enabled: !!brandName,
   });
 
   useEffect(() => {
@@ -153,6 +189,14 @@ export default function MoodBoard() {
             <Logo />
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowFontDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Type className="h-4 w-4" />
+              AI Font Recommendations
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button 
@@ -198,13 +242,16 @@ export default function MoodBoard() {
               {/* Color Palette */}
               <Card className="shadow-md">
                 <CardContent className="p-6">
-                  <h2 className="text-xl font-semibold mb-4"
+                  <h2 
+                    className="text-xl font-semibold mb-4"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
                       fontStyle: fonts.primary.style,
                     } : undefined}
-                  >Color Palette</h2>
+                  >
+                    Color Palette
+                  </h2>
                   <ColorPaletteEditor
                     colors={colors}
                     onChange={setColors}
@@ -300,6 +347,85 @@ export default function MoodBoard() {
             Failed to load mood board data. Please make sure you have selected a brand name and style.
           </p>
         )}
+
+        {/* Font Dialog */}
+        <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
+          <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>AI-Recommended Font Combinations</DialogTitle>
+            </DialogHeader>
+
+            <div className="flex-1 overflow-y-auto pr-2">
+              <div className="grid grid-cols-1 gap-6 py-4">
+                {loadingFonts ? (
+                  <p className="text-center text-muted-foreground">
+                    Generating font recommendations...
+                  </p>
+                ) : (
+                  fontRecommendations.map((recommendation, index) => (
+                    <Card
+                      key={index}
+                      className={`cursor-pointer transition-all ${
+                        selectedFont === recommendation ? 'ring-2 ring-primary' : ''
+                      }`}
+                      onClick={() => setSelectedFont(recommendation)}
+                    >
+                      <CardContent className="p-6">
+                        <div className="mb-4">
+                          <h3
+                            className="text-3xl mb-2"
+                            style={{
+                              fontFamily: recommendation.primary.family,
+                              fontWeight: recommendation.primary.weight,
+                              fontStyle: recommendation.primary.style,
+                            }}
+                          >
+                            {brandName}
+                          </h3>
+                          <p
+                            className="text-base"
+                            style={{
+                              fontFamily: recommendation.secondary.family,
+                              fontWeight: recommendation.secondary.weight,
+                              fontStyle: recommendation.secondary.style,
+                            }}
+                          >
+                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                          </p>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
+                          <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
+                          <p className="mt-2">{recommendation.explanation}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
+              <Button
+                variant="outline"
+                onClick={() => setShowFontDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (selectedFont) {
+                    await loadFonts(selectedFont);
+                    setShowFontDialog(false);
+                  }
+                }}
+                disabled={!selectedFont}
+              >
+                Apply Font Combination
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );

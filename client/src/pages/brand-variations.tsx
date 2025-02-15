@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, RefreshCw, Type } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useState, useEffect, useRef } from "react";
 import { generateIconSvg } from "@/lib/generateIcon";
@@ -10,15 +10,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { useQuery } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import html2canvas from 'html2canvas';
 import { useFonts } from "@/contexts/FontContext";
 
@@ -62,14 +58,6 @@ const getRandomPleaseantColor = () => {
   return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 };
 
-const FONT_STYLES = [
-  'uppercase tracking-wider font-bold',
-  'uppercase tracking-tight font-extrabold',
-  'normal-case tracking-wide font-semibold',
-  'font-serif italic font-medium',
-  'font-mono uppercase tracking-widest font-bold',
-  'font-sans small-caps tracking-normal font-bold',
-];
 
 const BACKGROUNDS = [
   {
@@ -132,26 +120,10 @@ export default function BrandVariations() {
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
-  const [showFontDialog, setShowFontDialog] = useState(false);
-  const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
-
-  const { fonts, setFonts, loadFonts } = useFonts();
+  const { fonts } = useFonts();
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
-
-  const { data: fontRecommendations = [], isLoading: loadingFonts } = useQuery<FontRecommendation[]>({
-    queryKey: ['/api/font-recommendations', brandName],
-    queryFn: async () => {
-      const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
-      const response = await apiRequest(
-        "GET",
-        `/api/font-recommendations?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}`
-      );
-      return response.json();
-    },
-    enabled: !!brandName,
-  });
 
   useEffect(() => {
     if (!brandName) {
@@ -246,14 +218,6 @@ export default function BrandVariations() {
           >
             View Mood Board
           </Button>
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Refresh Designs
-          </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -278,7 +242,16 @@ export default function BrandVariations() {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-6">Branding Studio: {brandName}</h1>
+        <h1 
+          className="text-3xl font-bold mb-6"
+          style={fonts?.primary ? {
+            fontFamily: fonts.primary.family,
+            fontWeight: fonts.primary.weight,
+            fontStyle: fonts.primary.style,
+          } : undefined}
+        >
+          Branding Studio: {brandName}
+        </h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div>
@@ -324,16 +297,6 @@ export default function BrandVariations() {
               onChange={(e) => setBackgroundColor(e.target.value)}
               className="h-10"
             />
-          </div>
-          <div className="md:col-span-3">
-            <Button
-              variant="outline"
-              className="w-full"
-              onClick={() => setShowFontDialog(true)}
-            >
-              <Type className="h-4 w-4 mr-2" />
-              View AI Font Recommendations
-            </Button>
           </div>
         </div>
       </div>
@@ -384,6 +347,11 @@ export default function BrandVariations() {
                         className={`text-3xl text-center ${style.text} ${fontStyle}`}
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 300 }}
+                        style={fonts?.primary ? {
+                          fontFamily: fonts.primary.family,
+                          fontWeight: fonts.primary.weight,
+                          fontStyle: fonts.primary.style,
+                        } : undefined}
                       >
                         {brandName}
                       </motion.h3>
@@ -395,84 +363,6 @@ export default function BrandVariations() {
           ))}
         </motion.div>
       </AnimatePresence>
-
-      <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
-        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
-          <DialogHeader className="flex-shrink-0">
-            <DialogTitle>AI-Recommended Font Combinations</DialogTitle>
-          </DialogHeader>
-
-          <div className="flex-1 overflow-y-auto pr-2">
-            <div className="grid grid-cols-1 gap-6 py-4">
-              {loadingFonts ? (
-                <p className="text-center text-muted-foreground">
-                  Generating font recommendations...
-                </p>
-              ) : (
-                fontRecommendations.map((recommendation, index) => (
-                  <Card
-                    key={index}
-                    className={`cursor-pointer transition-all ${
-                      selectedFont === recommendation ? 'ring-2 ring-primary' : ''
-                    }`}
-                    onClick={() => setSelectedFont(recommendation)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="mb-4">
-                        <h3
-                          className="text-3xl mb-2"
-                          style={{
-                            fontFamily: recommendation.primary.family,
-                            fontWeight: recommendation.primary.weight,
-                            fontStyle: recommendation.primary.style,
-                          }}
-                        >
-                          {brandName}
-                        </h3>
-                        <p
-                          className="text-base"
-                          style={{
-                            fontFamily: recommendation.secondary.family,
-                            fontWeight: recommendation.secondary.weight,
-                            fontStyle: recommendation.secondary.style,
-                          }}
-                        >
-                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                        </p>
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
-                        <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
-                        <p className="mt-2">{recommendation.explanation}</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
-            <Button
-              variant="outline"
-              onClick={() => setShowFontDialog(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={async () => {
-                if (selectedFont) {
-                  await loadFonts(selectedFont);
-                  setShowFontDialog(false);
-                }
-              }}
-              disabled={!selectedFont}
-            >
-              Apply Font Combination
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
