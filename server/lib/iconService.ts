@@ -46,20 +46,21 @@ function getRandomElement<T>(array: T[]): T {
 
 async function fetchIconsFromSVGRepo(query: string): Promise<string[]> {
   try {
-    const response = await axios.get('https://www.svgrepo.com/api/svgs', {
+    // Updated API endpoint and parameters
+    const response = await axios.get('https://www.svgrepo.com/api/vectors/', {
       params: {
-        query,
+        term: query,
         limit: 20,
-        style: 'line',
+        type: 'line'
       },
       headers: {
-        'Accept': 'application/json',
+        'Accept': 'application/json'
       }
     });
 
-    if (response.data && Array.isArray(response.data)) {
-      return response.data.map(icon => {
-        const svg = icon.svg;
+    if (response.data && Array.isArray(response.data.vectors)) {
+      return response.data.vectors.map((vector: any) => {
+        const svg = vector.svg;
         // Extract the first path with a 'd' attribute
         const pathMatch = svg.match(/<path[^>]*\sd="([^"]+)"[^>]*>/);
         if (!pathMatch) return null;

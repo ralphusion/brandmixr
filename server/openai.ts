@@ -17,6 +17,10 @@ export async function generateMoodBoard(
   moodDescription: string;
   imagePrompts: string[];
 }> {
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured");
+  }
+
   const prompt = `Create a brand mood board for "${brandName}" in the ${industry} industry.
 Please provide the following elements in JSON format:
 
@@ -35,14 +39,22 @@ Response format:
   "imagePrompts": ["prompt1", "prompt2", "prompt3"]
 }`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" }
-  });
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
 
-  const content = response.choices[0].message.content || '{}';
-  return JSON.parse(content);
+    const content = response.choices[0].message.content || '{}';
+    return JSON.parse(content);
+  } catch (error) {
+    console.error('Error generating mood board:', error);
+    if (error instanceof Error && error.message.includes('API key')) {
+      throw new Error('OpenAI API key is invalid or not properly configured');
+    }
+    throw error;
+  }
 }
 
 export async function generateApiKey(name: string, rateLimit: number = 100): Promise<string> {
@@ -104,7 +116,13 @@ Format the response as: {"names": ["name1", "name2", ..., "name50"]}`;
     return result.names;
   } catch (error) {
     console.error('Error generating names:', error);
-    throw new Error(`Failed to generate names: ${error.message}`);
+    if (error instanceof Error) {
+      if (error.message.includes('API key')) {
+        throw new Error('OpenAI API key is invalid or not properly configured');
+      }
+      throw new Error(`Failed to generate names: ${error.message}`);
+    }
+    throw new Error('An unexpected error occurred while generating names');
   }
 }
 
@@ -114,7 +132,12 @@ export async function generateDescription(
   description: string,
   keywords: string[]
 ): Promise<string> {
-  const prompt = `Generate a compelling brand description for a business with the following details:
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured");
+  }
+
+  try {
+    const prompt = `Generate a compelling brand description for a business with the following details:
 
 Brand Name: ${name}
 Industry: ${industry}
@@ -129,16 +152,28 @@ Create a description that:
 
 Please respond with just the description text, no JSON formatting needed.`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  return response.choices[0].message.content || "Description not available.";
+    return response.choices[0].message.content || "Description not available.";
+  } catch (error) {
+    console.error('Error generating description:', error);
+    if (error instanceof Error && error.message.includes('API key')) {
+      throw new Error('OpenAI API key is invalid or not properly configured');
+    }
+    throw error;
+  }
 }
 
 export async function generateLogoWithDalle(brandName: string, style: string): Promise<{ url: string }> {
-  const prompt = `Create a simple, minimalistic icon for "${brandName}". The design should be:
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured");
+  }
+
+  try {
+    const prompt = `Create a simple, minimalistic icon for "${brandName}". The design should be:
 - Extremely minimalistic, using only essential geometric shapes (circles, squares, lines)
 - Single color design that works on both light and dark backgrounds
 - No text or lettering
@@ -147,15 +182,22 @@ export async function generateLogoWithDalle(brandName: string, style: string): P
 - Professional and modern look
 Style guidance: ${style}`;
 
-  const response = await openai.images.generate({
-    model: "dall-e-3",
-    prompt,
-    n: 1,
-    size: "1024x1024",
-    quality: "standard",
-  });
+    const response = await openai.images.generate({
+      model: "dall-e-3",
+      prompt,
+      n: 1,
+      size: "1024x1024",
+      quality: "standard",
+    });
 
-  return { url: response.data[0].url || '' };
+    return { url: response.data[0].url || '' };
+  } catch (error) {
+    console.error('Error generating logo:', error);
+    if (error instanceof Error && error.message.includes('API key')) {
+      throw new Error('OpenAI API key is invalid or not properly configured');
+    }
+    throw error;
+  }
 }
 
 export interface FontRecommendation {
@@ -177,7 +219,12 @@ export async function generateFontRecommendations(
   industry: string,
   style: string
 ): Promise<FontRecommendation[]> {
-  const prompt = `Generate font combinations for the brand "${brandName}" in the ${industry} industry.
+  if (!process.env.OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is not configured");
+  }
+
+  try {
+    const prompt = `Generate font combinations for the brand "${brandName}" in the ${industry} industry.
 The brand style is: ${style}
 
 Please provide 5 different font combinations in JSON format. Each combination should have:
@@ -206,13 +253,20 @@ Response format:
   ]
 }`;
 
-  const response = await openai.chat.completions.create({
-    model: "gpt-4o",
-    messages: [{ role: "user", content: prompt }],
-    response_format: { type: "json_object" }
-  });
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [{ role: "user", content: prompt }],
+      response_format: { type: "json_object" }
+    });
 
-  const content = response.choices[0].message.content || '{"recommendations": []}';
-  const result = JSON.parse(content);
-  return result.recommendations;
+    const content = response.choices[0].message.content || '{"recommendations": []}';
+    const result = JSON.parse(content);
+    return result.recommendations;
+  } catch (error) {
+    console.error('Error generating font recommendations:', error);
+    if (error instanceof Error && error.message.includes('API key')) {
+      throw new Error('OpenAI API key is invalid or not properly configured');
+    }
+    throw error;
+  }
 }

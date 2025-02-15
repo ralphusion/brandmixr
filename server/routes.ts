@@ -61,10 +61,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (error instanceof ZodError) {
         res.status(400).json({ error: "Invalid input data", details: error.errors });
-      } else if (error instanceof Error && error.message.includes("API key")) {
-        res.status(500).json({ error: "API configuration error. Please try again later." });
+      } else if (error instanceof Error) {
+        if (error.message.includes('API key')) {
+          res.status(503).json({ 
+            error: "API service is currently unavailable. Please try again later.",
+            details: "OpenAI API configuration issue"
+          });
+        } else {
+          res.status(500).json({ 
+            error: "Failed to generate names. Please try again.",
+            details: error.message
+          });
+        }
       } else {
-        res.status(500).json({ error: "Failed to generate names. Please try again." });
+        res.status(500).json({ error: "An unexpected error occurred" });
       }
     }
   });
