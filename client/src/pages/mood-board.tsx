@@ -19,6 +19,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { generateIconSvg } from "@/lib/generateIcon";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
@@ -34,6 +35,17 @@ type RegenerationSection = {
   index?: number;
 };
 
+const ICON_STYLES = {
+  initials: [
+    { value: 'initials-simple', label: 'Simple Initials' },
+    { value: 'initials-detailed', label: 'Detailed Initials' },
+  ],
+  abstract: [
+    { value: 'abstract-geometric', label: 'Geometric Abstract' },
+    { value: 'abstract-organic', label: 'Organic Abstract' },
+  ],
+};
+
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
@@ -44,6 +56,9 @@ export default function MoodBoard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [regeneratingSection, setRegeneratingSection] = useState<RegenerationSection | null>(null);
+  const [logoSvg, setLogoSvg] = useState<string>("");
+  const [iconStyle, setIconStyle] = useState<string>('initials-simple');
+  const [iconColor, setIconColor] = useState("#000000");
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -273,6 +288,29 @@ export default function MoodBoard() {
     }
   };
 
+  useEffect(() => {
+    if (brandName) {
+      const svg = generateIconSvg(brandName, {
+        style: iconStyle,
+        color: iconColor,
+        backgroundColor: 'transparent'
+      });
+      const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+      setLogoSvg(dataUrl);
+    }
+  }, [brandName, iconStyle, iconColor]);
+
+  const handleRegenerateLogo = () => {
+    if (!brandName) return;
+    const newStyle = Object.keys(ICON_STYLES)
+      .flatMap(category => ICON_STYLES[category])
+      .map(style => style.value)
+      .filter(style => style !== iconStyle)[
+      Math.floor(Math.random() * (Object.keys(ICON_STYLES).length -1))
+    ];
+    setIconStyle(newStyle);
+  };
+
   if (!brandName) {
     navigate('/');
     return null;
@@ -321,6 +359,54 @@ export default function MoodBoard() {
           </div>
         ) : moodBoardData ? (
           <div className="grid grid-cols-1 gap-6">
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className="text-xl font-semibold"
+                    style={fonts?.primary ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    } : undefined}
+                  >
+                    Brand Logo
+                  </h2>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRegenerateLogo}
+                    >
+                      <SparkleIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex items-center justify-center p-8 bg-gray-50 dark:bg-gray-900 rounded-lg">
+                  <div className="flex flex-col items-center gap-6">
+                    <div className="w-24 h-24 bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm">
+                      {logoSvg && (
+                        <img
+                          src={logoSvg}
+                          alt="Brand Logo"
+                          className="w-full h-full object-contain"
+                        />
+                      )}
+                    </div>
+                    <h3
+                      className="text-3xl"
+                      style={fonts?.primary ? {
+                        fontFamily: fonts.primary.family,
+                        fontWeight: fonts.primary.weight,
+                        fontStyle: fonts.primary.style,
+                      } : undefined}
+                    >
+                      {brandName}
+                    </h3>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">

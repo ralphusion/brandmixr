@@ -9,14 +9,85 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import html2canvas from 'html2canvas';
 import { useFonts } from "@/contexts/FontContext";
+
+// Extended background styles including dark greys
+const BACKGROUNDS = [
+  {
+    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
+    text: "text-emerald-800 dark:text-emerald-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-slate-800 to-gray-900",
+    text: "text-gray-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900",
+    text: "text-blue-800 dark:text-blue-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-zinc-700 to-slate-800",
+    text: "text-zinc-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950 dark:to-yellow-900",
+    text: "text-amber-800 dark:text-amber-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-gray-800 to-neutral-900",
+    text: "text-gray-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900",
+    text: "text-rose-800 dark:text-rose-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-950 dark:to-purple-900",
+    text: "text-violet-800 dark:text-violet-100"
+  },
+  {
+    bg: "bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-purple-900 to-slate-900",
+    text: "text-purple-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900",
+    text: "text-lime-800 dark:text-lime-100"
+  },
+  {
+    bg: "bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-gray-900 via-gray-800 to-black",
+    text: "text-gray-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900",
+    text: "text-sky-800 dark:text-sky-100"
+  }
+];
+
+// Creative font styles for diverse brand presentations
+const FONT_STYLES = [
+  'font-serif italic tracking-wide font-medium',
+  'font-sans uppercase tracking-[0.2em] font-black',
+  'font-mono uppercase tracking-tight font-bold',
+  'font-serif normal-case tracking-normal font-light',
+  'font-sans small-caps tracking-widest font-extrabold',
+  'font-mono lowercase tracking-tight font-semibold',
+  'font-serif uppercase tracking-[0.15em] font-bold italic',
+  'font-sans normal-case tracking-wide font-thin',
+  'font-mono small-caps tracking-normal font-medium',
+  'font-serif uppercase tracking-[0.25em] font-black',
+  'font-sans italic tracking-wider font-extrabold',
+  'font-mono normal-case tracking-[0.1em] font-bold'
+];
+
+// Function to generate a random pleasing color
+const getRandomPleaseantColor = () => {
+  const hue = Math.floor(Math.random() * 360); // Random hue
+  const saturation = 60 + Math.floor(Math.random() * 20); // 60-80%
+  const lightness = 45 + Math.floor(Math.random() * 15); // 45-60%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
 
 const ICON_STYLES = {
   initials: [
@@ -49,54 +120,6 @@ const ICON_STYLES = {
     { value: 'decorative-ornate', label: 'Ornate Design' }
   ]
 };
-
-// Function to generate a random pleasing color
-const getRandomPleaseantColor = () => {
-  const hue = Math.floor(Math.random() * 360); // Random hue
-  const saturation = 60 + Math.floor(Math.random() * 20); // 60-80%
-  const lightness = 45 + Math.floor(Math.random() * 15); // 45-60%
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-};
-
-
-const BACKGROUNDS = [
-  {
-    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
-    text: "text-emerald-800 dark:text-emerald-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900",
-    text: "text-blue-800 dark:text-blue-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950 dark:to-yellow-900",
-    text: "text-amber-800 dark:text-amber-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900",
-    text: "text-rose-800 dark:text-rose-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-950 dark:to-purple-900",
-    text: "text-violet-800 dark:text-violet-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950 dark:to-gray-900",
-    text: "text-slate-800 dark:text-slate-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900",
-    text: "text-lime-800 dark:text-lime-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900",
-    text: "text-sky-800 dark:text-sky-100"
-  },
-  {
-    bg: "bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-950 dark:to-red-900",
-    text: "text-orange-800 dark:text-orange-100"
-  }
-];
 
 interface FontRecommendation {
   primary: {
@@ -242,7 +265,7 @@ export default function BrandVariations() {
       </div>
 
       <div className="mb-8">
-        <h1 
+        <h1
           className="text-3xl font-bold mb-6"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
@@ -303,7 +326,7 @@ export default function BrandVariations() {
 
       <AnimatePresence mode="wait">
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -311,6 +334,7 @@ export default function BrandVariations() {
           {BACKGROUNDS.map((style, index) => {
             const cardId = `variation-${index}`;
             const isSelected = selectedCardId === cardId;
+            const fontStyle = FONT_STYLES[index % FONT_STYLES.length];
 
             return (
               <motion.div
@@ -331,7 +355,7 @@ export default function BrandVariations() {
                   >
                     {logoSvg && (
                       <motion.div
-                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm"
+                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
                         whileHover={{ scale: 1.1 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
@@ -343,14 +367,9 @@ export default function BrandVariations() {
                       </motion.div>
                     )}
                     <motion.h3
-                      className={`text-3xl text-center ${style.text}`}
+                      className={`text-3xl text-center ${style.text} ${fontStyle}`}
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
-                      style={fonts?.primary ? {
-                        fontFamily: fonts.primary.family,
-                        fontWeight: fonts.primary.weight,
-                        fontStyle: fonts.primary.style,
-                      } : undefined}
                     >
                       {brandName}
                     </motion.h3>
