@@ -126,6 +126,15 @@ interface FontRecommendation {
   explanation: string;
 }
 
+interface FontStyle {
+  fontFamily: string;
+  fontWeight: string;
+  fontStyle: string;
+  textTransform: string;
+  textDecoration: string;
+  letterSpacing: string;
+}
+
 const BACKGROUNDS = [
   { bg: 'bg-blue-500 text-white', text: 'text-white' },
   { bg: 'bg-red-500 text-white', text: 'text-white' },
@@ -154,7 +163,7 @@ export default function MoodBoard() {
   const [iconStyle, setIconStyle] = useState<string>('initials-simple');
   const [iconColor, setIconColor] = useState("#000000");
   const [selectedBackground, setSelectedBackground] = useState<typeof BACKGROUNDS[0] | null>(null);
-  const [selectedFontStyle, setSelectedFontStyle] = useState<string>('');
+  const [selectedFontStyle, setSelectedFontStyle] = useState<FontStyle | null>(null);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -390,7 +399,7 @@ export default function MoodBoard() {
       setIconStyle(savedConfig.iconStyle);
       setIconColor(savedConfig.iconColor);
       setSelectedBackground(savedConfig.selectedBackground);
-      setSelectedFontStyle(savedConfig.fontStyle);
+      setSelectedFontStyle(JSON.parse(savedConfig.fontStyle));
     }
   }, []);
 
@@ -407,7 +416,6 @@ export default function MoodBoard() {
     }
   }, [brandName, iconStyle, iconColor]);
 
-  // Update handleRegenerateLogo function
   const handleRegenerateLogo = () => {
     if (!brandName) return;
 
@@ -437,8 +445,8 @@ export default function MoodBoard() {
     const textDecoration = TEXT_DECORATIONS[Math.floor(Math.random() * TEXT_DECORATIONS.length)];
     const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
 
-    // Create font style string with inline styles
-    const newFontStyle = {
+    // Create font style object
+    const newFontStyle: FontStyle = {
       fontFamily: randomFont.family,
       fontWeight: randomFont.weight,
       fontStyle,
@@ -451,7 +459,7 @@ export default function MoodBoard() {
     setIconStyle(newStyle);
     setIconColor(newIconColor);
     setSelectedBackground(newBackground);
-    setSelectedFontStyle(JSON.stringify(newFontStyle));
+    setSelectedFontStyle(newFontStyle);
 
     // Load the font
     const fontSettings: FontSettings = {
@@ -475,7 +483,7 @@ export default function MoodBoard() {
       setIconStyle(savedConfig.iconStyle);
       setIconColor(savedConfig.iconColor);
       setSelectedBackground(savedConfig.selectedBackground);
-      setSelectedFontStyle(savedConfig.fontStyle);
+      setSelectedFontStyle(JSON.parse(savedConfig.fontStyle));
     }
   };
 
@@ -615,7 +623,6 @@ export default function MoodBoard() {
                     </Tooltip>
                   </div>
                 </div>
-                {/* Update the logo container section JSX */}
                 <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
                   <div className="flex flex-col items-center gap-6 logo-container bg-transparent">
                     <div className="w-24 h-24 bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-sm">
@@ -629,11 +636,11 @@ export default function MoodBoard() {
                     </div>
                     <h3
                       className={`text-3xl ${selectedBackground?.text || ''}`}
-                      style={selectedFontStyle ? JSON.parse(selectedFontStyle) : fonts?.primary ? {
+                      style={selectedFontStyle || (fonts?.primary ? {
                         fontFamily: fonts.primary.family,
                         fontWeight: fonts.primary.weight,
                         fontStyle: fonts.primary.style,
-                      } : undefined}
+                      } : undefined)}
                     >
                       {brandName}
                     </h3>
