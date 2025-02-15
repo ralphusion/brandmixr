@@ -7,7 +7,7 @@ export function Logo({ className = "" }: { className?: string }) {
         <Text className="w-6 h-6 text-primary-foreground" />
       </div>
       <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/90 bg-clip-text text-transparent dark:from-primary dark:to-primary/90 dark:text-primary-foreground/90">
-        BrandEzee
+        BrandMixr
       </span>
     </div>
   );
