@@ -83,6 +83,10 @@ export default function MoodBoard() {
         logging: true, // Enable logging for debugging
         allowTaint: true,
         foreignObjectRendering: true,
+        width: moodBoardRef.current.offsetWidth,
+        height: moodBoardRef.current.offsetHeight,
+        windowWidth: moodBoardRef.current.scrollWidth,
+        windowHeight: moodBoardRef.current.scrollHeight,
       });
 
       if (format === 'png') {
@@ -167,9 +171,9 @@ export default function MoodBoard() {
           <Skeleton className="h-[200px] rounded-lg" />
         </div>
       ) : moodBoardData ? (
-        <div ref={moodBoardRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div ref={moodBoardRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-background rounded-lg">
           {/* Color Palette */}
-          <Card>
+          <Card className="shadow-md">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
               <div className="flex flex-wrap gap-4">
@@ -195,7 +199,7 @@ export default function MoodBoard() {
           </Card>
 
           {/* Keywords */}
-          <Card>
+          <Card className="shadow-md">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
               <div className="flex flex-wrap gap-3">
@@ -215,7 +219,7 @@ export default function MoodBoard() {
           </Card>
 
           {/* Description */}
-          <Card className="md:col-span-2">
+          <Card className="md:col-span-2 shadow-md">
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Brand Mood</h2>
               <p className="text-muted-foreground leading-relaxed">
@@ -232,12 +236,12 @@ export default function MoodBoard() {
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: index * 0.2 }}
             >
-              <Card>
+              <Card className="shadow-md">
                 <CardContent className="p-6">
                   <img
                     src={imageUrl}
                     alt={`Mood image ${index + 1}`}
-                    className="w-full h-48 object-cover rounded-lg"
+                    className="w-full h-64 object-contain rounded-lg bg-muted/50"
                   />
                 </CardContent>
               </Card>
