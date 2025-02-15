@@ -83,8 +83,8 @@ export function generateSimpleLogo(config: LogoConfig): string {
   const primary = getRandomElement(colors.primary);
   const accent = getRandomElement(colors.accent);
   const icon = iconService.getRandomIcon(industry);
-  const weight = getRandomElement(font.weights);
-  const styleAttr = getRandomElement(font.styles);
+  const weight = font.weights[0]; // We now get a single weight from the font service
+  const styleAttr = font.styles[0]; // We now get a single style from the font service
 
   // Create an enhanced SVG with advanced text styling
   const svgContent = `
@@ -122,6 +122,5 @@ export function generateSimpleLogo(config: LogoConfig): string {
       </g>
     </svg>`;
 
-  const base64 = Buffer.from(svgContent).toString('base64');
-  return `data:image/svg+xml;base64,${base64}`;
+  return `data:image/svg+xml;base64,${Buffer.from(svgContent).toString('base64')}`;
 }

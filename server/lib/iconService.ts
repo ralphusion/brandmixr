@@ -1,4 +1,3 @@
-// Server-side implementation of icon service with Phosphor icons
 import type { Typography, IconCategory, IconStyle } from './types';
 
 // High-quality Phosphor icon paths for different categories
@@ -52,8 +51,9 @@ const PROFESSIONAL_ICONS = {
   }
 };
 
-// Keep track of used icons globally to prevent any repetition
+// Keep track of used icons and fonts globally for the current session
 const usedIcons = new Set<string>();
+const usedFontStyles = new Set<string>();
 
 // High-quality typography styles
 const EXTENDED_TYPOGRAPHY = [
@@ -68,7 +68,6 @@ function getRandomElement<T>(array: T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-// Get all available icons for a category
 function getAllIcons(categoryKey: keyof typeof PROFESSIONAL_ICONS): string[] {
   const category = PROFESSIONAL_ICONS[categoryKey];
   const allIcons: string[] = [];
@@ -80,9 +79,29 @@ function getAllIcons(categoryKey: keyof typeof PROFESSIONAL_ICONS): string[] {
   return allIcons;
 }
 
+function generateUniqueFontStyle(): Typography {
+  const font = getRandomElement(EXTENDED_TYPOGRAPHY);
+  const weight = getRandomElement(font.weights);
+  const style = getRandomElement(font.styles);
+
+  const fontStyle = `${font.family}-${weight}-${style}`;
+
+  // If this combination is already used, try again
+  if (usedFontStyles.has(fontStyle)) {
+    // If all font styles are used, clear the set
+    if (usedFontStyles.size >= EXTENDED_TYPOGRAPHY.length * 5) { // Approximate max combinations
+      usedFontStyles.clear();
+    }
+    return generateUniqueFontStyle();
+  }
+
+  usedFontStyles.add(fontStyle);
+  return { family: font.family, weights: [weight], styles: [style] };
+}
+
 export const iconService = {
   getRandomFont(): Typography {
-    return getRandomElement(EXTENDED_TYPOGRAPHY);
+    return generateUniqueFontStyle();
   },
 
   getRandomIcon(industry: string): string {
@@ -104,7 +123,7 @@ export const iconService = {
     // Filter out already used icons
     const availableIcons = allIcons.filter(icon => !usedIcons.has(icon));
 
-    // If all icons have been used, clear the used icons set and try again
+    // If all icons have been used, clear the used icons set
     if (availableIcons.length === 0) {
       usedIcons.clear();
       return this.getRandomIcon(industry);
@@ -117,9 +136,10 @@ export const iconService = {
     return icon;
   },
 
-  // Clear the used icons cache (useful for new generation sessions)
-  clearUsedIcons() {
+  // Clear the used icons and font styles cache (useful for new generation sessions)
+  clearUsedCache() {
     usedIcons.clear();
+    usedFontStyles.clear();
   }
 };
 

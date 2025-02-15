@@ -58,6 +58,11 @@ export default function LogoStudio() {
   }
 
   const handleGenerateLogo = async (isMore = false) => {
+    if (!isMore) {
+      // Clear the icon and font cache when generating a new set
+      await apiRequest("POST", "/api/clear-icon-cache");
+    }
+
     setIsGenerating(true);
     try {
       const response = await apiRequest("POST", "/api/generate-logo", {
@@ -72,7 +77,7 @@ export default function LogoStudio() {
       if (data.logos) {
         if (isMore) {
           setGeneratedLogos(prev => [...prev, ...data.logos]);
-          setHasMore(data.logos.length === 15); // If we get less than 15, we've reached the end
+          setHasMore(data.logos.length === 15);
         } else {
           setGeneratedLogos(data.logos);
           setHasMore(true);
@@ -164,8 +169,8 @@ export default function LogoStudio() {
             </div>
 
             <div className="flex items-end">
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 size="lg"
                 onClick={() => handleGenerateLogo(false)}
                 disabled={isGenerating}
@@ -198,7 +203,7 @@ export default function LogoStudio() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card 
+                    <Card
                       className="overflow-hidden"
                       style={{ backgroundColor: generatePastelColor() }}
                     >
