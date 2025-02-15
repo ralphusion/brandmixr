@@ -42,7 +42,10 @@ export function generateSimpleLogo(config: LogoConfig): string {
     generateGeometricLogo(brandName, colors)
   ];
 
-  return variations[Math.floor(Math.random() * variations.length)];
+  const svgContent = variations[Math.floor(Math.random() * variations.length)];
+  // Convert SVG to base64 and return as data URL
+  const base64 = Buffer.from(svgContent).toString('base64');
+  return `data:image/svg+xml;base64,${base64}`;
 }
 
 function generateTextOnlyLogo(text: string, color: string): string {
