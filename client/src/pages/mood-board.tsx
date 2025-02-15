@@ -904,20 +904,19 @@ export default function MoodBoard() {
                           <Skeleton className="w-full h-full" />
                         </motion.div>
                       ) : (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
-                        >
-                          <img
-                            src={imageUrl}
-                            alt={`Mood image ${index+ 1}`}
-                            className="w-full h-full object-contain"
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        <motion.div                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
+                    >
+                      <img
+                        src={imageUrl}
+                        alt={`Mood image ${index+ 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
                   </CardContent>
                 </Card>
               </motion.div>
