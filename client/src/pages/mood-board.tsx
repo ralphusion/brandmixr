@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Copy, Download, Type } from "lucide-react";
+import { ArrowLeft, Copy, Download, Type, RotateCcw } from "lucide-react";
 import { SparkleIcon } from "@/components/SparkleIcon";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -57,8 +57,8 @@ const BACKGROUNDS = [
 ];
 
 const getRandomPleaseantColor = () => {
-    const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
-    return BACKGROUNDS[randomIndex].bg;
+  const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+  return BACKGROUNDS[randomIndex].bg;
 }
 
 
@@ -360,6 +360,45 @@ export default function MoodBoard() {
     }
   };
 
+  const handleDownloadLogo = async () => {
+    if (!brandName) return;
+
+    const logoElement = document.querySelector('.logo-container') as HTMLElement;
+    if (!logoElement) return;
+
+    try {
+      const canvas = await html2canvas(logoElement, {
+        backgroundColor: null,
+        scale: 2,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-logo.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error during logo download:", error);
+      toast({
+        title: "Download failed",
+        description: "Failed to download the logo",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleResetPalette = () => {
+    if (moodBoardData?.colors) {
+      setColors(moodBoardData.colors);
+      toast({
+        title: "Colors Reset",
+        description: "Color palette has been reset to original",
+      });
+    }
+  };
+
   if (!brandName) {
     navigate('/');
     return null;
@@ -422,6 +461,19 @@ export default function MoodBoard() {
                     Brand Logo
                   </h2>
                   <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleDownloadLogo}
+                          title="Download logo as PNG"
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Download logo as PNG</TooltipContent>
+                    </Tooltip>
                     <Button
                       variant="ghost"
                       size="sm"
@@ -436,12 +488,12 @@ export default function MoodBoard() {
                       onClick={handleResetLogo}
                       title="Reset to selected logo"
                     >
-                      <ArrowLeft className="h-4 w-4" />
+                      <RotateCcw className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
                 <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
-                  <div className="flex flex-col items-center gap-6">
+                  <div className="flex flex-col items-center gap-6 logo-container">
                     <div className="w-24 h-24 bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-sm">
                       {logoSvg && (
                         <img
@@ -478,14 +530,34 @@ export default function MoodBoard() {
                   >
                     Color Palette
                   </h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleRegenerate('colors')}
-                    disabled={regeneratingSection?.type === 'colors'}
-                  >
-                    <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleResetPalette}
+                          disabled={regeneratingSection?.type === 'colors'}
+                        >
+                          <RotateCcw className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Reset to original colors</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRegenerate('colors')}
+                          disabled={regeneratingSection?.type === 'colors'}
+                        >
+                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Generate new colors</TooltipContent>
+                    </Tooltip>
+                  </div>
                 </div>
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
