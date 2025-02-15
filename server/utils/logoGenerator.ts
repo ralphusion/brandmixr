@@ -75,10 +75,24 @@ function getRandomElement<T>(array: T[]): T {
 export function generateSimpleLogo(config: LogoConfig): string {
   const { brandName, style, industry } = config;
   const logoStyle = mapStyleToLogoStyle(style);
+  const colors = DEFAULT_COLORS[logoStyle];
 
-  // Get icon path only from the icon service
+  // Get icon path and colors
   const iconPath = iconService.getRandomIcon(industry);
+  const primaryColor = getRandomElement(colors.primary);
+  const accentColor = getRandomElement(colors.accent);
 
-  // Return the raw SVG path for direct use in the component
-  return iconPath;
+  // Return the SVG path with styling
+  return `
+    <path 
+      d="${iconPath}"
+      fill="url(#gradient-${primaryColor.substring(1)})"
+    />
+    <defs>
+      <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+        <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
+      </linearGradient>
+    </defs>
+  `;
 }
