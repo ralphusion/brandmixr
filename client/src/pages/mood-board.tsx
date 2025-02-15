@@ -2,7 +2,8 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Copy, RotateCw, Download, Type } from "lucide-react";
+import { ArrowLeft, Copy, Download, Type } from "lucide-react";
+import { SiOpenai } from "react-icons/si";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -50,6 +51,10 @@ export default function MoodBoard() {
   const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [regeneratingSection, setRegeneratingSection] = useState<{
+    type: 'keywords' | 'mood' | 'image';
+    index?: number;
+  } | null>(null);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -84,7 +89,6 @@ export default function MoodBoard() {
     }
   }, [moodBoardData?.colors]);
 
-  // Track image loading
   useEffect(() => {
     if (!moodBoardData?.images?.length) return;
 
@@ -149,6 +153,8 @@ export default function MoodBoard() {
   const handleRegenerate = async (section: 'keywords' | 'mood' | 'image', imageIndex?: number) => {
     if (!brandName || !formData.industry || !formData.style) return;
 
+    setRegeneratingSection({ type: section, index: imageIndex });
+
     try {
       let endpoint = '';
       let updatedData;
@@ -159,7 +165,6 @@ export default function MoodBoard() {
           const keywordsResponse = await apiRequest("POST", endpoint);
           updatedData = await keywordsResponse.json();
 
-          // Update only keywords in the cached data
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
             ...oldData,
             keywords: updatedData.keywords,
@@ -171,7 +176,6 @@ export default function MoodBoard() {
           const moodResponse = await apiRequest("POST", endpoint);
           updatedData = await moodResponse.json();
 
-          // Update only mood description in the cached data
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
             ...oldData,
             moodDescription: updatedData.moodDescription,
@@ -188,7 +192,6 @@ export default function MoodBoard() {
           });
           updatedData = await imageResponse.json();
 
-          // Update only the specific image in the cached data
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
             const newImages = [...oldData.images];
             newImages[imageIndex] = updatedData.image;
@@ -210,6 +213,8 @@ export default function MoodBoard() {
         description: "Failed to regenerate content",
         variant: "destructive",
       });
+    } finally {
+      setRegeneratingSection(null);
     }
   };
 
@@ -332,8 +337,9 @@ export default function MoodBoard() {
                     variant="ghost"
                     size="sm"
                     onClick={() => handleRegenerate('keywords')}
+                    disabled={regeneratingSection?.type === 'keywords'}
                   >
-                    <RotateCw className="h-4 w-4" />
+                    <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
                 <ColorPaletteEditor
@@ -369,33 +375,59 @@ export default function MoodBoard() {
                       </TooltipTrigger>
                       <TooltipContent>Copy keywords</TooltipContent>
                     </Tooltip>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRegenerate('keywords')}
-                    >
-                      <RotateCw className="h-4 w-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRegenerate('keywords')}
+                          disabled={regeneratingSection?.type === 'keywords'}
+                        >
+                          <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Regenerate with AI</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-3">
-                  {moodBoardData.keywords.map((keyword, index) => (
-                    <motion.span
-                      key={index}
-                      className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
-                      initial={{ scale: 0.9, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: index * 0.1 }}
-                      style={fonts?.secondary ? {
-                        fontFamily: fonts.secondary.family,
-                        fontWeight: fonts.secondary.weight,
-                        fontStyle: fonts.secondary.style,
-                      } : undefined}
+                <AnimatePresence mode="wait">
+                  {regeneratingSection?.type === 'keywords' ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-wrap gap-3"
                     >
-                      {keyword}
-                    </motion.span>
-                  ))}
-                </div>
+                      {Array(5).fill(0).map((_, index) => (
+                        <Skeleton key={index} className="h-8 w-24 rounded-full" />
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="flex flex-wrap gap-3"
+                    >
+                      {moodBoardData.keywords.map((keyword, index) => (
+                        <motion.span
+                          key={index}
+                          className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: index * 0.1 }}
+                          style={fonts?.secondary ? {
+                            fontFamily: fonts.secondary.family,
+                            fontWeight: fonts.secondary.weight,
+                            fontStyle: fonts.secondary.style,
+                          } : undefined}
+                        >
+                          {keyword}
+                        </motion.span>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </CardContent>
             </Card>
 
@@ -425,25 +457,49 @@ export default function MoodBoard() {
                       </TooltipTrigger>
                       <TooltipContent>Copy description</TooltipContent>
                     </Tooltip>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRegenerate('mood')}
-                    >
-                      <RotateCw className="h-4 w-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRegenerate('mood')}
+                          disabled={regeneratingSection?.type === 'mood'}
+                        >
+                          <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'mood' ? 'animate-spin' : ''}`} />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Regenerate with AI</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
-                <p 
-                  className="text-muted-foreground leading-relaxed"
-                  style={fonts?.secondary ? {
-                    fontFamily: fonts.secondary.family,
-                    fontWeight: fonts.secondary.weight,
-                    fontStyle: fonts.secondary.style,
-                  } : undefined}
-                >
-                  {moodBoardData.moodDescription}
-                </p>
+                <AnimatePresence mode="wait">
+                  {regeneratingSection?.type === 'mood' ? (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="space-y-2"
+                    >
+                      <Skeleton className="h-4 w-full" />
+                      <Skeleton className="h-4 w-5/6" />
+                      <Skeleton className="h-4 w-4/6" />
+                    </motion.div>
+                  ) : (
+                    <motion.p 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="text-muted-foreground leading-relaxed"
+                      style={fonts?.secondary ? {
+                        fontFamily: fonts.secondary.family,
+                        fontWeight: fonts.secondary.weight,
+                        fontStyle: fonts.secondary.style,
+                      } : undefined}
+                    >
+                      {moodBoardData.moodDescription}
+                    </motion.p>
+                  )}
+                </AnimatePresence>
               </CardContent>
             </Card>
 
@@ -469,21 +525,45 @@ export default function MoodBoard() {
                         </TooltipTrigger>
                         <TooltipContent>Download image</TooltipContent>
                       </Tooltip>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRegenerate('image', index)}
-                      >
-                        <RotateCw className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleRegenerate('image', index)}
+                            disabled={regeneratingSection?.type === 'image' && regeneratingSection.index === index}
+                          >
+                            <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'image' && regeneratingSection.index === index ? 'animate-spin' : ''}`} />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>Regenerate with AI</TooltipContent>
+                      </Tooltip>
                     </div>
-                    <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
-                      <img
-                        src={imageUrl}
-                        alt={`Mood image ${index + 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
+                    <AnimatePresence mode="wait">
+                      {regeneratingSection?.type === 'image' && regeneratingSection.index === index ? (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center"
+                        >
+                          <Skeleton className="w-full h-full" />
+                        </motion.div>
+                      ) : (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={`Mood image ${index + 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </CardContent>
                 </Card>
               </motion.div>
