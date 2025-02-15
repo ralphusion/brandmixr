@@ -31,12 +31,28 @@ const DEFAULT_COLORS = {
   }
 };
 
-function generatePastelColor(): string {
-  const hue = Math.floor(Math.random() * 360);
-  const saturation = 25 + Math.floor(Math.random() * 25);
-  const lightness = 80 + Math.floor(Math.random() * 10);
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-}
+// Advanced text effects for different styles
+const TEXT_EFFECTS = {
+  modern: {
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    fontVariationSettings: "'wght' 600"
+  },
+  classic: {
+    letterSpacing: '0.02em',
+    fontStyle: 'italic',
+    fontVariationSettings: "'wght' 500"
+  },
+  minimal: {
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    fontVariationSettings: "'wght' 300"
+  },
+  bold: {
+    letterSpacing: '0.03em',
+    fontVariationSettings: "'wght' 800"
+  }
+};
 
 function mapStyleToLogoStyle(style: string): LogoStyle {
   const styleMap: { [key: string]: LogoStyle } = {
@@ -62,15 +78,15 @@ export function generateSimpleLogo(config: LogoConfig): string {
   const logoStyle = mapStyleToLogoStyle(style);
   const colors = DEFAULT_COLORS[logoStyle];
   const font = iconService.getRandomFont();
+  const textEffect = TEXT_EFFECTS[logoStyle];
 
-  // Generate logo with better alignment and spacing
   const primary = getRandomElement(colors.primary);
   const accent = getRandomElement(colors.accent);
   const icon = iconService.getRandomIcon(industry);
   const weight = getRandomElement(font.weights);
   const styleAttr = getRandomElement(font.styles);
 
-  // Create a horizontally aligned logo with proper spacing
+  // Create an enhanced SVG with advanced text styling
   const svgContent = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
       <defs>
@@ -78,6 +94,9 @@ export function generateSimpleLogo(config: LogoConfig): string {
           <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
           <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
         </linearGradient>
+        <filter id="shadow">
+          <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.3"/>
+        </filter>
       </defs>
       <g transform="translate(30, 35)">
         <path d="${icon}" 
@@ -85,15 +104,19 @@ export function generateSimpleLogo(config: LogoConfig): string {
               transform="scale(2.5)" 
               stroke="${accent}" 
               stroke-width="0.5"
+              filter="url(#shadow)"
         />
         <text x="95" y="25" 
-              font-family="${font.family}, Arial, sans-serif" 
+              font-family="${font.family}, system-ui, sans-serif" 
               font-size="38"
               font-weight="${weight}"
               font-style="${styleAttr}"
               fill="${primary}"
-              letter-spacing="0.02em"
-              dominant-baseline="central">
+              letter-spacing="${textEffect.letterSpacing}"
+              text-transform="${textEffect.textTransform || 'none'}"
+              style="font-variation-settings: ${textEffect.fontVariationSettings}"
+              dominant-baseline="central"
+              filter="url(#shadow)">
               ${brandName}
         </text>
       </g>
