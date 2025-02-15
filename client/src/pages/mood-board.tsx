@@ -164,6 +164,8 @@ export default function MoodBoard() {
   const [iconColor, setIconColor] = useState("#000000");
   const [selectedBackground, setSelectedBackground] = useState<typeof BACKGROUNDS[0] | null>(null);
   const [selectedFontStyle, setSelectedFontStyle] = useState<FontStyle | null>(null);
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null); // Added state for selected card
+
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -394,12 +396,13 @@ export default function MoodBoard() {
   };
 
   useEffect(() => {
-    const savedConfig = JSON.parse(sessionStorage.getItem('selectedLogoConfig') || 'null');
+    const savedConfig = sessionStorage.getItem('selectedLogoConfig');
     if (savedConfig) {
-      setIconStyle(savedConfig.iconStyle);
-      setIconColor(savedConfig.iconColor);
-      setSelectedBackground(savedConfig.selectedBackground);
-      setSelectedFontStyle(savedConfig.fontStyle);
+      const parsedConfig = JSON.parse(savedConfig);
+      setIconStyle(parsedConfig.iconStyle);
+      setIconColor(parsedConfig.iconColor);
+      setSelectedBackground(parsedConfig.selectedBackground);
+      setSelectedFontStyle(parsedConfig.fontStyle);
     }
   }, []);
 
@@ -478,12 +481,13 @@ export default function MoodBoard() {
   };
 
   const handleResetLogo = () => {
-    const savedConfig = JSON.parse(sessionStorage.getItem('selectedLogoConfig') || 'null');
+    const savedConfig = sessionStorage.getItem('selectedLogoConfig');
     if (savedConfig) {
-      setIconStyle(savedConfig.iconStyle);
-      setIconColor(savedConfig.iconColor);
-      setSelectedBackground(savedConfig.selectedBackground);
-      setSelectedFontStyle(JSON.parse(savedConfig.fontStyle));
+      const parsedConfig = JSON.parse(savedConfig);
+      setIconStyle(parsedConfig.iconStyle);
+      setIconColor(parsedConfig.iconColor);
+      setSelectedBackground(parsedConfig.selectedBackground);
+      setSelectedFontStyle(parsedConfig.fontStyle); 
     }
   };
 
@@ -517,6 +521,18 @@ export default function MoodBoard() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleCardSelect = (cardId: string) => {
+    setSelectedCardId(cardId);
+    // Store the selected logo configuration
+    const selectedStyle = BACKGROUNDS[parseInt(cardId.split('-')[1])];
+    sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
+      iconStyle,
+      iconColor,
+      selectedBackground: selectedStyle,
+      fontStyle: selectedFontStyle 
+    }));
   };
 
 
@@ -912,18 +928,18 @@ export default function MoodBoard() {
                         </motion.div>
                       ) : (
                         <motion.div                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Mood image ${index+ 1}`}
-                        className="w-full h-full object-contain"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
+                        >
+                          <img
+                            src={imageUrl}
+                            alt={`Mood image ${index+ 1}`}
+                            className="w-full h-full object-contain"
+                          />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </CardContent>
                 </Card>
               </motion.div>
