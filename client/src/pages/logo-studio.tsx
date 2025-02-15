@@ -185,7 +185,7 @@ export default function LogoStudio() {
       </Card>
 
       {/* Generated Logos Section */}
-      <Card className="shadow-md">
+      <Card className="shadow-md mb-8">
         <CardContent className="p-6">
           <h2 className="text-2xl font-bold mb-6">Generated Logos</h2>
           {generatedLogos.length > 0 ? (
@@ -256,6 +256,26 @@ export default function LogoStudio() {
           )}
         </CardContent>
       </Card>
+
+      {/* Generate More Button */}
+      <Button
+        className="w-full mb-8"
+        size="lg"
+        onClick={() => handleGenerateLogo(true)}
+        disabled={isGenerating}
+      >
+        {isGenerating ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Generating More Logos...
+          </>
+        ) : (
+          <>
+            <SparkleIcon className="mr-2 h-4 w-4" />
+            Generate More Logo Variations
+          </>
+        )}
+      </Button>
     </div>
   );
 }

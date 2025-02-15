@@ -90,9 +90,9 @@ function generateModernLogo(text: string, colors: any, industry: string, font: T
         <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
       </linearGradient>
     </defs>
-    <g transform="translate(30, 20)">
-      <path d="${icon}" fill="url(#grad1)" transform="scale(2)" stroke="${accent}" stroke-width="0.5"/>
-      <text x="80" y="45" 
+    <g transform="translate(30, 25)">
+      <path d="${icon}" fill="url(#grad1)" transform="scale(2.5)" stroke="${accent}" stroke-width="0.5"/>
+      <text x="100" y="45" 
             font-family="${font.family}, Arial, sans-serif" 
             font-size="38"
             font-weight="${weight}"
