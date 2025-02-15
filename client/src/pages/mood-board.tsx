@@ -45,17 +45,12 @@ type RegenerationSection = {
   index?: number;
 };
 
-const BACKGROUNDS = [
-  { bg: 'bg-blue-500 text-white', text: 'text-white' },
-  { bg: 'bg-red-500 text-white', text: 'text-white' },
-  { bg: 'bg-green-500 text-white', text: 'text-white' },
-  { bg: 'bg-yellow-500 text-black', text: 'text-black' },
-  { bg: 'bg-purple-500 text-white', text: 'text-white' },
-];
+//const BACKGROUNDS = [ ... ]; //Removed as not used after changes
 
 const getRandomPleaseantColor = () => {
-  const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
-  return BACKGROUNDS[randomIndex].bg;
+  //const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length); //Removed as not used after changes
+  //return BACKGROUNDS[randomIndex].bg; //Removed as not used after changes
+  return 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800'; // Default for now.  Could be improved.
 }
 
 
@@ -92,18 +87,16 @@ const ICON_STYLES = {
 };
 
 const FONT_FAMILIES = [
-  { family: 'Playfair Display', style: 'normal', weight: '700' },
-  { family: 'Montserrat', style: 'normal', weight: '600' },
-  { family: 'Roboto Slab', style: 'normal', weight: '500' },
+  { family: 'Montserrat', style: 'normal', weight: '700' },
+  { family: 'Inter', style: 'normal', weight: '600' },
   { family: 'Poppins', style: 'normal', weight: '700' },
-  { family: 'Lora', style: 'italic', weight: '600' },
-  { family: 'Merriweather', style: 'normal', weight: '900' },
   { family: 'Source Sans Pro', style: 'normal', weight: '700' },
-  { family: 'Open Sans', style: 'normal', weight: '800' },
-  { family: 'Raleway', style: 'normal', weight: '700' },
-  { family: 'Nunito', style: 'normal', weight: '800' },
-  { family: 'Work Sans', style: 'normal', weight: '700' },
-  { family: 'DM Serif Display', style: 'normal', weight: '400' }
+  { family: 'Nunito Sans', style: 'normal', weight: '800' },
+  { family: 'Work Sans', style: 'normal', weight: '600' },
+  { family: 'Open Sans', style: 'normal', weight: '700' },
+  { family: 'Roboto', style: 'normal', weight: '700' },
+  { family: 'SF Pro Display', style: 'normal', weight: '600' },
+  { family: 'Raleway', style: 'normal', weight: '700' }
 ];
 
 const TEXT_TRANSFORMS = [
@@ -114,18 +107,16 @@ const TEXT_TRANSFORMS = [
 ];
 
 const FONT_STYLES_ARRAY = [
-  'font-serif italic tracking-wide font-medium',
+  'font-sans tracking-wide font-bold',
   'font-sans uppercase tracking-[0.2em] font-black',
-  'font-mono uppercase tracking-tight font-bold',
-  'font-serif normal-case tracking-normal font-light',
-  'font-sans small-caps tracking-widest font-extrabold',
-  'font-mono lowercase tracking-tight font-semibold',
-  'font-serif uppercase tracking-[0.15em] font-bold italic',
-  'font-sans normal-case tracking-wide font-thin',
-  'font-mono small-caps tracking-normal font-medium',
-  'font-serif uppercase tracking-[0.25em] font-black',
-  'font-sans italic tracking-wider font-extrabold',
-  'font-mono normal-case tracking-[0.1em] font-bold'
+  'font-sans tracking-tight font-bold',
+  'font-sans tracking-normal font-semibold',
+  'font-sans uppercase tracking-widest font-extrabold',
+  'font-sans tracking-tight font-bold',
+  'font-sans uppercase tracking-[0.15em] font-bold',
+  'font-sans tracking-wide font-medium',
+  'font-sans tracking-normal font-semibold',
+  'font-sans uppercase tracking-[0.25em] font-black'
 ];
 
 const FONT_STYLES = [
@@ -191,6 +182,25 @@ interface FontStyle {
 }
 
 
+const CARD_GRADIENTS = [
+  // Professional & Modern
+  'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800',
+  'bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700',
+  'bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700',
+  // Soft & Elegant
+  'bg-gradient-to-br from-rose-400 via-pink-400 to-rose-500',
+  'bg-gradient-to-br from-violet-500 via-purple-500 to-violet-600',
+  'bg-gradient-to-br from-sky-400 via-blue-400 to-sky-500',
+  // Rich & Deep
+  'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900',
+  'bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800',
+  'bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800',
+  // Pastel & Subtle
+  'bg-gradient-to-br from-blue-100 via-indigo-200 to-blue-300',
+  'bg-gradient-to-br from-emerald-100 via-teal-200 to-emerald-300',
+  'bg-gradient-to-br from-rose-100 via-pink-200 to-rose-300'
+];
+
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
@@ -204,11 +214,7 @@ export default function MoodBoard() {
   const [logoSvg, setLogoSvg] = useState<string>("");
   const [iconStyle, setIconStyle] = useState<IconStyle>('initials-simple');
   const [iconColor, setIconColor] = useState("#000000");
-  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>([
-    'bg-gradient-to-br from-blue-50 to-indigo-100',
-    'bg-gradient-to-br from-emerald-50 to-teal-100',
-    'bg-gradient-to-br from-rose-50 to-pink-100'
-  ]);
+  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>(CARD_GRADIENTS.slice(0,3));
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
 
@@ -512,30 +518,27 @@ export default function MoodBoard() {
       setIconStyle(newStyle);
       setIconColor(newIconColor);
 
-      // Generate three different font styles
+      // Generate three different font styles using the updated FONT_FAMILIES
       const newFontStyles = Array(3).fill(null).map(() => {
         const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
         return {
           fontFamily: randomFont.family,
           fontWeight: randomFont.weight,
-          fontStyle: FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)],
+          fontStyle: 'normal', // Always normal, no italics
           textTransform: TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)],
           letterSpacing: LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
         };
       });
 
       // Generate new background gradients
+      const usedGradients = new Set();
       const newBackgrounds = Array(3).fill(null).map(() => {
-        const gradients = [
-          'bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900',
-          'bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900',
-          'bg-gradient-to-br from-amber-50 to-yellow-100 dark:from-amber-950 dark:to-yellow-900',
-          'bg-gradient-to-br from-rose-50 to-pink-100 dark:from-rose-950 dark:to-pink-900',
-          'bg-gradient-to-br from-violet-50 to-purple-100 dark:from-violet-950 dark:to-purple-900',
-          'bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900',
-          'bg-gradient-to-br from-sky-50 to-cyan-100 dark:from-sky-950 dark:to-cyan-900'
-        ];
-        return gradients[Math.floor(Math.random() * gradients.length)];
+        let gradient;
+        do {
+          gradient = CARD_GRADIENTS[Math.floor(Math.random() * CARD_GRADIENTS.length)];
+        } while (usedGradients.has(gradient));
+        usedGradients.add(gradient);
+        return gradient;
       });
 
       // Store font styles in session
@@ -664,7 +667,7 @@ export default function MoodBoard() {
                 >
                   {logoSvg && (
                     <motion.div
-                      className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white p-2 shadow-sm"
+                      className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 p-2 shadow-sm"
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
@@ -676,14 +679,13 @@ export default function MoodBoard() {
                     </motion.div>
                   )}
                   <motion.h3
-                    className="text-3xl text-center"
+                    className="text-3xl text-center text-white"
                     style={{
                       fontFamily: fontStyle?.fontFamily,
                       fontWeight: fontStyle?.fontWeight,
-                      fontStyle: fontStyle?.fontStyle,
+                      fontStyle: 'normal',
                       textTransform: fontStyle?.textTransform,
                       letterSpacing: fontStyle?.letterSpacing,
-                      color: iconColor
                     }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
