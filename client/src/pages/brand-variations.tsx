@@ -142,7 +142,7 @@ export default function BrandVariations() {
     queryFn: async () => {
       const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
       const response = await apiRequest(
-        "GET", 
+        "GET",
         `/api/font-recommendations?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}`
       );
       return response.json();
@@ -394,60 +394,62 @@ export default function BrandVariations() {
       </AnimatePresence>
 
       <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
+        <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+          <DialogHeader className="flex-shrink-0">
             <DialogTitle>AI-Recommended Font Combinations</DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 gap-6 py-4">
-            {loadingFonts ? (
-              <p className="text-center text-muted-foreground">
-                Generating font recommendations...
-              </p>
-            ) : (
-              fontRecommendations.map((recommendation, index) => (
-                <Card
-                  key={index}
-                  className={`cursor-pointer transition-all ${
-                    selectedFont === recommendation ? 'ring-2 ring-primary' : ''
-                  }`}
-                  onClick={() => setSelectedFont(recommendation)}
-                >
-                  <CardContent className="p-6">
-                    <div className="mb-4">
-                      <h3
-                        className="text-3xl mb-2"
-                        style={{
-                          fontFamily: recommendation.primary.family,
-                          fontWeight: recommendation.primary.weight,
-                          fontStyle: recommendation.primary.style,
-                        }}
-                      >
-                        {brandName}
-                      </h3>
-                      <p
-                        className="text-base"
-                        style={{
-                          fontFamily: recommendation.secondary.family,
-                          fontWeight: recommendation.secondary.weight,
-                          fontStyle: recommendation.secondary.style,
-                        }}
-                      >
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                      </p>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
-                      <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
-                      <p className="mt-2">{recommendation.explanation}</p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+          <div className="flex-1 overflow-y-auto pr-2">
+            <div className="grid grid-cols-1 gap-6 py-4">
+              {loadingFonts ? (
+                <p className="text-center text-muted-foreground">
+                  Generating font recommendations...
+                </p>
+              ) : (
+                fontRecommendations.map((recommendation, index) => (
+                  <Card
+                    key={index}
+                    className={`cursor-pointer transition-all ${
+                      selectedFont === recommendation ? 'ring-2 ring-primary' : ''
+                    }`}
+                    onClick={() => setSelectedFont(recommendation)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="mb-4">
+                        <h3
+                          className="text-3xl mb-2"
+                          style={{
+                            fontFamily: recommendation.primary.family,
+                            fontWeight: recommendation.primary.weight,
+                            fontStyle: recommendation.primary.style,
+                          }}
+                        >
+                          {brandName}
+                        </h3>
+                        <p
+                          className="text-base"
+                          style={{
+                            fontFamily: recommendation.secondary.family,
+                            fontWeight: recommendation.secondary.weight,
+                            fontStyle: recommendation.secondary.style,
+                          }}
+                        >
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        </p>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
+                        <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
+                        <p className="mt-2">{recommendation.explanation}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
             <Button
               variant="outline"
               onClick={() => setShowFontDialog(false)}
