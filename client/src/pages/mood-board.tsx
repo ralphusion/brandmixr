@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Copy, Download, Type } from "lucide-react";
-import { SiOpenai } from "react-icons/si";
+import { SparkleIcon } from "@/components/SparkleIcon";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -221,10 +221,10 @@ export default function MoodBoard() {
 
   const handleDownload = async (format: 'png' | 'pdf') => {
     if (!moodBoardRef.current || !brandName || !imagesLoaded) {
-      console.log("Cannot download: ", { 
-        hasRef: !!moodBoardRef.current, 
-        brandName, 
-        imagesLoaded 
+      console.log("Cannot download: ", {
+        hasRef: !!moodBoardRef.current,
+        brandName,
+        imagesLoaded
       });
       return;
     }
@@ -303,7 +303,7 @@ export default function MoodBoard() {
           </Button>
         </div>
 
-        <h1 
+        <h1
           className="text-3xl font-bold mb-6"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
@@ -324,7 +324,7 @@ export default function MoodBoard() {
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 
+                  <h2
                     className="text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
@@ -340,7 +340,7 @@ export default function MoodBoard() {
                     onClick={() => handleRegenerate('colors')}
                     disabled={regeneratingSection?.type === 'colors'}
                   >
-                    <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
+                    <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
                 <AnimatePresence mode="wait">
@@ -372,7 +372,7 @@ export default function MoodBoard() {
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 
+                  <h2
                     className="text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
@@ -403,7 +403,7 @@ export default function MoodBoard() {
                           onClick={() => handleRegenerate('keywords')}
                           disabled={regeneratingSection?.type === 'keywords'}
                         >
-                          <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Regenerate with AI</TooltipContent>
@@ -454,7 +454,7 @@ export default function MoodBoard() {
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 
+                  <h2
                     className="text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
@@ -485,7 +485,7 @@ export default function MoodBoard() {
                           onClick={() => handleRegenerate('mood')}
                           disabled={regeneratingSection?.type === 'mood'}
                         >
-                          <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'mood' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'mood' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Regenerate with AI</TooltipContent>
@@ -505,7 +505,7 @@ export default function MoodBoard() {
                       <Skeleton className="h-4 w-4/6" />
                     </motion.div>
                   ) : (
-                    <motion.p 
+                    <motion.p
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
@@ -553,7 +553,7 @@ export default function MoodBoard() {
                             onClick={() => handleRegenerate('image', index)}
                             disabled={regeneratingSection?.type === 'image' && regeneratingSection.index === index}
                           >
-                            <SiOpenai className={`h-4 w-4 ${regeneratingSection?.type === 'image' && regeneratingSection.index === index ? 'animate-spin' : ''}`} />
+                            <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'image' && regeneratingSection.index === index ? 'animate-spin' : ''}`} />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>Regenerate with AI</TooltipContent>
