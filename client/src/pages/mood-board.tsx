@@ -675,14 +675,16 @@ export default function MoodBoard() {
     const [selectedFont, setSelectedFont] = useState(() => {
       try {
         const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
-        return styles[index]?.fontFamily || fontStyle?.fontFamily || FONT_FAMILIES[0].family;
+        return styles[index]?.fontFamily || FONT_FAMILIES[0].family;
       } catch (error) {
         console.error('Error loading font style:', error);
         return FONT_FAMILIES[0].family;
       }
     });
 
-    const handleFontChange = (value: string) => {
+    const handleFontChange = (e: Event) => {
+      e.stopPropagation();
+      const value = (e.target as HTMLSelectElement).value;
       try {
         setSelectedFont(value);
         const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
@@ -707,7 +709,10 @@ export default function MoodBoard() {
           className={`${background} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
             isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
           }`}
-          onClick={onSelect}
+          onClick={(e) => {
+            e.preventDefault();
+            onSelect();
+          }}
         >
           <CardContent
             className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
@@ -742,10 +747,18 @@ export default function MoodBoard() {
               {brandName}
             </motion.h3>
           </CardContent>
-          <div className="p-4 bg-white/10 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+          <div 
+            className="p-4 bg-white/10 backdrop-blur-sm" 
+            onClick={(e) => {
+              e.stopPropagation();
+              e.preventDefault();
+            }}
+          >
             <Select 
-              value={selectedFont} 
-              onValueChange={handleFontChange}
+              value={selectedFont}
+              onValueChange={(value) => {
+                handleFontChange({ target: { value } } as any);
+              }}
             >
               <SelectTrigger className="bg-white/90">
                 <SelectValue placeholder="Select font" />
