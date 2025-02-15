@@ -27,6 +27,7 @@ interface MoodBoardData {
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
+  const [imagesLoaded, setImagesLoaded] = useState(false);
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
   const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
@@ -40,42 +41,80 @@ export default function MoodBoard() {
     enabled: !!brandName && !!formData.industry && !!formData.style,
   });
 
-  const handleDownload = async (format: 'png' | 'pdf') => {
-    if (!moodBoardRef.current || !brandName) return;
+  // Track image loading
+  useEffect(() => {
+    if (!moodBoardData?.images?.length) return;
 
-    const canvas = await html2canvas(moodBoardRef.current, {
-      scale: 2, // Higher quality
-      backgroundColor: null,
-      useCORS: true, // Handle cross-origin images
-    });
-
-    if (format === 'png') {
-      // Download as PNG
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.png`;
-      link.href = dataUrl;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } else {
-      // Download as PDF using canvas data
-      const { jsPDF } = await import('jspdf');
-      const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'px',
-        format: [canvas.width, canvas.height]
+    const loadImages = async () => {
+      const imagePromises = moodBoardData.images.map(url => {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = () => resolve(true);
+          img.onerror = reject;
+          img.src = url;
+        });
       });
 
-      pdf.addImage(
-        canvas.toDataURL('image/png'),
-        'PNG',
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
-      pdf.save(`${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.pdf`);
+      try {
+        await Promise.all(imagePromises);
+        setImagesLoaded(true);
+      } catch (error) {
+        console.error("Failed to load images:", error);
+      }
+    };
+
+    loadImages();
+  }, [moodBoardData?.images]);
+
+  const handleDownload = async (format: 'png' | 'pdf') => {
+    if (!moodBoardRef.current || !brandName || !imagesLoaded) {
+      console.log("Cannot download: ", { 
+        hasRef: !!moodBoardRef.current, 
+        brandName, 
+        imagesLoaded 
+      });
+      return;
+    }
+
+    try {
+      const canvas = await html2canvas(moodBoardRef.current, {
+        scale: 2, // Higher quality
+        backgroundColor: null,
+        useCORS: true, // Handle cross-origin images
+        logging: true, // Enable logging for debugging
+        allowTaint: true,
+        foreignObjectRendering: true,
+      });
+
+      if (format === 'png') {
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        const { jsPDF } = await import('jspdf');
+        const pdf = new jsPDF({
+          orientation: 'landscape',
+          unit: 'px',
+          format: [canvas.width, canvas.height]
+        });
+
+        pdf.addImage(
+          canvas.toDataURL('image/png'),
+          'PNG',
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        pdf.save(`${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.pdf`);
+      }
+    } catch (error) {
+      console.error("Error during download:", error);
     }
   };
 
@@ -101,9 +140,13 @@ export default function MoodBoard() {
         <div className="flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                className="flex items-center gap-2"
+                disabled={!imagesLoaded}
+              >
                 <Download className="h-4 w-4" />
-                Download Mood Board
+                {imagesLoaded ? 'Download Mood Board' : 'Loading Images...'}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -157,11 +200,11 @@ export default function MoodBoard() {
           <Card>
             <CardContent className="p-6">
               <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-3">
                 {moodBoardData.keywords.map((keyword, index) => (
                   <motion.span
                     key={index}
-                    className="px-3 py-1 bg-primary/10 rounded-full text-sm"
+                    className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ delay: index * 0.1 }}
@@ -197,6 +240,7 @@ export default function MoodBoard() {
                     src={imageUrl}
                     alt={`Mood image ${index + 1}`}
                     className="w-full h-48 object-cover rounded-lg"
+                    crossOrigin="anonymous"
                   />
                 </CardContent>
               </Card>
