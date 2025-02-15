@@ -22,6 +22,19 @@ import {
 } from "@/components/ui/dialog";
 import { generateIconSvg } from "@/lib/generateIcon";
 
+interface FontSettings {
+  primary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+  secondary: {
+    family: string;
+    weight: string;
+    style: string;
+  };
+}
+
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
   keywords: string[];
@@ -46,6 +59,52 @@ const ICON_STYLES = {
     { value: 'abstract-organic', label: 'Organic Abstract' },
   ],
 };
+
+// Add these font configurations near the top of the file after existing constants
+const FONT_FAMILIES = [
+  { family: 'Playfair Display', style: 'normal', weight: '700' },
+  { family: 'Montserrat', style: 'normal', weight: '600' },
+  { family: 'Roboto Slab', style: 'normal', weight: '500' },
+  { family: 'Poppins', style: 'normal', weight: '700' },
+  { family: 'Lora', style: 'italic', weight: '600' },
+  { family: 'Merriweather', style: 'normal', weight: '900' },
+  { family: 'Source Sans Pro', style: 'normal', weight: '700' },
+  { family: 'Open Sans', style: 'normal', weight: '800' },
+  { family: 'Raleway', style: 'normal', weight: '700' },
+  { family: 'Nunito', style: 'normal', weight: '800' },
+  { family: 'Work Sans', style: 'normal', weight: '700' },
+  { family: 'DM Serif Display', style: 'normal', weight: '400' },
+  { family: 'Roboto', style: 'normal', weight: '400' }, // Added Roboto
+  { family: 'Arial', style: 'normal', weight: '400' }, // Added Arial
+  { family: 'Times New Roman', style: 'normal', weight: '400' }, //Added Times New Roman
+  { family: 'Helvetica', style: 'normal', weight: '400' }, // Added Helvetica
+];
+
+const TEXT_TRANSFORMS = [
+  'uppercase',
+  'lowercase',
+  'capitalize',
+  'none'
+];
+
+const FONT_STYLES = [
+  'normal',
+  'italic'
+];
+
+const TEXT_DECORATIONS = [
+  'none',
+  'underline'
+];
+
+const LETTER_SPACING = [
+  'normal',
+  'wide',
+  'wider',
+  'widest',
+  'tight',
+  'tighter'
+];
 
 type IconStyle = 'initials-simple' | 'initials-detailed' | 'abstract-geometric' | 'abstract-organic';
 
@@ -330,10 +389,11 @@ export default function MoodBoard() {
     }
   }, [brandName, iconStyle, iconColor]);
 
+  // Update handleRegenerateLogo function to properly handle font loading
   const handleRegenerateLogo = () => {
     if (!brandName) return;
 
-    // Get all available styles
+    // Get all available icon styles
     const styles = Object.keys(ICON_STYLES)
       .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
       .map(style => style.value);
@@ -342,13 +402,53 @@ export default function MoodBoard() {
     const availableStyles = styles.filter(style => style !== iconStyle);
     const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)];
 
-    // Generate new color
-    const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length);
-    const newColor = BACKGROUNDS[randomIndex].bg;
+    // Generate new colors
+    const hue = Math.floor(Math.random() * 360);
+    const saturation = 60 + Math.floor(Math.random() * 20);
+    const lightness = 45 + Math.floor(Math.random() * 15);
+    const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+
+    // Select random background
+    const randomBgIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+    const newBackground = BACKGROUNDS[randomBgIndex];
+
+    // Generate random font styling
+    const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
+    const textTransform = TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)];
+    const fontStyle = FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)];
+    const textDecoration = TEXT_DECORATIONS[Math.floor(Math.random() * TEXT_DECORATIONS.length)];
+    const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
+
+    // Create font style string
+    const newFontStyle = `
+      font-family: ${randomFont.family};
+      font-weight: ${randomFont.weight};
+      font-style: ${fontStyle};
+      text-transform: ${textTransform};
+      text-decoration: ${textDecoration};
+      letter-spacing: ${letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`};
+    `.trim();
+
+    // Update all states
     setIconStyle(newStyle);
-    setIconColor(newColor);
-    setSelectedBackground(BACKGROUNDS[randomIndex]);
-    setSelectedFontStyle('');
+    setIconColor(newIconColor);
+    setSelectedBackground(newBackground);
+    setSelectedFontStyle(newFontStyle);
+
+    // Load the new font
+    const fontSettings: FontSettings = {
+      primary: {
+        family: randomFont.family,
+        weight: randomFont.weight,
+        style: randomFont.style,
+      },
+      secondary: {
+        family: randomFont.family,
+        weight: randomFont.weight,
+        style: randomFont.style,
+      }
+    };
+    loadFonts(fontSettings);
   };
 
   const handleResetLogo = () => {
@@ -441,7 +541,7 @@ export default function MoodBoard() {
             <Skeleton className="h-[200px] rounded-lg" />
           </div>
         ) : moodBoardData ? (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="grid grid-cols-1 gap-6" ref={moodBoardRef}>
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -482,14 +582,19 @@ export default function MoodBoard() {
                       </TooltipTrigger>
                       <TooltipContent>Download logo as PNG</TooltipContent>
                     </Tooltip>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleRegenerateLogo}
-                      title="Generate new logo variation"
-                    >
-                      <SparkleIcon className="h-4 w-4" />
-                    </Button>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleRegenerateLogo}
+                          title="Generate new logo variation"
+                        >
+                          <SparkleIcon className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Generate new logo variation</TooltipContent>
+                    </Tooltip>
                   </div>
                 </div>
                 <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
@@ -807,16 +912,14 @@ export default function MoodBoard() {
             <div className="flex-1 overflow-y-auto pr-2">
               <div className="grid grid-cols-1 gap-6 py-4">
                 {loadingFonts ? (
-                  <p className="text-center text-muted-foreground">
+                  <p className="text-center text-mutedforeground">
                     Generating font recommendations...
                   </p>
                 ) : (
                   fontRecommendations.map((recommendation, index) => (
                     <Card
                       key={index}
-                      className={`cursor-pointer transition-all ${
-                        selectedFont === recommendation ? 'ring-2 ring-primary' : ''
-                      }`}
+                      className={`cursor-pointer transition-all ${selectedFont === recommendation ? 'ring-2 ring-primary ring-offset-2' : ''}`}
                       onClick={() => setSelectedFont(recommendation)}
                     >
                       <CardContent className="p-6">
@@ -852,32 +955,34 @@ export default function MoodBoard() {
                   ))
                 )}
               </div>
-            </div>
 
-            <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
-              <Button
-                variant="outline"
-                onClick={() => setShowFontDialog(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={async () => {
-                  if (selectedFont) {
-                    await loadFonts(selectedFont);
-                    setShowFontDialog(false);
-                  }
-                }}
-                disabled={!selectedFont}
-              >
-                Apply Font Combination
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </TooltipProvider>
-  );
+              <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFontDialog(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={async () => {
+                    if (selectedFont) {
+                      await loadFonts({
+                        primary: selectedFont.primary,
+                        secondary: selectedFont.secondary
+                      });
+                      setShowFontDialog(false);
+                    }
+                  }}
+                  disabled={!selectedFont}
+                >
+                  Apply Font Combination
+                </Button>
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </TooltipProvider>
+    );
 }
 
 interface FontRecommendation {
