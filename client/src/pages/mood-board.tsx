@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
@@ -28,6 +29,7 @@ export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
   const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
@@ -40,6 +42,12 @@ export default function MoodBoard() {
     },
     enabled: !!brandName && !!formData.industry && !!formData.style,
   });
+
+  useEffect(() => {
+    if (moodBoardData?.colors) {
+      setColors(moodBoardData.colors);
+    }
+  }, [moodBoardData?.colors]);
 
   // Track image loading
   useEffect(() => {
@@ -171,84 +179,71 @@ export default function MoodBoard() {
           <Skeleton className="h-[200px] rounded-lg" />
         </div>
       ) : moodBoardData ? (
-        <div ref={moodBoardRef} className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-background rounded-lg">
-          {/* Color Palette */}
-          <Card className="shadow-md">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
-              <div className="flex flex-wrap gap-4">
-                {moodBoardData.colors.map((color, index) => (
-                  <motion.div
-                    key={index}
-                    className="flex flex-col items-center"
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <div
-                      className="w-16 h-16 rounded-lg shadow-md"
-                      style={{ backgroundColor: color.hex }}
-                    />
-                    <span className="text-sm text-muted-foreground mt-2">
-                      {color.name}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+        <div>
+          <div ref={moodBoardRef} className="grid grid-cols-1 gap-6 p-6 bg-background rounded-lg">
+            {/* Color Palette */}
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Color Palette</h2>
+                <ColorPaletteEditor
+                  colors={colors}
+                  onChange={setColors}
+                />
+              </CardContent>
+            </Card>
 
-          {/* Keywords */}
-          <Card className="shadow-md">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
-              <div className="flex flex-wrap gap-3">
-                {moodBoardData.keywords.map((keyword, index) => (
-                  <motion.span
-                    key={index}
-                    className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    {keyword}
-                  </motion.span>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+            {/* Keywords */}
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Brand Keywords</h2>
+                <div className="flex flex-wrap gap-3">
+                  {moodBoardData.keywords.map((keyword, index) => (
+                    <motion.span
+                      key={index}
+                      className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      {keyword}
+                    </motion.span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Description */}
-          <Card className="md:col-span-2 shadow-md">
-            <CardContent className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Brand Mood</h2>
-              <p className="text-muted-foreground leading-relaxed">
-                {moodBoardData.moodDescription}
-              </p>
-            </CardContent>
-          </Card>
+            {/* Description */}
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <h2 className="text-xl font-semibold mb-4">Brand Mood</h2>
+                <p className="text-muted-foreground leading-relaxed">
+                  {moodBoardData.moodDescription}
+                </p>
+              </CardContent>
+            </Card>
 
-          {/* AI Generated Images */}
-          {moodBoardData.images?.map((imageUrl, index) => (
-            <motion.div
-              key={index}
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: index * 0.2 }}
-            >
-              <Card className="shadow-md">
-                <CardContent className="p-6">
-                  <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
-                    <img
-                      src={imageUrl}
-                      alt={`Mood image ${index + 1}`}
-                      className="w-full h-full object-contain"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+            {/* AI Generated Images */}
+            {moodBoardData.images?.map((imageUrl, index) => (
+              <motion.div
+                key={index}
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: index * 0.2 }}
+              >
+                <Card className="shadow-md">
+                  <CardContent className="p-6">
+                    <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
+                      <img
+                        src={imageUrl}
+                        alt={`Mood image ${index + 1}`}
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
         </div>
       ) : (
         <p className="text-center text-muted-foreground">
