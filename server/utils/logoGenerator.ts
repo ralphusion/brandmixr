@@ -1,5 +1,6 @@
 import type { LogoStyle } from '../../shared/types';
 import { iconService } from '../lib/iconService';
+import type { Typography } from '../lib/types';
 
 interface LogoConfig {
   brandName: string;
@@ -10,32 +11,58 @@ interface LogoConfig {
 const DEFAULT_COLORS = {
   modern: {
     primary: ['#2196F3', '#00BCD4', '#3F51B5', '#009688', '#1976D2', '#0288D1'],
-    secondary: ['#FF4081', '#FFC107', '#4CAF50', '#FF5722', '#F50057', '#00E5FF']
+    secondary: ['#FF4081', '#FFC107', '#4CAF50', '#FF5722', '#F50057', '#00E5FF'],
+    accent: ['#E91E63', '#FFEB3B', '#009688', '#673AB7', '#FF1744', '#00B0FF']
   },
-  minimalist: {
+  classic: {
+    primary: ['#1976D2', '#0D47A1', '#2962FF', '#283593', '#1565C0', '#0277BD'],
+    secondary: ['#D32F2F', '#FBC02D', '#388E3C', '#1565C0', '#C2185B', '#00838F'],
+    accent: ['#C2185B', '#FFA000', '#00796B', '#311B92', '#D50000', '#006064']
+  },
+  minimal: {
     primary: ['#212121', '#424242', '#616161', '#757575', '#263238', '#37474F'],
-    secondary: ['#757575', '#9E9E9E', '#BDBDBD', '#EEEEEE', '#B0BEC5', '#CFD8DC']
+    secondary: ['#757575', '#9E9E9E', '#BDBDBD', '#EEEEEE', '#B0BEC5', '#CFD8DC'],
+    accent: ['#000000', '#FFFFFF', '#F5F5F5', '#FAFAFA', '#ECEFF1', '#455A64']
   },
-  playful: {
+  bold: {
     primary: ['#E91E63', '#9C27B0', '#673AB7', '#3F51B5', '#F50057', '#D500F9'],
-    secondary: ['#00BCD4', '#FFEB3B', '#FF5722', '#795548', '#00B8D4', '#FFD600']
-  },
-  luxury: {
-    primary: ['#8D6E63', '#795548', '#6D4C41', '#5D4037', '#4E342E', '#3E2723'],
-    secondary: ['#D4AF37', '#CFB53B', '#C5B358', '#B8860B', '#DAA520', '#CD853F']
+    secondary: ['#00BCD4', '#FFEB3B', '#FF5722', '#795548', '#00B8D4', '#FFD600'],
+    accent: ['#F50057', '#D500F9', '#651FFF', '#304FFE', '#00E5FF', '#FFEA00']
   }
 };
 
-function mapStyleToLogoStyle(style: string): keyof typeof DEFAULT_COLORS {
-  const styleMap: { [key: string]: keyof typeof DEFAULT_COLORS } = {
-    minimalist: 'minimalist',
+const TEXT_EFFECTS = {
+  modern: {
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    fontVariationSettings: "'wght' 600"
+  },
+  classic: {
+    letterSpacing: '0.02em',
+    fontStyle: 'italic',
+    fontVariationSettings: "'wght' 500"
+  },
+  minimal: {
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    fontVariationSettings: "'wght' 300"
+  },
+  bold: {
+    letterSpacing: '0.03em',
+    fontVariationSettings: "'wght' 800"
+  }
+};
+
+function mapStyleToLogoStyle(style: string): LogoStyle {
+  const styleMap: { [key: string]: LogoStyle } = {
     modern: 'modern',
-    playful: 'playful',
-    luxury: 'luxury',
-    tech: 'modern',
-    organic: 'modern',
-    vintage: 'luxury',
-    abstract: 'playful'
+    classic: 'classic',
+    minimal: 'minimal',
+    bold: 'bold',
+    professional: 'classic',
+    playful: 'bold',
+    elegant: 'minimal',
+    tech: 'modern'
   };
 
   return styleMap[style.toLowerCase()] || 'modern';
@@ -53,7 +80,7 @@ export function generateSimpleLogo(config: LogoConfig): string {
   // Get icon path and colors
   const iconPath = iconService.getRandomIcon(industry);
   const primaryColor = getRandomElement(colors.primary);
-  const secondaryColor = getRandomElement(colors.secondary);
+  const accentColor = getRandomElement(colors.accent);
 
   // Return the SVG path with styling
   return `
@@ -64,7 +91,7 @@ export function generateSimpleLogo(config: LogoConfig): string {
     <defs>
       <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${secondaryColor};stop-opacity:0.8" />
+        <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
       </linearGradient>
     </defs>
   `;

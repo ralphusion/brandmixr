@@ -1,9 +1,7 @@
 import { createCanvas } from 'canvas';
-import TextToSVG from 'text-to-svg';
+import * as HB from 'node-harfbuzz';
 import * as opentype from 'opentype.js';
 import { Typography } from './types';
-import { promisify } from 'util';
-import path from 'path';
 
 interface FontFeatures {
   ligatures?: boolean;
@@ -21,13 +19,12 @@ interface TextShapingOptions {
   letterSpacing?: number;
 }
 
-class TypographyService {
-  private static instance: TypographyService | null = null;
-  private textToSVG: typeof TextToSVG | null = null;
-  private initialized: boolean = false;
+export class TypographyService {
+  private static instance: TypographyService;
+  private hb: typeof HB;
 
   private constructor() {
-    // Defer initialization until first use
+    this.hb = require('node-harfbuzz');
   }
 
   public static getInstance(): TypographyService {
@@ -37,63 +34,57 @@ class TypographyService {
     return TypographyService.instance;
   }
 
-  private async initialize() {
-    if (!this.initialized) {
-      console.log('Initializing TypographyService...');
-      this.textToSVG = TextToSVG;
-      this.initialized = true;
-      console.log('TypographyService initialized');
-    }
-  }
-
-  async loadFont(fontFamily: string): Promise<TextToSVG> {
-    await this.initialize();
-    if (!this.textToSVG) {
-      throw new Error('TypographyService not initialized');
-    }
-
-    const fontPath = path.join('/usr/share/fonts/truetype', `${fontFamily.toLowerCase().replace(/\s+/g, '-')}.ttf`);
-    return new Promise((resolve, reject) => {
-      this.textToSVG!.load(fontPath, (err: Error | null, textToSVG?: TextToSVG) => {
-        if (err) reject(err);
-        else if (textToSVG) resolve(textToSVG);
-        else reject(new Error('Failed to load font'));
-      });
-    });
-  }
-
   async shapeText(options: TextShapingOptions): Promise<string> {
-    const { font, text, fontSize = 42, letterSpacing = 0 } = options;
+    const { font, text, features = {}, fontSize = 42, letterSpacing = 0 } = options;
 
-    try {
-      const textToSVG = await this.loadFont(font.family);
+    // Create font face with OpenType.js
+    const fontPath = `/usr/share/fonts/truetype/${font.family.toLowerCase().replace(/\s+/g, '-')}.ttf`;
+    const fontData = await opentype.load(fontPath);
 
-      const attributes = {
-        fill: 'currentColor',
-        stroke: 'none'
-      };
+    // Create HarfBuzz buffer
+    const buffer = this.hb.createBuffer();
+    buffer.addText(text);
+    buffer.guessSegmentProperties();
 
-      const textOptions = {
-        x: 0,
-        y: 0,
-        fontSize,
-        kerning: true,
-        letterSpacing,
-        anchor: 'left top',
-        attributes
-      };
+    // Set up font features
+    const fontFeatures = [
+      features.ligatures ? '+liga' : '-liga',
+      features.swashes ? '+swsh' : '-swsh',
+      features.alternates ? '+salt' : '-salt',
+      features.kerning ? '+kern' : '-kern',
+    ];
 
-      const svgPath = textToSVG.getPath(text, textOptions);
-      return svgPath;
-    } catch (error) {
-      console.error('Error shaping text:', error);
-      // Return a basic text path as fallback
-      const canvas = createCanvas(fontSize * text.length, fontSize * 1.5);
-      const ctx = canvas.getContext('2d');
-      ctx.font = `${fontSize}px ${font.family}`;
-      ctx.fillText(text, 0, fontSize);
-      return `<path d="M0,${fontSize} L${fontSize * text.length},${fontSize}"/>`;
+    if (features.styleSet && features.styleSet > 0) {
+      fontFeatures.push(`+ss${String(features.styleSet).padStart(2, '0')}`);
     }
+
+    // Shape the text
+    const hbFont = this.hb.createFace(fontData.arrayBuffer, 0);
+    this.hb.shape(hbFont, buffer, fontFeatures);
+
+    // Get glyph positions and generate SVG path
+    const glyphPositions = buffer.getGlyphPositions();
+    const glyphInfos = buffer.getGlyphInfos();
+    
+    let svgPath = '';
+    let xOffset = 0;
+
+    for (let i = 0; i < glyphInfos.length; i++) {
+      const glyph = fontData.glyphs.get(glyphInfos[i].codepoint);
+      const position = glyphPositions[i];
+      
+      // Scale the glyph path to fontSize
+      const scale = fontSize / fontData.unitsPerEm;
+      const glyphPath = glyph.path.toPathData(scale);
+      
+      // Add letter spacing
+      xOffset += position.xAdvance * scale + letterSpacing;
+      
+      // Transform the path to the correct position
+      svgPath += `<path transform="translate(${xOffset},0)" d="${glyphPath}"/>`;
+    }
+
+    return svgPath;
   }
 
   generateDynamicTypography(text: string, style: 'modern' | 'classic' | 'playful' | 'elegant'): FontFeatures {
@@ -127,4 +118,3 @@ class TypographyService {
 }
 
 export const typographyService = TypographyService.getInstance();
-export default typographyService;

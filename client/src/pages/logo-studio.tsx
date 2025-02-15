@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -117,20 +117,14 @@ export default function LogoStudio() {
     }
   };
 
-  const handleDownload = async (logo: string, index: number) => {
+  const handleDownload = async (imageUrl: string, index: number) => {
     try {
-      // Create an SVG element with the logo path
-      const svgContent = `
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="300" height="300">
-          ${logo}
-        </svg>
-      `;
-
-      const blob = new Blob([svgContent], { type: 'image/svg+xml' });
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-logo-${index + 1}.svg`;
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-logo-${index + 1}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -254,7 +248,7 @@ export default function LogoStudio() {
                       <div className="flex flex-col items-center gap-4">
                         <svg
                           viewBox="0 0 24 24"
-                          className={`w-16 h-16 ${style.text}`}
+                          className={`w-12 h-12 ${style.text}`}
                           fill="currentColor"
                           dangerouslySetInnerHTML={{ __html: logo }}
                         />
@@ -272,7 +266,7 @@ export default function LogoStudio() {
                         onClick={() => handleDownload(logo, index)}
                       >
                         <Download className="h-4 w-4 mr-2" />
-                        Download SVG
+                        Download
                       </Button>
                     </CardContent>
                   </Card>

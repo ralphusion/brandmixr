@@ -1,12 +1,11 @@
 import { Router } from "express";
 import { validateApiKey } from "../middleware/auth";
-import { generateNames, generateApiKey } from "../openai";
+import { generateNames, generateApiKey } from "../openai"; // Added generateApiKey import
 import { generateNameSchema, stylePresetSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import swagger from "swagger-jsdoc";
 import { serve, setup } from "swagger-ui-express";
 import { storage } from "../storage";
-import { iconService } from "../lib/iconService";
 
 const router = Router();
 
@@ -182,26 +181,6 @@ router.post("/v1/style-presets", validateApiKey, async (req, res) => {
     } else {
       res.status(500).json({ error: "An unexpected error occurred" });
     }
-  }
-});
-
-/**
- * @swagger
- * /api/v1/icon-count:
- *   get:
- *     summary: Get total icon count
- *     description: Retrieve the count of available icons from all libraries
- *     responses:
- *       200:
- *         description: Icon count information
- */
-router.get("/v1/icon-count", async (_req, res) => {
-  try {
-    // This will trigger initialization and counting of icons
-    iconService.getRandomIcon("test");
-    res.json({ message: "Check the server logs for icon count details" });
-  } catch (error) {
-    res.status(500).json({ error: "An unexpected error occurred" });
   }
 });
 

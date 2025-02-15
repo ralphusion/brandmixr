@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import html2canvas from 'html2canvas';
 import { useFonts } from "@/contexts/FontContext";
-import type { IconStyle } from "@/lib/types";
 
 // Extended background styles including dark greys
 const BACKGROUNDS = [
@@ -82,7 +81,15 @@ const FONT_STYLES = [
   'font-mono normal-case tracking-[0.1em] font-bold'
 ];
 
-const ICON_STYLES: { [key: string]: { value: IconStyle; label: string }[] } = {
+// Function to generate a random pleasing color
+const getRandomPleaseantColor = () => {
+  const hue = Math.floor(Math.random() * 360); // Random hue
+  const saturation = 60 + Math.floor(Math.random() * 20); // 60-80%
+  const lightness = 45 + Math.floor(Math.random() * 15); // 45-60%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
+
+const ICON_STYLES = {
   initials: [
     { value: 'initials-simple', label: 'Simple Initials' },
     { value: 'initials-rounded', label: 'Rounded Initials' },
@@ -114,14 +121,6 @@ const ICON_STYLES: { [key: string]: { value: IconStyle; label: string }[] } = {
   ]
 };
 
-// Function to generate a random pleasing color
-const getRandomPleaseantColor = () => {
-  const hue = Math.floor(Math.random() * 360); // Random hue
-  const saturation = 60 + Math.floor(Math.random() * 20); // 60-80%
-  const lightness = 45 + Math.floor(Math.random() * 15); // 45-60%
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-};
-
 interface FontRecommendation {
   primary: {
     family: string;
@@ -139,8 +138,8 @@ interface FontRecommendation {
 export default function BrandVariations() {
   const [, navigate] = useLocation();
   const [logoSvg, setLogoSvg] = useState<string>("");
-  const [iconStyle, setIconStyle] = useState<IconStyle>('modern-minimal');
-  const [iconColor, setIconColor] = useState('#2196F3');
+  const [iconStyle, setIconStyle] = useState<string>('initials-simple');
+  const [iconColor, setIconColor] = useState(getRandomPleaseantColor());
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
@@ -164,7 +163,8 @@ export default function BrandVariations() {
       color: iconColor,
       backgroundColor
     });
-    setLogoSvg(svg);
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+    setLogoSvg(dataUrl);
   };
 
   const handleCardSelect = (cardId: string) => {
@@ -288,7 +288,7 @@ export default function BrandVariations() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div>
             <Label htmlFor="icon-style">Icon Options</Label>
-            <Select value={iconStyle} onValueChange={(value: IconStyle) => setIconStyle(value)}>
+            <Select value={iconStyle} onValueChange={(value: string) => setIconStyle(value)}>
               <SelectTrigger id="icon-style">
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
