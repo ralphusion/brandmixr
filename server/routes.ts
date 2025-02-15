@@ -1,16 +1,13 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription, generateLogoWithDalle, generateMoodBoard, generateFontRecommendations } from "./openai";
+import { generateNames, generateDescription, generateMoodBoard, generateFontRecommendations } from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
 import { checkDomainAvailability } from "./utils/domain";
 import { checkTrademarkAvailability } from "./utils/trademark";
-import OpenAI from "openai";
-
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { generateLogoWithGemini, generateLogoPrompt } from "./gemini";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -57,37 +54,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error("Brand name, style, and industry are required");
       }
 
-      // Number of logos to generate
+      // Number of logos to generate (4 initially, or if isMore is true)
       const numberOfLogos = 4;
+      const currentLogos = isMore ? (req.body.currentLogos || []) : [];
+      const startIndex = currentLogos.length;
 
-      // Generate logo variations using DALL-E 3
-      const prompts = Array(numberOfLogos).fill(null).map((_, index) => {
-        const basePrompt = `Create a standalone ${style.toLowerCase()} logo design for ${industry.toLowerCase()} brand "${brandName}". The logo should be a clean, professional design on a pure white background with no additional elements, frames, or mockups.`;
-
-        const variations = [
-          "Focus on creating a unique and memorable icon or symbol. Use minimal colors and shapes for maximum impact.",
-          "Design an elegant typographic logo with creative letterforms. Ensure the text is clear and legible.",
-          "Combine a distinctive symbol with modern typography. Keep the design balanced and professional.",
-          "Create an abstract or geometric representation of the brand's essence. Make it bold and contemporary."
-        ];
-
-        return `${basePrompt} ${variations[index % variations.length]}`;
+      // Generate logo variations using Gemini
+      const logoPromises = Array(numberOfLogos).fill(null).map(async (_, index) => {
+        const prompt = generateLogoPrompt(brandName, style, industry, startIndex + index);
+        return generateLogoWithGemini(prompt);
       });
 
-      const logoPromises = prompts.map(async (prompt) => {
-        const response = await openai.images.generate({
-          model: "dall-e-3",
-          prompt: prompt + " The final image should only contain the logo design on a white background, with no additional elements, frames, or mockups.",
-          n: 1,
-          size: "1024x1024",
-          quality: "hd",
-          style: "natural",
-        });
-
-        return response.data[0].url;
-      });
-
-      const logos = await Promise.all(logoPromises);
+      const newLogos = await Promise.all(logoPromises);
+      const logos = isMore ? [...currentLogos, ...newLogos] : newLogos;
 
       res.json({ logos });
     } catch (error) {
