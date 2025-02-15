@@ -293,8 +293,10 @@ export default function Generate() {
               <ResultsGrid
                 names={savedNames.map(n => ({
                   name: n.name,
-                  domain: '',
-                  domainAvailable: false
+                  domain: n.domain || '',
+                  domainAvailable: n.domainAvailable || false,
+                  trademarkExists: n.trademarkExists || null,
+                  similarTrademarks: n.similarTrademarks || []
                 }))}
                 onSave={(name) => {
                   const savedName = savedNames.find(n => n.name === name.name);
