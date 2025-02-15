@@ -49,7 +49,7 @@ function getRandomElement<T>(array: T[]): T {
 }
 
 export function generateSimpleLogo(config: LogoConfig): string {
-  const { brandName, style } = config;
+  const { brandName, style, industry } = config;
   const logoStyle = mapStyleToLogoStyle(style);
   const colors = DEFAULT_COLORS[logoStyle];
 
@@ -101,7 +101,7 @@ function generateCircularLogo(text: string, colors: any): string {
     <text x="100" y="90" font-family="Arial, sans-serif" font-size="24" 
           font-weight="bold" fill="${primary}" text-anchor="middle">${text}</text>
     <text x="100" y="120" font-family="Arial, sans-serif" font-size="14" 
-          fill="${secondary}" text-anchor="middle">ESTABLISHED 2024</text>
+          fill="${secondary}" text-anchor="middle">STUDIO FOREVER</text>
   </svg>`;
 }
 
@@ -121,16 +121,23 @@ function generateIconicLogo(text: string, colors: any): string {
   const primary = getRandomElement(colors.primary);
   const accent = getRandomElement(colors.accent);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  // Create a more modern, abstract icon container
+  const icon = `
+    <path d="M40,20 C60,20 80,40 60,60 C40,80 20,60 40,40 Z" fill="url(#grad4)" />
+    <rect x="65" y="20" width="20" height="60" rx="10" fill="url(#grad4)" opacity="0.8" />
+  `;
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
     <defs>
       <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
         <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
       </linearGradient>
     </defs>
-    <path d="M100,20 L180,180 L20,180 Z" fill="url(#grad4)"/>
-    <text x="100" y="140" font-family="Arial, sans-serif" font-size="24" 
-          font-weight="bold" fill="#FFFFFF" text-anchor="middle" 
-          dominant-baseline="middle">${text}</text>
+    ${icon}
+    <text x="100" y="60" font-family="Arial, sans-serif" font-size="32" 
+          font-weight="bold" fill="${primary}" letter-spacing="1">
+          ${text}
+    </text>
   </svg>`;
 }
