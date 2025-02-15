@@ -413,73 +413,102 @@ export default function MoodBoard() {
 
   useEffect(() => {
     if (brandName) {
-      const svg = generateIconSvg(brandName, {
-        style: iconStyle as IconStyle,
-        color: iconColor,
-        backgroundColor: 'transparent'
-      });
-      const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
-      setLogoSvg(dataUrl);
+      try {
+        const svg = generateIconSvg(brandName, {
+          style: iconStyle as IconStyle,
+          color: iconColor,
+          backgroundColor: 'transparent'
+        });
+        const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+        setLogoSvg(dataUrl);
+      } catch (error) {
+        console.error('Error generating icon:', error);
+        toast({
+          title: "Icon generation failed",
+          description: "Failed to generate icon. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   }, [brandName, iconStyle, iconColor]);
 
   const handleRegenerateLogo = () => {
     if (!brandName) return;
 
-    // Get all available icon styles
-    const styles = Object.keys(ICON_STYLES)
-      .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
-      .map(style => style.value);
+    // Store current values as fallback
+    const currentStyle = iconStyle;
+    const currentColor = iconColor;
+    const currentBackground = selectedBackground;
+    const currentFontStyle = selectedFontStyle;
 
-    // Filter out current style and select random
-    const availableStyles = styles.filter(style => style !== iconStyle);
-    const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
+    try {
+      // Get all available icon styles
+      const styles = Object.keys(ICON_STYLES)
+        .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
+        .map(style => style.value);
 
-    // Generate new colors
-    const hue = Math.floor(Math.random() * 360);
-    const saturation = 60 + Math.floor(Math.random() * 20);
-    const lightness = 45 + Math.floor(Math.random() * 15);
-    const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      // Filter out current style and select random
+      const availableStyles = styles.filter(style => style !== iconStyle);
+      const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
-    // Select random background
-    const randomBgIndex = Math.floor(Math.random() * BACKGROUNDS.length);
-    const newBackground = BACKGROUNDS[randomBgIndex];
+      // Generate new colors
+      const hue = Math.floor(Math.random() * 360);
+      const saturation = 60 + Math.floor(Math.random() * 20);
+      const lightness = 45 + Math.floor(Math.random() * 15);
+      const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
-    // Generate random font styling
-    const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
-    const textTransform = TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)];
-    const fontStyle = FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)];
-    const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
+      // Select random background
+      const randomBgIndex = Math.floor(Math.random() * BACKGROUNDS.length);
+      const newBackground = BACKGROUNDS[randomBgIndex];
 
-    // Create font style object
-    const newFontStyle: FontStyle = {
-      fontFamily: randomFont.family,
-      fontWeight: randomFont.weight,
-      fontStyle,
-      textTransform,
-      letterSpacing: letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`,
-    };
+      // Generate random font styling
+      const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
+      const textTransform = TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)];
+      const fontStyle = FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)];
+      const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
 
-    // Update all states
-    setIconStyle(newStyle);
-    setIconColor(newIconColor);
-    setSelectedBackground(newBackground);
-    setSelectedFontStyle(newFontStyle);
+      // Create font style object
+      const newFontStyle: FontStyle = {
+        fontFamily: randomFont.family,
+        fontWeight: randomFont.weight,
+        fontStyle,
+        textTransform,
+        letterSpacing: letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`,
+      };
 
-    // Load the font
-    const fontSettings: FontSettings = {
-      primary: {
-        family: randomFont.family,
-        weight: randomFont.weight,
-        style: randomFont.style,
-      },
-      secondary: {
-        family: randomFont.family,
-        weight: randomFont.weight,
-        style: randomFont.style,
-      }
-    };
-    loadFonts(fontSettings);
+      // Update states only after successful generation
+      setIconStyle(newStyle);
+      setIconColor(newIconColor);
+      setSelectedBackground(newBackground);
+      setSelectedFontStyle(newFontStyle);
+
+      // Load the font
+      const fontSettings: FontSettings = {
+        primary: {
+          family: randomFont.family,
+          weight: randomFont.weight,
+          style: randomFont.style,
+        },
+        secondary: {
+          family: randomFont.family,
+          weight: randomFont.weight,
+          style: randomFont.style,
+        }
+      };
+      loadFonts(fontSettings);
+    } catch (error) {
+      console.error('Error regenerating logo:', error);
+      // Revert to previous values if generation fails
+      setIconStyle(currentStyle);
+      setIconColor(currentColor);
+      setSelectedBackground(currentBackground);
+      setSelectedFontStyle(currentFontStyle);
+      toast({
+        title: "Generation failed",
+        description: "Failed to generate new logo variation. Previous style restored.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleResetLogo = () => {

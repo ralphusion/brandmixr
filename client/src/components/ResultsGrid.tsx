@@ -83,12 +83,10 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
   const [description, setDescription] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch saved names to check favorite status
   const { data: savedNames = [] } = useQuery<BrandName[]>({
     queryKey: ["/api/names/saved"],
   });
 
-  // Create a Set of saved names for O(1) lookup
   const savedNamesSet = new Set(savedNames.map(n => n.name));
 
   const handleCopy = async (name: string) => {
@@ -136,7 +134,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
   };
 
   return (
-    <TooltipProvider>
+    <TooltipProvider delayDuration={300}>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {names.map((nameData, index) => {
           const name = typeof nameData === 'string' ? nameData : nameData.name;
@@ -149,7 +147,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
           return (
             <Card 
               key={index}
-              className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
+              className={`${colorSet.bg} transition-transform hover:scale-105 cursor-pointer group relative overflow-visible shadow-lg dark:shadow-md dark:shadow-black/20`}
               onClick={() => handleCardClick(name)}
             >
               <CardContent className="p-6 relative h-full flex flex-col items-center justify-center min-h-[200px]">
@@ -193,7 +191,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                 <div className="absolute bottom-3 right-3 flex gap-2">
                   {domain && (
                     <Tooltip>
-                      <TooltipTrigger>
+                      <TooltipTrigger asChild>
                         <div className={`rounded-full p-1.5 ${
                           domainAvailable 
                             ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300' 
@@ -202,7 +200,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                           <Globe className="h-4 w-4" />
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom" sideOffset={5} className="z-50">
                         <p>{domainAvailable ? "Domain name is available" : "Domain name is taken"}</p>
                       </TooltipContent>
                     </Tooltip>
@@ -210,7 +208,7 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
 
                   {trademarkExists !== null && (
                     <Tooltip>
-                      <TooltipTrigger>
+                      <TooltipTrigger asChild>
                         <div className={`rounded-full p-1.5 ${
                           !trademarkExists 
                             ? 'bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300' 
@@ -219,19 +217,26 @@ export function ResultsGrid({ names, onSave, readOnly = false }: ResultsGridProp
                           <Shield className="h-4 w-4" />
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom" sideOffset={5} className="z-50">
                         <p>{!trademarkExists ? "No similar trademarks found" : "Similar trademarks exist"}</p>
                       </TooltipContent>
                     </Tooltip>
                   )}
                 </div>
 
-                <div className="absolute bottom-3 left-3" onClick={(e) => handleInfoClick(e, name)}>
+                <div className="absolute bottom-3 left-3">
                   <Tooltip>
-                    <TooltipTrigger>
-                      <Info className="h-4 w-4 opacity-50 hover:opacity-75 dark:text-gray-300" />
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="p-0 h-auto"
+                        onClick={(e) => handleInfoClick(e, name)}
+                      >
+                        <Info className="h-4 w-4 opacity-50 hover:opacity-75 dark:text-gray-300" />
+                      </Button>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent side="bottom" sideOffset={5} className="z-50">
                       <p>Click for brand description</p>
                     </TooltipContent>
                   </Tooltip>
