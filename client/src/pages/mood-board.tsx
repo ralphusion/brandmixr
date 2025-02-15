@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Type, SparkleIcon, Copy, PenTool } from "lucide-react";
+import { ArrowLeft, Download, SparkleIcon, Copy } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,7 +17,6 @@ import html2canvas from 'html2canvas';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
 import { generateIconSvg } from "@/lib/generateIcon";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
@@ -227,7 +226,6 @@ export default function MoodBoard() {
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
-  const [showFontDialog, setShowFontDialog] = useState(false);
   const [selectedFont, setSelectedFont] = useState<FontRecommendation | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -238,7 +236,6 @@ export default function MoodBoard() {
   const [cardBackgrounds, setCardBackgrounds] = useState<string[]>(CARD_GRADIENTS.slice(0, 3));
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
   const params = new URLSearchParams(window.location.search);
@@ -829,24 +826,6 @@ export default function MoodBoard() {
               Back to Brand Studio
             </Button>
             <Logo />
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate(`/logo-studio?name=${encodeURIComponent(brandName || '')}`)}
-              className="flex items-center gap-2"
-            >
-              <PenTool className="h-4 w-4" />
-              Logo Studio
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setShowFontDialog(true)}
-              className="flex items-center gap-2"
-            >
-              <Type className="h-4 w-4" />
-              AI FontRecommendations
-            </Button>
           </div>
         </div>
 
