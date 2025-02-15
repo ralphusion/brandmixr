@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useState, useEffect } from "react";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+import { generateIconSvg } from "@/lib/generateIcon";
 
 const FONT_STYLES = [
   'uppercase tracking-wider font-bold',
@@ -41,7 +40,6 @@ const BACKGROUNDS = [
     bg: "bg-gradient-to-br from-slate-50 to-gray-100 dark:from-slate-950 dark:to-gray-900", 
     text: "text-slate-800 dark:text-slate-100" 
   },
-  // Additional pastel and darker variants
   { 
     bg: "bg-gradient-to-br from-lime-50 to-green-100 dark:from-lime-950 dark:to-green-900", 
     text: "text-lime-800 dark:text-lime-100" 
@@ -58,9 +56,7 @@ const BACKGROUNDS = [
 
 export default function BrandVariations() {
   const [, navigate] = useLocation();
-  const [logoUrl, setLogoUrl] = useState<string>("");
-  const [isGeneratingLogo, setIsGeneratingLogo] = useState(false);
-  const { toast } = useToast();
+  const [logoSvg, setLogoSvg] = useState<string>("");
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
 
@@ -72,26 +68,11 @@ export default function BrandVariations() {
     generateLogo();
   }, [brandName]);
 
-  const generateLogo = async () => {
+  const generateLogo = () => {
     if (!brandName) return;
-
-    setIsGeneratingLogo(true);
-    try {
-      const res = await apiRequest("POST", "/api/generate-logo", { 
-        brandName,
-        style: "minimalist icon design using simple geometric shapes" 
-      });
-      const data = await res.json();
-      setLogoUrl(data.url);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to generate logo. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingLogo(false);
-    }
+    const svg = generateIconSvg(brandName);
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+    setLogoSvg(dataUrl);
   };
 
   if (!brandName) {
@@ -116,10 +97,9 @@ export default function BrandVariations() {
         <Button
           variant="outline"
           onClick={generateLogo}
-          disabled={isGeneratingLogo}
           className="flex items-center gap-2"
         >
-          <RefreshCw className={`h-4 w-4 ${isGeneratingLogo ? 'animate-spin' : ''}`} />
+          <RefreshCw className="h-4 w-4" />
           Refresh Icon
         </Button>
       </div>
@@ -134,18 +114,13 @@ export default function BrandVariations() {
               className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20`}
             >
               <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
-                {logoUrl && (
+                {logoSvg && (
                   <div className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white dark:bg-gray-800 p-2 shadow-sm">
                     <img 
-                      src={logoUrl} 
+                      src={logoSvg} 
                       alt="Brand Icon" 
-                      className="w-full h-full object-contain filter dark:invert"
+                      className="w-full h-full object-contain"
                     />
-                  </div>
-                )}
-                {isGeneratingLogo && !logoUrl && (
-                  <div className="w-16 h-16 mb-2 flex items-center justify-center">
-                    <RefreshCw className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
                 )}
                 <h3 className={`text-3xl text-center ${style.text} ${fontStyle}`}>

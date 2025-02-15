@@ -12,6 +12,7 @@ import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
 import { FilterMenu, type FilterOptions } from "@/components/FilterMenu";
+import { GeneratingAnimation } from "@/components/GeneratingAnimation";
 
 const NAMES_PER_PAGE = 12;
 
@@ -223,7 +224,7 @@ export default function Generate() {
         <TabsContent value="generated">
           {generateMutation.isPending && (
             <div className="text-center py-12">
-              <p className="text-lg text-muted-foreground">Generating more names...</p>
+              <GeneratingAnimation />
             </div>
           )}
 
