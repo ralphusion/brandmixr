@@ -52,25 +52,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/generate-logo", async (req, res) => {
     try {
-      const { brandName, style, industry } = req.body;
+      const { brandName, style, industry, isMore } = req.body;
       if (!brandName || !style || !industry) {
         throw new Error("Brand name, style, and industry are required");
       }
 
-      // Generate multiple logo variations using DALL-E 3
-      const prompts = [
-        `Create a professional ${style.toLowerCase()} style logo for a ${industry.toLowerCase()} brand named "${brandName}". The logo should be minimal, elegant, and memorable. Use a clean design with strong typography and simple shapes. The logo should work well at different sizes and in both color and monochrome. Create the logo against a pure white background.`,
-        `Design a unique ${style.toLowerCase()} logo for "${brandName}", a ${industry.toLowerCase()} company. Focus on creating a distinctive icon or symbol that represents the brand's identity. The design should be modern and versatile. Place the logo on a white background.`,
-        `Generate a ${style.toLowerCase()} logo design for "${brandName}" in the ${industry.toLowerCase()} sector. The logo should be innovative and impactful, combining contemporary design elements with timeless appeal. Ensure the logo is presented on a white background.`
-      ];
+      // Number of logos to generate
+      const numberOfLogos = 4;
+
+      // Generate logo variations using DALL-E 3
+      const prompts = Array(numberOfLogos).fill(null).map((_, index) => {
+        const basePrompt = `Create a standalone ${style.toLowerCase()} logo design for ${industry.toLowerCase()} brand "${brandName}". The logo should be a clean, professional design on a pure white background with no additional elements, frames, or mockups.`;
+
+        const variations = [
+          "Focus on creating a unique and memorable icon or symbol. Use minimal colors and shapes for maximum impact.",
+          "Design an elegant typographic logo with creative letterforms. Ensure the text is clear and legible.",
+          "Combine a distinctive symbol with modern typography. Keep the design balanced and professional.",
+          "Create an abstract or geometric representation of the brand's essence. Make it bold and contemporary."
+        ];
+
+        return `${basePrompt} ${variations[index % variations.length]}`;
+      });
 
       const logoPromises = prompts.map(async (prompt) => {
         const response = await openai.images.generate({
           model: "dall-e-3",
-          prompt: prompt,
+          prompt: prompt + " The final image should only contain the logo design on a white background, with no additional elements, frames, or mockups.",
           n: 1,
           size: "1024x1024",
-          quality: "standard",
+          quality: "hd",
           style: "natural",
         });
 

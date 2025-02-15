@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ArrowLeft, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Download, Loader2, SparkleIcon } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { motion } from "framer-motion";
@@ -35,34 +34,37 @@ const INDUSTRY_OPTIONS = [
 
 export default function LogoStudio() {
   const [, navigate] = useLocation();
-  const [brandName, setBrandName] = useState<string>("");
   const [selectedStyle, setSelectedStyle] = useState<string>("modern");
   const [selectedIndustry, setSelectedIndustry] = useState<string>("technology");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedLogos, setGeneratedLogos] = useState<string[]>([]);
   const { toast } = useToast();
 
-  const handleGenerateLogo = async () => {
-    if (!brandName.trim()) {
-      toast({
-        title: "Brand name required",
-        description: "Please enter a brand name to generate logos",
-        variant: "destructive"
-      });
-      return;
-    }
+  const params = new URLSearchParams(window.location.search);
+  const brandName = params.get('name');
 
+  if (!brandName) {
+    navigate('/');
+    return null;
+  }
+
+  const handleGenerateLogo = async (isMore = false) => {
     setIsGenerating(true);
     try {
       const response = await apiRequest("POST", "/api/generate-logo", {
         brandName,
         style: selectedStyle,
-        industry: selectedIndustry
+        industry: selectedIndustry,
+        isMore
       });
 
       const data = await response.json();
       if (data.logos) {
-        setGeneratedLogos(data.logos);
+        if (isMore) {
+          setGeneratedLogos(prev => [...prev, ...data.logos]);
+        } else {
+          setGeneratedLogos(data.logos);
+        }
       }
     } catch (error) {
       toast({
@@ -103,10 +105,10 @@ export default function LogoStudio() {
           <Button
             variant="ghost"
             className="mr-4"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/mood-board?name=${encodeURIComponent(brandName)}`)}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
+            Back to Mood Board
           </Button>
           <Logo />
         </div>
@@ -117,17 +119,6 @@ export default function LogoStudio() {
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold mb-6">Logo Generator</h2>
             <div className="space-y-4">
-              <div>
-                <Label htmlFor="brand-name">Brand Name</Label>
-                <Input
-                  id="brand-name"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  placeholder="Enter your brand name"
-                  className="mt-1"
-                />
-              </div>
-
               <div>
                 <Label htmlFor="style">Style Preference</Label>
                 <Select value={selectedStyle} onValueChange={setSelectedStyle}>
@@ -163,7 +154,7 @@ export default function LogoStudio() {
               <Button 
                 className="w-full" 
                 size="lg"
-                onClick={handleGenerateLogo}
+                onClick={() => handleGenerateLogo(false)}
                 disabled={isGenerating}
               >
                 {isGenerating ? (
@@ -184,34 +175,54 @@ export default function LogoStudio() {
             <CardContent className="p-6">
               <h2 className="text-2xl font-bold mb-6">Generated Logos</h2>
               {generatedLogos.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {generatedLogos.map((logo, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                    >
-                      <Card className="overflow-hidden">
-                        <CardContent className="p-4">
-                          <img
-                            src={logo}
-                            alt={`Generated logo ${index + 1}`}
-                            className="w-full aspect-square object-contain mb-4"
-                          />
-                          <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => handleDownload(logo, index)}
-                          >
-                            <Download className="h-4 w-4 mr-2" />
-                            Download
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ))}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {generatedLogos.map((logo, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                      >
+                        <Card className="overflow-hidden">
+                          <CardContent className="p-4">
+                            <img
+                              src={logo}
+                              alt={`Generated logo ${index + 1}`}
+                              className="w-full aspect-square object-contain mb-4"
+                            />
+                            <Button
+                              variant="outline"
+                              className="w-full"
+                              onClick={() => handleDownload(logo, index)}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Download
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                  <Button
+                    className="w-full"
+                    variant="outline"
+                    onClick={() => handleGenerateLogo(true)}
+                    disabled={isGenerating}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Generating More...
+                      </>
+                    ) : (
+                      <>
+                        <SparkleIcon className="mr-2 h-4 w-4" />
+                        Generate More Variations
+                      </>
+                    )}
+                  </Button>
+                </>
               ) : (
                 <div className="flex flex-col items-center justify-center h-[400px] text-muted-foreground">
                   {isGenerating ? (
@@ -219,7 +230,7 @@ export default function LogoStudio() {
                   ) : (
                     <>
                       <p className="text-lg mb-2">No logos generated yet</p>
-                      <p className="text-sm">Fill in the details and click Generate to create your logos</p>
+                      <p className="text-sm">Select your preferences and click Generate to create your logos</p>
                     </>
                   )}
                 </div>
