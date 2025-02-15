@@ -1,5 +1,5 @@
 import { useLocation } from "wouter";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download, RefreshCw } from "lucide-react";
@@ -8,6 +8,13 @@ import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/queryClient";
+import html2canvas from 'html2canvas';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
@@ -19,6 +26,7 @@ interface MoodBoardData {
 
 export default function MoodBoard() {
   const [, navigate] = useLocation();
+  const moodBoardRef = useRef<HTMLDivElement>(null);
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
   const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
@@ -32,6 +40,45 @@ export default function MoodBoard() {
     enabled: !!brandName && !!formData.industry && !!formData.style,
   });
 
+  const handleDownload = async (format: 'png' | 'pdf') => {
+    if (!moodBoardRef.current || !brandName) return;
+
+    const canvas = await html2canvas(moodBoardRef.current, {
+      scale: 2, // Higher quality
+      backgroundColor: null,
+      useCORS: true, // Handle cross-origin images
+    });
+
+    if (format === 'png') {
+      // Download as PNG
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      // Download as PDF using canvas data
+      const { jsPDF } = await import('jspdf');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+
+      pdf.addImage(
+        canvas.toDataURL('image/png'),
+        'PNG',
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+      pdf.save(`${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.pdf`);
+    }
+  };
+
   if (!brandName) {
     navigate('/');
     return null;
@@ -44,12 +91,30 @@ export default function MoodBoard() {
           <Button
             variant="ghost"
             className="mr-4"
-            onClick={() => navigate('/brand-variations')}
+            onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName)}`)}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Brand Studio
           </Button>
           <Logo />
+        </div>
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex items-center gap-2">
+                <Download className="h-4 w-4" />
+                Download Mood Board
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => handleDownload('png')}>
+                Download as PNG
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDownload('pdf')}>
+                Download as PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -61,7 +126,7 @@ export default function MoodBoard() {
           <Skeleton className="h-[200px] rounded-lg" />
         </div>
       ) : moodBoardData ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div ref={moodBoardRef} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Color Palette */}
           <Card>
             <CardContent className="p-6">
