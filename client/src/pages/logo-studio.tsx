@@ -33,7 +33,6 @@ const INDUSTRY_OPTIONS = [
   { value: "travel", label: "Travel & Hospitality" }
 ];
 
-// Font styles from brand variations
 const FONT_STYLES = [
   'font-serif italic tracking-wide font-medium',
   'font-sans uppercase tracking-[0.2em] font-black',
@@ -49,7 +48,6 @@ const FONT_STYLES = [
   'font-mono normal-case tracking-[0.1em] font-bold'
 ];
 
-// Backgrounds from brand variations
 const BACKGROUNDS = [
   {
     bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
@@ -168,7 +166,6 @@ export default function LogoStudio() {
           Logo Studio: {brandName}
         </h1>
 
-        {/* Controls Section */}
         <Card className="mb-8 shadow-md">
           <CardContent className="p-6">
             <h2 className="text-2xl font-bold mb-6">Logo Generator</h2>
@@ -227,7 +224,6 @@ export default function LogoStudio() {
         </Card>
       </div>
 
-      {/* Generated Logos Section */}
       <AnimatePresence mode="wait">
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
@@ -248,28 +244,25 @@ export default function LogoStudio() {
                   transition={{ delay: index * 0.05 }}
                 >
                   <Card className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer`}>
-                    <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4">
-                      <motion.div
-                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        <img
-                          src={logo}
-                          alt={`Generated logo ${index + 1}`}
-                          className="w-full h-full object-contain"
+                    <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-6">
+                      <div className="flex flex-col items-center gap-4">
+                        <svg
+                          viewBox="0 0 24 24"
+                          className={`w-12 h-12 ${style.text}`}
+                          fill="currentColor"
+                          dangerouslySetInnerHTML={{ __html: logo }}
                         />
-                      </motion.div>
-                      <motion.h3
-                        className={`text-3xl text-center ${style.text} ${fontStyle}`}
-                        whileHover={{ scale: 1.05 }}
-                        transition={{ type: "spring", stiffness: 300 }}
-                      >
-                        {brandName}
-                      </motion.h3>
+                        <motion.h3
+                          className={`text-3xl text-center ${style.text} ${fontStyle}`}
+                          whileHover={{ scale: 1.05 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          {brandName}
+                        </motion.h3>
+                      </div>
                       <Button
                         variant="outline"
-                        className="mt-4"
+                        className="mt-2"
                         onClick={() => handleDownload(logo, index)}
                       >
                         <Download className="h-4 w-4 mr-2" />

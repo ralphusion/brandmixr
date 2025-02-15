@@ -31,7 +31,6 @@ const DEFAULT_COLORS = {
   }
 };
 
-// Advanced text effects for different styles
 const TEXT_EFFECTS = {
   modern: {
     letterSpacing: '0.05em',
@@ -76,51 +75,10 @@ function getRandomElement<T>(array: T[]): T {
 export function generateSimpleLogo(config: LogoConfig): string {
   const { brandName, style, industry } = config;
   const logoStyle = mapStyleToLogoStyle(style);
-  const colors = DEFAULT_COLORS[logoStyle];
-  const font = iconService.getRandomFont();
-  const textEffect = TEXT_EFFECTS[logoStyle];
 
-  const primary = getRandomElement(colors.primary);
-  const accent = getRandomElement(colors.accent);
-  const icon = iconService.getRandomIcon(industry);
-  const weight = font.weights[0]; // We now get a single weight from the font service
-  const styleAttr = font.styles[0]; // We now get a single style from the font service
+  // Get icon path only from the icon service
+  const iconPath = iconService.getRandomIcon(industry);
 
-  // Create an enhanced SVG with advanced text styling
-  const svgContent = `
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
-      <defs>
-        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
-        </linearGradient>
-        <filter id="shadow">
-          <feDropShadow dx="0" dy="1" stdDeviation="1" flood-opacity="0.3"/>
-        </filter>
-      </defs>
-      <g transform="translate(30, 35)">
-        <path d="${icon}" 
-              fill="url(#grad1)" 
-              transform="scale(2.5)" 
-              stroke="${accent}" 
-              stroke-width="0.5"
-              filter="url(#shadow)"
-        />
-        <text x="95" y="25" 
-              font-family="${font.family}, system-ui, sans-serif" 
-              font-size="38"
-              font-weight="${weight}"
-              font-style="${styleAttr}"
-              fill="${primary}"
-              letter-spacing="${textEffect.letterSpacing}"
-              text-transform="${textEffect.textTransform || 'none'}"
-              style="font-variation-settings: ${textEffect.fontVariationSettings}"
-              dominant-baseline="central"
-              filter="url(#shadow)">
-              ${brandName}
-        </text>
-      </g>
-    </svg>`;
-
-  return `data:image/svg+xml;base64,${Buffer.from(svgContent).toString('base64')}`;
+  // Return the raw SVG path for direct use in the component
+  return iconPath;
 }
