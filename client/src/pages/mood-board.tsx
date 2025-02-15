@@ -238,11 +238,13 @@ export default function MoodBoard() {
             >
               <Card className="shadow-md">
                 <CardContent className="p-6">
-                  <img
-                    src={imageUrl}
-                    alt={`Mood image ${index + 1}`}
-                    className="w-full h-64 object-contain rounded-lg bg-muted/50"
-                  />
+                  <div className="aspect-video bg-muted/50 rounded-lg overflow-hidden">
+                    <img
+                      src={imageUrl}
+                      alt={`Mood image ${index + 1}`}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
