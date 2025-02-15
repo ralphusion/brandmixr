@@ -49,28 +49,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/generate-logo", async (req, res) => {
     try {
+      console.log("Received generate-logo request:", req.body);
       const { brandName, style, industry, isMore } = req.body;
+
       if (!brandName || !style || !industry) {
         throw new Error("Brand name, style, and industry are required");
       }
 
-      // Number of logos to generate (4 initially, or if isMore is true)
       const numberOfLogos = 4;
       const currentLogos = isMore ? (req.body.currentLogos || []) : [];
       const startIndex = currentLogos.length;
 
-      // Generate logo variations using Gemini
+      console.log(`Generating ${numberOfLogos} logos for ${brandName}`);
+
       const logoPromises = Array(numberOfLogos).fill(null).map(async (_, index) => {
         const prompt = generateLogoPrompt(brandName, style, industry, startIndex + index);
+        console.log(`Generating logo ${index + 1} with prompt:`, prompt);
         return generateLogoWithGemini(prompt);
       });
 
       const newLogos = await Promise.all(logoPromises);
-      const logos = isMore ? [...currentLogos, ...newLogos] : newLogos;
+      console.log(`Successfully generated ${newLogos.length} new logos`);
 
+      const logos = isMore ? [...currentLogos, ...newLogos] : newLogos;
       res.json({ logos });
     } catch (error) {
-      console.error("Error generating logo:", error);
+      console.error("Error in generate-logo endpoint:", error);
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {

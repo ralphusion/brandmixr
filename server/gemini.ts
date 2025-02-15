@@ -2,31 +2,38 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
-const BASE_SVG_TEMPLATE = `
+const BASE_SVG_TEMPLATE = `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
   <rect width="100%" height="100%" fill="white"/>
 </svg>`;
 
 export async function generateLogoWithGemini(prompt: string): Promise<string> {
   try {
+    console.log("Generating logo with prompt:", prompt);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const result = await model.generateContent([
-      prompt,
       {
-        inlineData: {
-          mimeType: "image/svg+xml",
-          data: Buffer.from(BASE_SVG_TEMPLATE).toString('base64'),
-        },
-      },
+        role: "user",
+        parts: [
+          { text: prompt },
+          {
+            inline_data: {
+              mime_type: "image/svg+xml",
+              data: Buffer.from(BASE_SVG_TEMPLATE).toString('base64')
+            }
+          }
+        ]
+      }
     ]);
 
     const response = await result.response;
     const imagePartBase64 = response.text();
-    return `data:image/svg+xml;base64,${imagePartBase64}`;
+    console.log("Generated logo response:", imagePartBase64.substring(0, 100) + "...");
+    return `data:image/svg+xml;base64,${Buffer.from(imagePartBase64).toString('base64')}`;
   } catch (error) {
-    console.error("Error generating logo with Gemini:", error);
-    throw error;
+    console.error("Error in generateLogoWithGemini:", error);
+    throw new Error(`Failed to generate logo: ${error.message}`);
   }
 }
 
