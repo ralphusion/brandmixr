@@ -224,7 +224,8 @@ export default function MoodBoard() {
             setImageLoadErrors(prev => [...prev, index]);
             reject(new Error(`Failed to load image at index ${index}`));
           };
-          img.src = url;
+          // Add timestamp to URL to prevent caching
+          img.src = `${url}${url.includes('?') ? '&' : '?'}_t=${Date.now()}`;
         });
       });
 
@@ -352,17 +353,21 @@ export default function MoodBoard() {
             throw new Error('No image returned from server');
           }
 
+          // Add timestamp to prevent browser caching
+          const imageUrl = `${updatedData.image}${updatedData.image.includes('?') ? '&' : '?'}_t=${Date.now()}`;
+
           queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
             if (!oldData || !oldData.images) return oldData;
 
             const newImages = [...oldData.images];
-            newImages[imageIndex] = updatedData.image;
+            newImages[imageIndex] = imageUrl;
             return {
               ...oldData,
               images: newImages,
             };
           });
 
+          // Force immediate image reload
           setImagesLoaded(false);
           setImageLoadErrors(prev => prev.filter(idx => idx !== imageIndex));
           break;
@@ -850,7 +855,8 @@ export default function MoodBoard() {
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}                      exit={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
                       className="space-y-2"
                     >
                       <Skeleton className="h-12 w-full rounded-lg" />
