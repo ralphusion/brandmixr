@@ -18,6 +18,8 @@ import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/comp
 import { useFonts } from "@/contexts/FontContext";
 import { generateIconSvg } from "@/lib/generateIcon";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { HexColorPicker } from "react-colorful";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface FontSettings {
   primary: {
@@ -45,14 +47,10 @@ type RegenerationSection = {
   index?: number;
 };
 
-//const BACKGROUNDS = [ ... ]; //Removed as not used after changes
 
 const getRandomPleaseantColor = () => {
-  //const randomIndex = Math.floor(Math.random() * BACKGROUNDS.length); //Removed as not used after changes
-  //return BACKGROUNDS[randomIndex].bg; //Removed as not used after changes
-  return 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800'; // Default for now.  Could be improved.
+  return 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800';
 }
-
 
 const ICON_STYLES = {
   initials: [
@@ -87,36 +85,29 @@ const ICON_STYLES = {
 };
 
 const FONT_FAMILIES = [
-  { family: 'Montserrat', style: 'normal', weight: '700' },
   { family: 'Inter', style: 'normal', weight: '600' },
+  { family: 'Montserrat', style: 'normal', weight: '700' },
   { family: 'Poppins', style: 'normal', weight: '700' },
-  { family: 'Source Sans Pro', style: 'normal', weight: '700' },
-  { family: 'Nunito Sans', style: 'normal', weight: '800' },
-  { family: 'Work Sans', style: 'normal', weight: '600' },
-  { family: 'Open Sans', style: 'normal', weight: '700' },
-  { family: 'Roboto', style: 'normal', weight: '700' },
   { family: 'SF Pro Display', style: 'normal', weight: '600' },
-  { family: 'Raleway', style: 'normal', weight: '700' }
-];
-
-const TEXT_TRANSFORMS = [
-  'uppercase',
-  'lowercase',
-  'capitalize',
-  'none'
+  { family: 'Helvetica Neue', style: 'normal', weight: '600' },
+  { family: 'Source Sans Pro', style: 'normal', weight: '600' },
+  { family: 'Nunito Sans', style: 'normal', weight: '700' },
+  { family: 'Work Sans', style: 'normal', weight: '600' }
 ];
 
 const FONT_STYLES_ARRAY = [
   'font-sans tracking-wide font-bold',
   'font-sans uppercase tracking-[0.2em] font-black',
   'font-sans tracking-tight font-bold',
-  'font-sans tracking-normal font-semibold',
   'font-sans uppercase tracking-widest font-extrabold',
-  'font-sans tracking-tight font-bold',
   'font-sans uppercase tracking-[0.15em] font-bold',
-  'font-sans tracking-wide font-medium',
-  'font-sans tracking-normal font-semibold',
-  'font-sans uppercase tracking-[0.25em] font-black'
+  'font-sans tracking-wide font-semibold'
+];
+
+const TEXT_TRANSFORMS = [
+  'uppercase',
+  'none',
+  'capitalize'
 ];
 
 const FONT_STYLES = [
@@ -183,22 +174,13 @@ interface FontStyle {
 
 
 const CARD_GRADIENTS = [
-  // Professional & Modern
   'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800',
   'bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700',
   'bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700',
-  // Soft & Elegant
-  'bg-gradient-to-br from-rose-400 via-pink-400 to-rose-500',
   'bg-gradient-to-br from-violet-500 via-purple-500 to-violet-600',
-  'bg-gradient-to-br from-sky-400 via-blue-400 to-sky-500',
-  // Rich & Deep
   'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900',
   'bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800',
-  'bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800',
-  // Pastel & Subtle
-  'bg-gradient-to-br from-blue-100 via-indigo-200 to-blue-300',
-  'bg-gradient-to-br from-emerald-100 via-teal-200 to-emerald-300',
-  'bg-gradient-to-br from-rose-100 via-pink-200 to-rose-300'
+  'bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800'
 ];
 
 export default function MoodBoard() {
@@ -213,10 +195,11 @@ export default function MoodBoard() {
   const [regeneratingSection, setRegeneratingSection] = useState<RegenerationSection | null>(null);
   const [logoSvg, setLogoSvg] = useState<string>("");
   const [iconStyle, setIconStyle] = useState<IconStyle>('initials-simple');
-  const [iconColor, setIconColor] = useState("#000000");
-  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>(CARD_GRADIENTS.slice(0,3));
+  const [logoColor, setLogoColor] = useState("#000000");
+  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>(CARD_GRADIENTS.slice(0, 3));
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
+  const [showColorPicker, setShowColorPicker] = useState(false);
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -462,8 +445,7 @@ export default function MoodBoard() {
         if (savedConfig) {
           const parsedConfig = JSON.parse(savedConfig);
           setIconStyle(parsedConfig.iconStyle || 'initials-simple');
-          setIconColor(parsedConfig.iconColor || '#000000');
-          //setCardBackground(parsedConfig.cardBackground || '#FFFFFF');
+          setLogoColor(parsedConfig.iconColor || '#000000');
 
         }
 
@@ -483,14 +465,14 @@ export default function MoodBoard() {
     if (brandName) {
       generateLogo();
     }
-  }, [brandName, iconStyle, iconColor]);
+  }, [brandName, iconStyle, logoColor]);
 
 
   const generateLogo = () => {
     if (!brandName) return;
     const svg = generateIconSvg(brandName, {
       style: iconStyle,
-      color: iconColor,
+      color: logoColor,
       backgroundColor: 'white' // Always use white background for icon
     });
     const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
@@ -501,36 +483,32 @@ export default function MoodBoard() {
     if (!brandName) return;
 
     try {
-      // Get available icon styles
       const styles = Object.keys(ICON_STYLES)
         .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
         .map(style => style.value);
 
-      // Select new style and color
       const availableStyles = styles.filter(style => style !== iconStyle);
       const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
       const hue = Math.floor(Math.random() * 360);
       const saturation = 60 + Math.floor(Math.random() * 20);
       const lightness = 45 + Math.floor(Math.random() * 15);
-      const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      const newLogoColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
       setIconStyle(newStyle);
-      setIconColor(newIconColor);
+      setLogoColor(newLogoColor);
 
-      // Generate three different font styles using the updated FONT_FAMILIES
       const newFontStyles = Array(3).fill(null).map(() => {
         const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
         return {
           fontFamily: randomFont.family,
           fontWeight: randomFont.weight,
-          fontStyle: 'normal', // Always normal, no italics
+          fontStyle: 'normal',
           textTransform: TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)],
           letterSpacing: LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
         };
       });
 
-      // Generate new background gradients
       const usedGradients = new Set();
       const newBackgrounds = Array(3).fill(null).map(() => {
         let gradient;
@@ -541,10 +519,8 @@ export default function MoodBoard() {
         return gradient;
       });
 
-      // Store font styles in session
       sessionStorage.setItem('fontStyles', JSON.stringify(newFontStyles));
 
-      // Update backgrounds
       setCardBackgrounds(newBackgrounds);
 
     } catch (error) {
@@ -593,17 +569,18 @@ export default function MoodBoard() {
     setSelectedCardId(cardId);
     sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
       iconStyle,
-      iconColor,
-      //cardBackground
+      logoColor,
     }));
   };
 
-  // Component for the color inputs section
   const ColorInputs = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div className="space-y-2">
         <Label htmlFor="icon-style">Icon Options</Label>
-        <Select value={iconStyle} onValueChange={setIconStyle}>
+        <Select
+          value={iconStyle}
+          onValueChange={(value: string) => setIconStyle(value as IconStyle)}
+        >
           <SelectTrigger id="icon-style">
             <SelectValue placeholder="Select style" />
           </SelectTrigger>
@@ -625,19 +602,27 @@ export default function MoodBoard() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="icon-color">Icon Color</Label>
-        <Input
-          id="icon-color"
-          type="color"
-          value={iconColor}
-          onChange={(e) => setIconColor(e.target.value)}
-          className="h-10"
-        />
+        <Label htmlFor="logo-color">Logo Color</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className="w-full h-10 p-0 relative overflow-hidden"
+              style={{ backgroundColor: logoColor }}
+            >
+              <div className="absolute inset-0 flex items-center justify-center text-white mix-blend-difference">
+                {logoColor}
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-3">
+            <HexColorPicker color={logoColor} onChange={setLogoColor} />
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
 
-  // Component for the card grid
   const CardGrid = () => {
     const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
 
@@ -667,7 +652,7 @@ export default function MoodBoard() {
                 >
                   {logoSvg && (
                     <motion.div
-                      className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 p-2 shadow-sm"
+                      className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-2 shadow-sm"
                       whileHover={{ scale: 1.1 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
@@ -679,13 +664,14 @@ export default function MoodBoard() {
                     </motion.div>
                   )}
                   <motion.h3
-                    className="text-3xl text-center text-white"
+                    className="text-3xl text-center"
                     style={{
                       fontFamily: fontStyle?.fontFamily,
                       fontWeight: fontStyle?.fontWeight,
                       fontStyle: 'normal',
                       textTransform: fontStyle?.textTransform,
                       letterSpacing: fontStyle?.letterSpacing,
+                      color: logoColor
                     }}
                     whileHover={{ scale: 1.05 }}
                     transition={{ type: "spring", stiffness: 300 }}
@@ -701,7 +687,6 @@ export default function MoodBoard() {
     );
   };
 
-  // Render the Brand Logo section
   const BrandLogoSection = () => (
     <Card className="shadow-md">
       <CardContent className="p-6">
@@ -761,7 +746,7 @@ export default function MoodBoard() {
   }
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIconColor(e.target.value);
+    setLogoColor(e.target.value);
   };
 
   if (!brandName) {
@@ -866,7 +851,7 @@ export default function MoodBoard() {
                     </motion.div>
                   ) : (
                     <motion.div
-                      initial={{ opacity:0 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                     >
