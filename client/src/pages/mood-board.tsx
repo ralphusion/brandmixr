@@ -672,16 +672,29 @@ export default function MoodBoard() {
     fontStyle: any;
     onSelect: () => void;
   }) => {
-    const [selectedFont, setSelectedFont] = useState(fontStyle?.fontFamily || FONT_FAMILIES[0].family);
+    const [selectedFont, setSelectedFont] = useState(() => {
+      try {
+        const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
+        return styles[index]?.fontFamily || fontStyle?.fontFamily || FONT_FAMILIES[0].family;
+      } catch (error) {
+        console.error('Error loading font style:', error);
+        return FONT_FAMILIES[0].family;
+      }
+    });
 
     const handleFontChange = (value: string) => {
-      setSelectedFont(value);
-      const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
-      styles[index] = {
-        ...styles[index],
-        fontFamily: value,
-      };
-      sessionStorage.setItem('fontStyles', JSON.stringify(styles));
+      try {
+        setSelectedFont(value);
+        const styles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
+        const newStyles = [...styles];
+        newStyles[index] = {
+          ...newStyles[index],
+          fontFamily: value,
+        };
+        sessionStorage.setItem('fontStyles', JSON.stringify(newStyles));
+      } catch (error) {
+        console.error('Error saving font style:', error);
+      }
     };
 
     return (
@@ -689,12 +702,12 @@ export default function MoodBoard() {
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: index * 0.05 }}
-        onClick={onSelect}
       >
         <Card
           className={`${background} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
             isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
           }`}
+          onClick={onSelect}
         >
           <CardContent
             className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
@@ -717,10 +730,10 @@ export default function MoodBoard() {
               className="text-3xl text-center text-white"
               style={{
                 fontFamily: selectedFont,
-                fontWeight: fontStyle?.fontWeight,
+                fontWeight: fontStyle?.fontWeight || '600',
                 fontStyle: 'normal',
-                textTransform: fontStyle?.textTransform,
-                letterSpacing: fontStyle?.letterSpacing,
+                textTransform: fontStyle?.textTransform || 'none',
+                letterSpacing: fontStyle?.letterSpacing || 'normal',
                 color: 'white'
               }}
               whileHover={{ scale: 1.05 }}
@@ -729,8 +742,11 @@ export default function MoodBoard() {
               {brandName}
             </motion.h3>
           </CardContent>
-          <div className="p-4 bg-white/10 backdrop-blur-sm">
-            <Select value={selectedFont} onValueChange={handleFontChange}>
+          <div className="p-4 bg-white/10 backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+            <Select 
+              value={selectedFont} 
+              onValueChange={handleFontChange}
+            >
               <SelectTrigger className="bg-white/90">
                 <SelectValue placeholder="Select font" />
               </SelectTrigger>
@@ -845,7 +861,7 @@ export default function MoodBoard() {
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-8">
-<div className="flex items-center">
+          <div className="flex items-center">
             <Button
               variant="ghost"
               className="mr-4"
