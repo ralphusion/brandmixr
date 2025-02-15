@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Logo } from "@/components/Logo";
+import { FilterMenu, type FilterOptions } from "@/components/FilterMenu";
 
 const NAMES_PER_PAGE = 12;
 
@@ -32,13 +33,17 @@ export default function Generate() {
   const [displayedNames, setDisplayedNames] = useState<GeneratedName[]>([]);
   const [page, setPage] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({
+    nameLength: [3, 20],
+    startingLetter: "",
+    searchText: "",
+  });
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
   const formData = sessionStorage.getItem('generatorFormData');
 
-  // Load saved generated names from sessionStorage
   useEffect(() => {
     const savedGeneratedNames = sessionStorage.getItem('generatedNames');
     const formData = sessionStorage.getItem('generatorFormData');
@@ -53,7 +58,6 @@ export default function Generate() {
       setGeneratedNames(parsedNames);
       setDisplayedNames(parsedNames.slice(0, NAMES_PER_PAGE));
     } else {
-      // Generate names when the page loads and no saved names exist
       generateMutation.mutate(JSON.parse(formData));
     }
   }, []);
@@ -81,9 +85,36 @@ export default function Generate() {
 
   useEffect(() => {
     const endIndex = page * NAMES_PER_PAGE;
-    const newNames = generatedNames.slice(0, endIndex);
+    const filteredNames = applyFilters(generatedNames);
+    const newNames = filteredNames.slice(0, endIndex);
     setDisplayedNames(newNames);
-  }, [page, generatedNames]);
+  }, [page, generatedNames, filters]);
+
+  const applyFilters = (names: GeneratedName[]): GeneratedName[] => {
+    return names.filter((nameData) => {
+      const name = nameData.name.toLowerCase();
+      const searchText = filters.searchText.toLowerCase();
+
+      const length = name.length;
+      if (length < filters.nameLength[0] || length > filters.nameLength[1]) {
+        return false;
+      }
+
+      if (filters.startingLetter) {
+        if (filters.startingLetter === "#") {
+          if (!/^\d/.test(name)) return false;
+        } else {
+          if (!name.startsWith(filters.startingLetter.toLowerCase())) return false;
+        }
+      }
+
+      if (searchText && !name.includes(searchText)) {
+        return false;
+      }
+
+      return true;
+    });
+  };
 
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
@@ -92,13 +123,10 @@ export default function Generate() {
       return res.json();
     },
     onSuccess: (data: GeneratedName[]) => {
-      // Append new names to existing ones instead of replacing
       setGeneratedNames(prev => [...prev, ...data]);
-      // Update displayed names to show all names up to the current page
       const endIndex = page * NAMES_PER_PAGE;
       setDisplayedNames(prev => [...prev, ...data].slice(0, endIndex));
       setIsGenerating(false);
-      // Store all generated names in sessionStorage
       sessionStorage.setItem('generatedNames', JSON.stringify([...generatedNames, ...data]));
     },
     onError: () => {
@@ -184,10 +212,13 @@ export default function Generate() {
       </div>
 
       <Tabs defaultValue="generated" className="mt-8">
-        <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-          <TabsTrigger value="generated">Generated Names</TabsTrigger>
-          <TabsTrigger value="saved">Saved Names</TabsTrigger>
-        </TabsList>
+        <div className="flex items-center justify-between mb-4">
+          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+            <TabsTrigger value="generated">Generated Names</TabsTrigger>
+            <TabsTrigger value="saved">Saved Names</TabsTrigger>
+          </TabsList>
+          <FilterMenu onFilterChange={setFilters} />
+        </div>
 
         <TabsContent value="generated">
           {generateMutation.isPending && (
@@ -202,12 +233,12 @@ export default function Generate() {
                 names={displayedNames}
                 onSave={(name) => saveMutation.mutate(name.name)}
               />
-              {generatedNames.length > displayedNames.length && !isGenerating && (
+              {applyFilters(generatedNames).length > displayedNames.length && !isGenerating && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
                   <p className="text-muted-foreground">Loading more names...</p>
                 </div>
               )}
-              {displayedNames.length === generatedNames.length && (
+              {displayedNames.length === applyFilters(generatedNames).length && (
                 <div className="mt-8 flex justify-center">
                   <Button
                     onClick={handleGenerateMore}
@@ -217,6 +248,12 @@ export default function Generate() {
                   </Button>
                 </div>
               )}
+            </div>
+          )}
+
+          {displayedNames.length === 0 && !generateMutation.isPending && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No names match your filters</p>
             </div>
           )}
         </TabsContent>
