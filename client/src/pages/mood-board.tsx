@@ -126,12 +126,12 @@ interface FontRecommendation {
   explanation: string;
 }
 
+// Update FontStyle interface
 interface FontStyle {
   fontFamily: string;
   fontWeight: string;
   fontStyle: string;
   textTransform: string;
-  textDecoration: string;
   letterSpacing: string;
 }
 
@@ -402,7 +402,11 @@ export default function MoodBoard() {
       setIconStyle(parsedConfig.iconStyle);
       setIconColor(parsedConfig.iconColor);
       setSelectedBackground(parsedConfig.selectedBackground);
-      setSelectedFontStyle(parsedConfig.fontStyle);
+      // Remove textDecoration from the saved font style
+      if (parsedConfig.fontStyle) {
+        const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
+        setSelectedFontStyle(fontStyle);
+      }
     }
   }, []);
 
@@ -445,7 +449,6 @@ export default function MoodBoard() {
     const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
     const textTransform = TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)];
     const fontStyle = FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)];
-    const textDecoration = TEXT_DECORATIONS[Math.floor(Math.random() * TEXT_DECORATIONS.length)];
     const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
 
     // Create font style object
@@ -454,7 +457,6 @@ export default function MoodBoard() {
       fontWeight: randomFont.weight,
       fontStyle,
       textTransform,
-      textDecoration,
       letterSpacing: letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`,
     };
 
@@ -487,7 +489,10 @@ export default function MoodBoard() {
       setIconStyle(parsedConfig.iconStyle);
       setIconColor(parsedConfig.iconColor);
       setSelectedBackground(parsedConfig.selectedBackground);
-      setSelectedFontStyle(parsedConfig.fontStyle); 
+      if (parsedConfig.fontStyle) {
+        const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
+        setSelectedFontStyle(fontStyle);
+      }
     }
   };
 
@@ -531,10 +536,19 @@ export default function MoodBoard() {
       iconStyle,
       iconColor,
       selectedBackground: selectedStyle,
-      fontStyle: selectedFontStyle 
+      fontStyle: selectedFontStyle
     }));
   };
 
+  const handleExport = () => {
+    //Implementation to export color palette
+    const a = document.createElement('a');
+    a.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(colors));
+    a.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-palette.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
   if (!brandName) {
     navigate('/');
@@ -657,7 +671,6 @@ export default function MoodBoard() {
                         fontWeight: selectedFontStyle.fontWeight,
                         fontStyle: selectedFontStyle.fontStyle,
                         textTransform: selectedFontStyle.textTransform as React.CSSProperties['textTransform'],
-                        textDecoration: selectedFontStyle.textDecoration as React.CSSProperties['textDecoration'],
                         letterSpacing: selectedFontStyle.letterSpacing as React.CSSProperties['letterSpacing'],
                       } : fonts?.primary ? {
                         fontFamily: fonts.primary.family,
@@ -685,6 +698,18 @@ export default function MoodBoard() {
                     Color Palette
                   </h2>
                   <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleExport()}
+                        >
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Download color palette</TooltipContent>
+                    </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -884,7 +909,7 @@ export default function MoodBoard() {
               <motion.div
                 key={index}
                 initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
+                animate={{ scale: 1, opacity:1 }}
                 transition={{ delay: index * 0.2 }}
               >
                 <Card className="shadow-md">
@@ -927,7 +952,8 @@ export default function MoodBoard() {
                           <Skeleton className="w-full h-full" />
                         </motion.div>
                       ) : (
-                        <motion.div                      initial={{ opacity: 0 }}
+                        <motion.div
+                          initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
                           className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
@@ -952,80 +978,80 @@ export default function MoodBoard() {
         )}
 
         <Dialog open={showFontDialog} onOpenChange={setShowFontDialog}>
-          <DialogContent>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>AI-Recommended Font Combinations</DialogTitle>
             </DialogHeader>
 
-            <div className="flex-1 overflow-y-auto pr-2">
-              <div className="grid grid-cols-1 gap-6 py-4">
-                {loadingFonts ? (
-                  <p className="text-center text-muted-foreground">
-                    Generating font recommendations...
-                  </p>
-                ) : (
-                  fontRecommendations.map((recommendation, index) => (
-                    <Card
-                      key={index}
-                      className={`cursor-pointer transition-all ${selectedFont === recommendation ? 'ring-2 ring-primary ring-offset-2' : ''}`}
-                      onClick={() => setSelectedFont(recommendation)}
-                    >
-                      <CardContent className="p-6">
-                        <div className="mb-4">
-                          <h3
-                            className="text-3xl mb-2"
-                            style={{
-                              fontFamily: recommendation.primary.family,
-                              fontWeight: recommendation.primary.weight,
-                              fontStyle: recommendation.primary.style,
-                            }}
-                          >
-                            {brandName}
-                          </h3>
-                          <p
-                            className="text-base"
-                            style={{
-                              fontFamily: recommendation.secondary.family,
-                              fontWeight: recommendation.secondary.weight,
-                              fontStyle: recommendation.secondary.style,
-                            }}
-                          >
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                          </p>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
-                          <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
-                          <p className="mt-2">{recommendation.explanation}</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
+            {loadingFonts ? (
+              <div className="space-y-4">
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-20 w-full" />
+                <Skeleton className="h-8 w-full" />
+                <Skeleton className="h-20 w-full" />
               </div>
-
-              <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFontDialog(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={async () => {
-                    if (selectedFont) {
-                      await loadFonts({
-                        primary: selectedFont.primary,
-                        secondary: selectedFont.secondary
-                      });
-                      setShowFontDialog(false);
-                    }
-                  }}
-                  disabled={!selectedFont}
-                >
-                  Apply Font Combination
-                </Button>
+            ) : (
+              <div className="space-y-6">
+                {fontRecommendations.map((recommendation, index) => (
+                  <Card
+                    key={index}
+                    className={`cursor-pointer transition-all ${selectedFont === recommendation ? 'ring-2 ring-primary ring-offset-2' : ''}`}
+                    onClick={() => setSelectedFont(recommendation)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="mb-4">
+                        <h3
+                          className="text-3xl mb-2"
+                          style={{
+                            fontFamily: recommendation.primary.family,
+                            fontWeight: recommendation.primary.weight,
+                            fontStyle: recommendation.primary.style,
+                          }}
+                        >
+                          {brandName}
+                        </h3>
+                        <p
+                          className="text-base"
+                          style={{
+                            fontFamily: recommendation.secondary.family,
+                            fontWeight: recommendation.secondary.weight,
+                            fontStyle: recommendation.secondary.style,
+                          }}
+                        >
+                          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                        </p>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p><strong>Primary:</strong> {recommendation.primary.family} ({recommendation.primary.weight})</p>
+                        <p><strong>Secondary:</strong> {recommendation.secondary.family} ({recommendation.secondary.weight})</p>
+                        <p className="mt-2">{recommendation.explanation}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
+            )}
+            <div className="flex justify-end space-x-2 pt-4 border-t flex-shrink-0">
+              <Button
+                variant="outline"
+                onClick={() => setShowFontDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={async () => {
+                  if (selectedFont) {
+                    await loadFonts({
+                      primary: selectedFont.primary,
+                      secondary: selectedFont.secondary
+                    });
+                    setShowFontDialog(false);
+                  }
+                }}
+                disabled={!selectedFont}
+              >
+                Apply Font Combination
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
