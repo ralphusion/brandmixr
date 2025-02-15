@@ -1,6 +1,6 @@
 import type { LogoStyle } from '../../shared/types';
 import { iconService } from '../lib/iconService';
-import type { Typography } from '../lib/iconService';
+import type { Typography } from '../lib/types';
 
 interface LogoConfig {
   brandName: string;
@@ -63,97 +63,42 @@ export function generateSimpleLogo(config: LogoConfig): string {
   const colors = DEFAULT_COLORS[logoStyle];
   const font = iconService.getRandomFont();
 
-  // Generate different logo variations with improved positioning
-  const variations = [
-    generateModernLogo(brandName, colors, industry, font),
-    generateMinimalistLogo(brandName, colors, font),
-    generateIconicLogo(brandName, colors, industry, font)
-  ];
+  // Generate logo with better alignment and spacing
+  const primary = getRandomElement(colors.primary);
+  const accent = getRandomElement(colors.accent);
+  const icon = iconService.getRandomIcon(industry);
+  const weight = getRandomElement(font.weights);
+  const styleAttr = getRandomElement(font.styles);
 
-  const svgContent = variations[Math.floor(Math.random() * variations.length)];
+  // Create a horizontally aligned logo with proper spacing
+  const svgContent = `
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+      <defs>
+        <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <g transform="translate(30, 35)">
+        <path d="${icon}" 
+              fill="url(#grad1)" 
+              transform="scale(2.5)" 
+              stroke="${accent}" 
+              stroke-width="0.5"
+        />
+        <text x="95" y="25" 
+              font-family="${font.family}, Arial, sans-serif" 
+              font-size="38"
+              font-weight="${weight}"
+              font-style="${styleAttr}"
+              fill="${primary}"
+              letter-spacing="0.02em"
+              dominant-baseline="central">
+              ${brandName}
+        </text>
+      </g>
+    </svg>`;
+
   const base64 = Buffer.from(svgContent).toString('base64');
   return `data:image/svg+xml;base64,${base64}`;
-}
-
-// Enhanced modern logo with better alignment
-function generateModernLogo(text: string, colors: any, industry: string, font: Typography): string {
-  const primary = getRandomElement(colors.primary);
-  const accent = getRandomElement(colors.accent);
-  const icon = iconService.getRandomIcon(industry);
-  const weight = getRandomElement(font.weights);
-  const style = getRandomElement(font.styles);
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
-    <defs>
-      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <g transform="translate(30, 25)">
-      <path d="${icon}" fill="url(#grad1)" transform="scale(2.5)" stroke="${accent}" stroke-width="0.5"/>
-      <text x="100" y="45" 
-            font-family="${font.family}, Arial, sans-serif" 
-            font-size="38"
-            font-weight="${weight}"
-            font-style="${style}"
-            fill="${primary}"
-            letter-spacing="0.02em"
-            dominant-baseline="central">
-            ${text}
-      </text>
-    </g>
-  </svg>`;
-}
-
-// Minimalist logo with refined typography
-function generateMinimalistLogo(text: string, colors: any, font: Typography): string {
-  const primary = getRandomElement(colors.primary);
-  const weight = getRandomElement(font.weights);
-  const style = getRandomElement(font.styles);
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
-    <text x="50%" y="60" 
-          font-family="${font.family}, Arial, sans-serif" 
-          font-size="42"
-          font-weight="${weight}"
-          font-style="${style}"
-          fill="${primary}"
-          letter-spacing="0.1em"
-          text-anchor="middle"
-          dominant-baseline="central">
-          ${text.toUpperCase()}
-    </text>
-  </svg>`;
-}
-
-// Iconic logo with improved icon-text relationship
-function generateIconicLogo(text: string, colors: any, industry: string, font: Typography): string {
-  const primary = getRandomElement(colors.primary);
-  const accent = getRandomElement(colors.accent);
-  const icon = iconService.getRandomIcon(industry);
-  const weight = getRandomElement(font.weights);
-  const style = getRandomElement(font.styles);
-
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
-    <defs>
-      <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
-      </linearGradient>
-    </defs>
-    <g transform="translate(30, 20)">
-      <path d="${icon}" fill="url(#grad4)" transform="scale(2.2)" stroke="${primary}" stroke-width="0.5"/>
-      <text x="90" y="40" 
-            font-family="${font.family}, Arial, sans-serif" 
-            font-size="36"
-            font-weight="${weight}"
-            font-style="${style}"
-            fill="${primary}"
-            letter-spacing="0.05em"
-            dominant-baseline="central">
-            ${text}
-      </text>
-    </g>
-  </svg>`;
 }
