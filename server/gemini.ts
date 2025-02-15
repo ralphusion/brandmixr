@@ -2,6 +2,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
+const BASE_SVG_TEMPLATE = `
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="100%" height="100%" fill="white"/>
+</svg>`;
+
 export async function generateLogoWithGemini(prompt: string): Promise<string> {
   try {
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -11,7 +16,7 @@ export async function generateLogoWithGemini(prompt: string): Promise<string> {
       {
         inlineData: {
           mimeType: "image/svg+xml",
-          data: "", // Initial empty canvas
+          data: Buffer.from(BASE_SVG_TEMPLATE).toString('base64'),
         },
       },
     ]);
