@@ -393,17 +393,6 @@ export default function MoodBoard() {
     }
   };
 
-  const handleResetPalette = () => {
-    if (moodBoardData?.colors) {
-      // Deep clone the original colors to ensure we're not sharing references
-      const resetColors = JSON.parse(JSON.stringify(moodBoardData.colors));
-      setColors(resetColors);
-      toast({
-        title: "Colors Reset",
-        description: "Color palette has been reset to original",
-      });
-    }
-  };
 
   if (!brandName) {
     navigate('/');
@@ -542,19 +531,6 @@ export default function MoodBoard() {
                     Color Palette
                   </h2>
                   <div className="flex gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleResetPalette}
-                          disabled={regeneratingSection?.type === 'colors'}
-                        >
-                          <RotateCcw className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Reset to original colors</TooltipContent>
-                    </Tooltip>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
