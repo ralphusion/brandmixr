@@ -65,7 +65,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
                       field.onChange(value);
                       onIndustryChange(value);
                     }}
-                    value={field.value}
+                    value={field.value || "select-industry"}
                   >
                     <FormControl>
                       <SelectTrigger className="dark:border-gray-700">
@@ -73,6 +73,7 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="select-industry" disabled>Select an industry</SelectItem>
                       {INDUSTRIES.map((industry) => (
                         <SelectItem key={industry} value={industry}>
                           {industry}
@@ -132,13 +133,14 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="dark:text-gray-200">Brand Style</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value || "select-style"}>
                     <FormControl>
                       <SelectTrigger className="dark:border-gray-700">
                         <SelectValue placeholder="Select a style" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
+                      <SelectItem value="select-style" disabled>Select a style</SelectItem>
                       {BRAND_STYLES.map((style) => (
                         <SelectItem key={style.value} value={style.value}>
                           {style.label}
