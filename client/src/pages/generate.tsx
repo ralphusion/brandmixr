@@ -41,6 +41,7 @@ export default function Generate() {
     searchText: "",
   });
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const loadingAnimationRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [, navigate] = useLocation();
 
@@ -64,9 +65,14 @@ export default function Generate() {
     }
   }, []);
 
-  const { data: savedNames = [] } = useQuery<BrandName[]>({
-    queryKey: ["/api/names/saved"],
-  });
+  // Auto-scroll when generating more names
+  useEffect(() => {
+    if (isGeneratingMore && loadingAnimationRef.current) {
+      const yOffset = -100; // Offset to show some content above
+      const y = loadingAnimationRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }, [isGeneratingMore]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -255,7 +261,11 @@ export default function Generate() {
                   >
                     Generate More Names
                   </Button>
-                  {isGeneratingMore && <GeneratingAnimation />}
+                  {isGeneratingMore && (
+                    <div ref={loadingAnimationRef}>
+                      <GeneratingAnimation />
+                    </div>
+                  )}
                 </div>
               )}
             </div>
