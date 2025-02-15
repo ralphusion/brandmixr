@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Copy, Download, Type, SparkleIcon } from "lucide-react";
+import { ArrowLeft, Download, Type, SparkleIcon, Copy } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,13 +16,8 @@ import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
 import html2canvas from 'html2canvas';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { generateIconSvg } from "@/lib/generateIcon";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface FontSettings {
   primary: {
@@ -108,15 +103,7 @@ const FONT_FAMILIES = [
   { family: 'Raleway', style: 'normal', weight: '700' },
   { family: 'Nunito', style: 'normal', weight: '800' },
   { family: 'Work Sans', style: 'normal', weight: '700' },
-  { family: 'DM Serif Display', style: 'normal', weight: '400' },
-  { family: 'Roboto', style: 'normal', weight: '400' },
-  { family: 'Times New Roman', style: 'normal', weight: '700' },
-  { family: 'Helvetica', style: 'normal', weight: '700' },
-  { family: 'Georgia', style: 'italic', weight: '700' },
-  { family: 'Palatino', style: 'normal', weight: '700' },
-  { family: 'Garamond', style: 'italic', weight: '600' },
-  { family: 'Futura', style: 'normal', weight: '700' },
-  { family: 'Verdana', style: 'normal', weight: '700' }
+  { family: 'DM Serif Display', style: 'normal', weight: '400' }
 ];
 
 const TEXT_TRANSFORMS = [
@@ -160,25 +147,25 @@ const LETTER_SPACING = [
   'tighter'
 ];
 
-type IconStyle = 
-  | 'initials-simple' 
-  | 'initials-rounded' 
-  | 'initials-gradient' 
-  | 'geometric-circle' 
-  | 'geometric-square' 
-  | 'geometric-hexagon' 
-  | 'geometric-triangle' 
-  | 'geometric-diamond' 
-  | 'abstract-waves' 
-  | 'abstract-dots' 
-  | 'abstract-lines' 
-  | 'abstract-mesh' 
-  | 'abstract-swirl' 
-  | 'modern-minimal' 
-  | 'modern-tech' 
-  | 'modern-gradient' 
-  | 'decorative-floral' 
-  | 'decorative-vintage' 
+type IconStyle =
+  | 'initials-simple'
+  | 'initials-rounded'
+  | 'initials-gradient'
+  | 'geometric-circle'
+  | 'geometric-square'
+  | 'geometric-hexagon'
+  | 'geometric-triangle'
+  | 'geometric-diamond'
+  | 'abstract-waves'
+  | 'abstract-dots'
+  | 'abstract-lines'
+  | 'abstract-mesh'
+  | 'abstract-swirl'
+  | 'modern-minimal'
+  | 'modern-tech'
+  | 'modern-gradient'
+  | 'decorative-floral'
+  | 'decorative-vintage'
   | 'decorative-ornate';
 
 interface FontRecommendation {
@@ -215,12 +202,10 @@ export default function MoodBoard() {
   const queryClient = useQueryClient();
   const [regeneratingSection, setRegeneratingSection] = useState<RegenerationSection | null>(null);
   const [logoSvg, setLogoSvg] = useState<string>("");
-  const [iconStyle, setIconStyle] = useState<string>('initials-simple');
+  const [iconStyle, setIconStyle] = useState<IconStyle>('initials-simple');
   const [iconColor, setIconColor] = useState("#000000");
-  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
-  const [selectedBackground, setSelectedBackground] = useState<typeof BACKGROUNDS[0] | null>(null);
-  const [selectedFontStyle, setSelectedFontStyle] = useState<FontStyle | null>(null);
-  const [selectedCardId, setSelectedCardId] = useState<string | null>(null); 
+  const [cardBackground, setCardBackground] = useState("#FFFFFF");
+  const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
 
   const params = new URLSearchParams(window.location.search);
@@ -284,10 +269,11 @@ export default function MoodBoard() {
     try {
       await navigator.clipboard.writeText(text);
       toast({
-        title: "Copied!",
+        title: "Copied",
         description: `${type} copied to clipboard`,
       });
     } catch (err) {
+      console.error('Error copying to clipboard:', err);
       toast({
         title: "Failed to copy",
         description: "Please try again",
@@ -467,13 +453,8 @@ export default function MoodBoard() {
           const parsedConfig = JSON.parse(savedConfig);
           setIconStyle(parsedConfig.iconStyle || 'initials-simple');
           setIconColor(parsedConfig.iconColor || '#000000');
-          setBackgroundColor(parsedConfig.backgroundColor || '#FFFFFF');
-          setSelectedBackground(parsedConfig.selectedBackground);
+          setCardBackground(parsedConfig.cardBackground || '#FFFFFF');
 
-          if (parsedConfig.fontStyle) {
-            const { textDecoration, ...fontStyle } = parsedConfig.fontStyle;
-            setSelectedFontStyle(fontStyle);
-          }
         }
 
         if (brandStudioFonts) {
@@ -490,55 +471,33 @@ export default function MoodBoard() {
 
   useEffect(() => {
     if (brandName) {
-      try {
-        const currentSvg = logoSvg;
-
-        if (!iconStyle || !iconColor) {
-          throw new Error('Invalid icon configuration');
-        }
-
-        const newSvg = generateIconSvg(brandName, {
-          style: iconStyle as IconStyle,
-          color: iconColor,
-          backgroundColor: backgroundColor
-        });
-
-        if (!newSvg || newSvg.trim() === '') {
-          throw new Error('Generated SVG is empty or invalid');
-        }
-
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(newSvg, 'image/svg+xml');
-        if (doc.getElementsByTagName('parsererror').length > 0) {
-          throw new Error('Invalid SVG generated');
-        }
-
-        const dataUrl = `data:image/svg+xml;base64,${btoa(newSvg)}`;
-        setLogoSvg(dataUrl);
-      } catch (error) {
-        console.error('Error generating icon:', error);
-        if (currentSvg) {
-          setLogoSvg(currentSvg);
-        }
-      }
+      generateLogo();
     }
-  }, [brandName, iconStyle, iconColor, backgroundColor]);
+  }, [brandName, iconStyle, iconColor, cardBackground]);
+
+
+  const generateLogo = () => {
+    if (!brandName) return;
+    const svg = generateIconSvg(brandName, {
+      style: iconStyle,
+      color: iconColor,
+      backgroundColor: 'white' // Always use white background for icon
+    });
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+    setLogoSvg(dataUrl);
+  };
 
   const handleRegenerateLogo = () => {
     if (!brandName) return;
 
-    const currentStyle = iconStyle;
-    const currentColor = iconColor;
-    const currentBackground = backgroundColor;
-    const currentFontStyle = selectedFontStyle;
-    const currentSvg = logoSvg;
-
     try {
+      // Get available icon styles
       const styles = Object.keys(ICON_STYLES)
         .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
         .map(style => style.value);
 
-      const availableStyles = styles.filter(style => style !== currentStyle);
+      // Select new style and color
+      const availableStyles = styles.filter(style => style !== iconStyle);
       const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
 
       const hue = Math.floor(Math.random() * 360);
@@ -546,69 +505,42 @@ export default function MoodBoard() {
       const lightness = 45 + Math.floor(Math.random() * 15);
       const newIconColor = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 
-      const testSvg = generateIconSvg(brandName, {
-        style: newStyle,
-        color: newIconColor,
-        backgroundColor: currentBackground
-      });
-
-      if (!testSvg || testSvg.trim() === '') {
-        throw new Error('Failed to generate test SVG');
-      }
-
       setIconStyle(newStyle);
       setIconColor(newIconColor);
-      setBackgroundColor(BACKGROUNDS[Math.floor(Math.random() * BACKGROUNDS.length)].bg);
 
-      const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
-      const newFontStyle: FontStyle = {
-        fontFamily: randomFont.family,
-        fontWeight: randomFont.weight,
-        fontStyle: FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)],
-        textTransform: TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)],
-        letterSpacing: LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
-      };
-      setSelectedFontStyle(newFontStyle);
+      // Generate three different font styles
+      const newFontStyles = Array(3).fill(null).map(() => {
+        const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
+        return {
+          fontFamily: randomFont.family,
+          fontWeight: randomFont.weight,
+          fontStyle: FONT_STYLES[Math.floor(Math.random() * FONT_STYLES.length)],
+          textTransform: TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)],
+          letterSpacing: LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
+        };
+      });
 
-      const fontSettings: FontSettings = {
-        primary: {
-          family: randomFont.family,
-          weight: randomFont.weight,
-          style: randomFont.style,
-        },
-        secondary: {
-          family: randomFont.family,
-          weight: randomFont.weight,
-          style: randomFont.style,
-        }
-      };
+      // Store font styles in session
+      sessionStorage.setItem('fontStyles', JSON.stringify(newFontStyles));
 
-      loadFonts(fontSettings);
-      sessionStorage.setItem('brandStudioFonts', JSON.stringify(fontSettings));
     } catch (error) {
       console.error('Error regenerating logo:', error);
-      setIconStyle(currentStyle);
-      setIconColor(currentColor);
-      setBackgroundColor(currentBackground);
-      setSelectedFontStyle(currentFontStyle);
-      setLogoSvg(currentSvg);
       toast({
         title: "Generation failed",
-        description: "Failed to generate new logo variation. Previous style restored.",
+        description: "Failed to generate new variations.",
         variant: "destructive",
       });
     }
   };
 
-
   const handleDownloadLogo = async () => {
-    if (!brandName) return;
-
-    const logoElement = document.querySelector('.logo-container');
-    if (!logoElement) return;
+    if (!brandName || !selectedCardRef.current) {
+      console.log("Cannot download: missing brandName or card reference");
+      return;
+    }
 
     try {
-      const canvas = await html2canvas(logoElement, {
+      const canvas = await html2canvas(selectedCardRef.current, {
         backgroundColor: null,
         scale: 2,
         logging: false,
@@ -635,15 +567,169 @@ export default function MoodBoard() {
 
   const handleCardSelect = (cardId: string) => {
     setSelectedCardId(cardId);
-    const selectedStyle = BACKGROUNDS[parseInt(cardId.split('-')[1])];
     sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
       iconStyle,
       iconColor,
-      backgroundColor,
-      selectedBackground: selectedStyle,
-      fontStyle: selectedFontStyle
+      cardBackground
     }));
   };
+
+  // Component for the color inputs section
+  const ColorInputs = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div className="space-y-2">
+        <Label htmlFor="icon-style">Icon Options</Label>
+        <Select value={iconStyle} onValueChange={setIconStyle}>
+          <SelectTrigger id="icon-style">
+            <SelectValue placeholder="Select style" />
+          </SelectTrigger>
+          <SelectContent>
+            {Object.entries(ICON_STYLES).map(([category, styles]) => (
+              <div key={category}>
+                <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                  {category.charAt(0).toUpperCase() + category.slice(1)}
+                </div>
+                {styles.map((style) => (
+                  <SelectItem key={style.value} value={style.value}>
+                    {style.label}
+                  </SelectItem>
+                ))}
+              </div>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="card-background">Card Background</Label>
+        <Input
+          id="card-background"
+          type="color"
+          value={cardBackground}
+          onChange={(e) => setCardBackground(e.target.value)}
+          className="h-10"
+        />
+      </div>
+    </div>
+  );
+
+  // Component for the card grid
+  const CardGrid = () => {
+    const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
+
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {Array(3).fill(null).map((_, index) => {
+          const cardId = `variation-${index}`;
+          const isSelected = selectedCardId === cardId;
+          const fontStyle = fontStyles[index] || FONT_STYLES_ARRAY[index % FONT_STYLES_ARRAY.length];
+
+          return (
+            <motion.div
+              key={cardId}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: index * 0.05 }}
+              onClick={() => handleCardSelect(cardId)}
+            >
+              <Card
+                className={`transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                  isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+                }`}
+                style={{
+                  background: cardBackground
+                }}
+              >
+                <CardContent
+                  className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
+                  ref={isSelected ? selectedCardRef : null}
+                >
+                  {logoSvg && (
+                    <motion.div
+                      className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white p-2 shadow-sm"
+                      whileHover={{ scale: 1.1 }}
+                      transition={{ type: "spring", stiffness: 300 }}
+                    >
+                      <img
+                        src={logoSvg}
+                        alt="Brand Icon"
+                        className="w-full h-full object-contain"
+                      />
+                    </motion.div>
+                  )}
+                  <motion.h3
+                    className="text-3xl text-center"
+                    style={{
+                      fontFamily: fontStyle?.fontFamily,
+                      fontWeight: fontStyle?.fontWeight,
+                      fontStyle: fontStyle?.fontStyle,
+                      textTransform: fontStyle?.textTransform,
+                      letterSpacing: fontStyle?.letterSpacing,
+                      color: iconColor
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    {brandName}
+                  </motion.h3>
+                </CardContent>
+              </Card>
+            </motion.div>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Render the Brand Logo section
+  const BrandLogoSection = () => (
+    <Card className="shadow-md">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2
+            className="text-xl font-semibold"
+            style={fonts?.primary ? {
+              fontFamily: fonts.primary.family,
+              fontWeight: fonts.primary.weight,
+              fontStyle: fonts.primary.style,
+            } : undefined}
+          >
+            Brand Logo
+          </h2>
+          <div className="flex gap-2">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleDownloadLogo}
+                  disabled={!selectedCardId}
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Download selected logo as PNG</TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleRegenerateLogo}
+                >
+                  <SparkleIcon className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Generate new variations</TooltipContent>
+            </Tooltip>
+          </div>
+        </div>
+
+        <ColorInputs />
+        <CardGrid />
+      </CardContent>
+    </Card>
+  );
 
   const handleExport = () => {
     const a = document.createElement('a');
@@ -656,10 +742,6 @@ export default function MoodBoard() {
 
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setIconColor(e.target.value);
-  };
-
-  const handleBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBackgroundColor(e.target.value);
   };
 
   if (!brandName) {
@@ -710,147 +792,7 @@ export default function MoodBoard() {
           </div>
         ) : moodBoardData ? (
           <div className="grid grid-cols-1 gap-6" ref={moodBoardRef}>
-            <Card className="shadow-md">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2
-                    className="text-xl font-semibold"
-                    style={fonts?.primary ? {
-                      fontFamily: fonts.primary.family,
-                      fontWeight: fonts.primary.weight,
-                      fontStyle: fonts.primary.style,
-                    } : undefined}
-                  >
-                    Brand Logo
-                  </h2>
-                  <div className="flex gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleDownloadLogo}
-                          title="Download logo as PNG"
-                        >
-                          <Download className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Download logo as PNG</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={handleRegenerateLogo}
-                          title="Generate new logo variation"
-                        >
-                          <SparkleIcon className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Generate new logo variation</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                  <div className="space-y-2">
-                    <Label htmlFor="icon-style">Icon Options</Label>
-                    <Select value={iconStyle} onValueChange={setIconStyle}>
-                      <SelectTrigger id="icon-style">
-                        <SelectValue placeholder="Select style" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(ICON_STYLES).map(([category, styles]) => (
-                          <div key={category}>
-                            <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                              {category.charAt(0).toUpperCase() + category.slice(1)}
-                            </div>
-                            {styles.map((style) => (
-                              <SelectItem key={style.value} value={style.value}>
-                                {style.label}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="icon-color">Icon Color</Label>
-                    <Input
-                      id="icon-color"
-                      type="color"
-                      value={iconColor}
-                      onChange={handleColorChange}
-                      className="h-10"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="background-color">Background Color</Label>
-                    <Input
-                      id="background-color"
-                      type="color"
-                      value={backgroundColor}
-                      onChange={handleBackgroundColorChange}
-                      className="h-10"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {BACKGROUNDS.slice(0, 3).map((style, index) => {
-                    const cardId = `variation-${index}`;
-                    const isSelected = selectedCardId === cardId;
-                    const fontStyle = FONT_STYLES_ARRAY[index % FONT_STYLES_ARRAY.length];
-
-                    return (
-                      <motion.div
-                        key={cardId}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => handleCardSelect(cardId)}
-                      >
-                        <Card
-                          className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
-                            isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
-                          }`}
-                        >
-                          <CardContent
-                            className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
-                            ref={isSelected ? selectedCardRef : null}
-                          >
-                            {logoSvg && (
-                              <motion.div
-                                className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
-                                whileHover={{ scale: 1.1 }}
-                                transition={{ type: "spring", stiffness: 300 }}
-                              >
-                                <img
-                                  src={logoSvg}
-                                  alt="Brand Icon"
-                                  className="w-full h-full object-contain"
-                                />
-                              </motion.div>
-                            )}
-                            <motion.h3
-                              className={`text-3xl text-center ${style.text} ${fontStyle}`}
-                              whileHover={{ scale: 1.05 }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              {brandName}
-                            </motion.h3>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            <BrandLogoSection />
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -939,7 +881,7 @@ export default function MoodBoard() {
                           size="sm"
                           onClick={() => handleCopyToClipboard(moodBoardData.keywords.join(', '), 'Keywords')}
                         >
-                          <Copy className="h-4 w-4" />
+                          <Download className="h-4 w-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Copy keywords</TooltipContent>
@@ -963,8 +905,7 @@ export default function MoodBoard() {
                   {regeneratingSection?.type === 'keywords' ? (
                     <motion.div
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}                      exit={{ opacity: 0 }}
                       className="flex flex-wrap gap-3"
                     >
                       {Array(5).fill(0).map((_, index) => (
