@@ -293,8 +293,8 @@ export default function Generate() {
               <ResultsGrid
                 names={savedNames.map(n => ({
                   name: n.name,
-                  domain: n.domain || '',
-                  domainAvailable: n.domainAvailable || false,
+                  domain: n.name + '.com', // Ensure domain name is set
+                  domainAvailable: n.domainAvailable === null ? false : n.domainAvailable,
                   trademarkExists: n.trademarkExists === null ? null : Boolean(n.trademarkExists),
                   similarTrademarks: n.similarTrademarks || []
                 }))}
