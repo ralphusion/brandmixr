@@ -1,6 +1,5 @@
 import type { LogoStyle } from '../../shared/types';
 import { iconService } from '../lib/iconService';
-import type { Typography } from '../lib/types';
 
 interface LogoConfig {
   brandName: string;
@@ -56,20 +55,10 @@ export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
   const colors = DEFAULT_COLORS[logoStyle];
 
   try {
-    // Get icon SVG and colors
-    const iconSvg = await iconService.getRandomIcon(industry);
+    const pathData = await iconService.getRandomIcon(industry);
     const primaryColor = getRandomElement(colors.primary);
     const accentColor = getRandomElement(colors.accent);
 
-    // Extract the path data from the SVG content
-    const pathMatch = iconSvg.match(/<path[^>]*d="([^"]*)"[^>]*>/);
-    if (!pathMatch) {
-      throw new Error('No path found in SVG');
-    }
-
-    const pathData = pathMatch[1];
-
-    // Return the SVG path with styling
     return `
       <path 
         d="${pathData}"
@@ -84,12 +73,20 @@ export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
     `;
   } catch (error) {
     console.error('Error generating logo:', error);
-    // Return a fallback simple shape if icon generation fails
+    const primaryColor = getRandomElement(colors.primary);
+    const accentColor = getRandomElement(colors.accent);
+
     return `
       <path 
         d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
-        fill="url(#gradient-${getRandomElement(colors.primary).substring(1)})"
+        fill="url(#gradient-${primaryColor.substring(1)})"
       />
+      <defs>
+        <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
+        </linearGradient>
+      </defs>
     `;
   }
 }
