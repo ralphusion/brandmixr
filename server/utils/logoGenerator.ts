@@ -75,17 +75,17 @@ function generateModernLogo(text: string, colors: any, industry: string, font: T
   const weight = getRandomElement(font.weights);
   const style = getRandomElement(font.styles);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
     <defs>
       <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
         <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
       </linearGradient>
     </defs>
-    <path d="${icon}" fill="url(#grad1)" transform="translate(20, 20) scale(0.6)"/>
-    <text x="100" y="60" 
+    <path d="${icon}" fill="url(#grad1)" transform="translate(50, 50) scale(1.8)" stroke="${accent}" stroke-width="0.5"/>
+    <text x="180" y="110" 
           font-family="${font.family}, Arial, sans-serif" 
-          font-size="36"
+          font-size="42"
           font-weight="${weight}"
           font-style="${style}"
           fill="${primary}"
@@ -100,10 +100,10 @@ function generateMinimalistLogo(text: string, colors: any, font: Typography): st
   const weight = getRandomElement(font.weights);
   const style = getRandomElement(font.styles);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
-    <text x="30" y="60" 
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
+    <text x="50" y="110" 
           font-family="${font.family}, Arial, sans-serif" 
-          font-size="42"
+          font-size="48"
           font-weight="${weight}"
           font-style="${style}"
           fill="${primary}"
@@ -120,17 +120,17 @@ function generateIconicLogo(text: string, colors: any, industry: string, font: T
   const weight = getRandomElement(font.weights);
   const style = getRandomElement(font.styles);
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100" width="300" height="100">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200" width="400" height="200">
     <defs>
       <linearGradient id="grad4" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style="stop-color:${primary};stop-opacity:1" />
         <stop offset="100%" style="stop-color:${accent};stop-opacity:1" />
       </linearGradient>
     </defs>
-    <path d="${icon}" fill="url(#grad4)" transform="translate(20, 20) scale(0.6)"/>
-    <text x="100" y="60" 
+    <path d="${icon}" fill="url(#grad4)" transform="translate(50, 50) scale(2)" stroke="${primary}" stroke-width="0.5"/>
+    <text x="180" y="110" 
           font-family="${font.family}, Arial, sans-serif" 
-          font-size="32"
+          font-size="42"
           font-weight="${weight}"
           font-style="${style}"
           fill="${primary}"
