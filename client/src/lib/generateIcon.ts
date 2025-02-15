@@ -1,5 +1,9 @@
-type IconStyle = 'geometric' | 'initials' | 'abstract';
-type IconShape = 'circle' | 'square' | 'hexagon';
+type IconStyle = 'initials-simple' | 'initials-rounded' | 'initials-gradient' |
+                'geometric-circle' | 'geometric-square' | 'geometric-hexagon' | 'geometric-triangle' | 'geometric-diamond' |
+                'abstract-waves' | 'abstract-dots' | 'abstract-lines' | 'abstract-mesh' | 'abstract-swirl' |
+                'modern-minimal' | 'modern-tech' | 'modern-gradient' |
+                'decorative-floral' | 'decorative-vintage' | 'decorative-ornate';
+
 type IconOptions = {
   style?: IconStyle;
   color?: string;
@@ -23,6 +27,14 @@ const shapes = {
       points.push(`${centerX + radius * Math.cos(angle)},${centerY + radius * Math.sin(angle)}`);
     }
     return `<polygon points="${points.join(' ')}" fill="${color}" />`;
+  },
+  triangle: (size: number, color: string) => {
+    const h = size * 0.866; // height of equilateral triangle
+    return `<polygon points="${size/2},${size/6} ${size*5/6},${h*5/6} ${size/6},${h*5/6}" fill="${color}" />`;
+  },
+  diamond: (size: number, color: string) => {
+    const points = `${size/2},${size/6} ${size*5/6},${size/2} ${size/2},${size*5/6} ${size/6},${size/2}`;
+    return `<polygon points="${points}" fill="${color}" />`;
   }
 };
 
@@ -47,49 +59,60 @@ const abstractShapes = {
     }
     return dots;
   },
-  lines: (size: number, color: string) => {
-    let lines = '';
-    const numLines = 5;
-    const spacing = size/numLines;
-    for(let i = 0; i < numLines; i++) {
-      lines += `<line x1="0" y1="${i*spacing}" x2="${size}" y2="${i*spacing}" 
-                stroke="${color}" stroke-width="${size/30}" />`;
+  mesh: (size: number, color: string) => {
+    let paths = '';
+    const grid = 4;
+    const spacing = size / grid;
+    for(let i = 0; i <= grid; i++) {
+      paths += `
+        <line x1="0" y1="${i*spacing}" x2="${size}" y2="${i*spacing}" 
+              stroke="${color}" stroke-width="1" opacity="0.5" />
+        <line x1="${i*spacing}" y1="0" x2="${i*spacing}" y2="${size}" 
+              stroke="${color}" stroke-width="1" opacity="0.5" />
+      `;
     }
-    return lines;
+    return paths;
+  },
+  swirl: (size: number, color: string) => {
+    const centerX = size / 2;
+    const centerY = size / 2;
+    let path = `M${centerX},${centerY} `;
+    for(let i = 0; i < 720; i += 5) {
+      const angle = i * Math.PI / 180;
+      const radius = (i / 720) * size / 3;
+      const x = centerX + radius * Math.cos(angle);
+      const y = centerY + radius * Math.sin(angle);
+      path += `L${x},${y} `;
+    }
+    return `<path d="${path}" stroke="${color}" fill="none" stroke-width="2" />`;
   }
-};
-
-const getColorFromName = (name: string): string => {
-  const hue = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360;
-  return `hsl(${hue}, 70%, 50%)`;
-};
-
-const getShapeFromName = (name: string): IconShape => {
-  const shapes: IconShape[] = ['circle', 'square', 'hexagon'];
-  const index = name.length % shapes.length;
-  return shapes[index];
 };
 
 export const generateIconSvg = (brandName: string, options: IconOptions = {}): string => {
   const size = 100;
-  const mainColor = options.color || getColorFromName(brandName);
-  const backgroundColor = options.backgroundColor || 'none';
-  const style = options.style || 'geometric';
+  const mainColor = options.color || '#000000';
+  const backgroundColor = options.backgroundColor || '#FFFFFF';
+  const style = options.style || 'initials-simple';
   const letter = brandName.charAt(0).toUpperCase();
 
   let content = '';
-  if (style === 'geometric') {
-    const shape = getShapeFromName(brandName);
-    content = shapes[shape](size, mainColor);
-  } else if (style === 'abstract') {
+  const [category, subStyle] = style.split('-');
+
+  if (category === 'initials') {
+    const radius = subStyle === 'rounded' ? 20 : 0;
+    const gradient = subStyle === 'gradient' ? `
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:${mainColor};stop-opacity:1" />
+          <stop offset="100%" style="stop-color:${mainColor};stop-opacity:0.6" />
+        </linearGradient>
+      </defs>
+    ` : '';
+
     content = `
-      ${abstractShapes.waves(size, mainColor)}
-      ${abstractShapes.dots(size, mainColor)}
-      ${abstractShapes.lines(size, mainColor)}
-    `;
-  } else { // initials
-    content = `
-      <rect x="0" y="0" width="${size}" height="${size}" rx="20" fill="${mainColor}" />
+      ${gradient}
+      <rect x="0" y="0" width="${size}" height="${size}" rx="${radius}" 
+            fill="${subStyle === 'gradient' ? 'url(#grad)' : mainColor}" />
       <text 
         x="50%" 
         y="50%" 
@@ -103,6 +126,32 @@ export const generateIconSvg = (brandName: string, options: IconOptions = {}): s
         ${letter}
       </text>
     `;
+  } else if (category === 'geometric' && shapes[subStyle]) {
+    content = shapes[subStyle](size, mainColor);
+  } else if (category === 'abstract' && abstractShapes[subStyle]) {
+    content = abstractShapes[subStyle](size, mainColor);
+  } else if (category === 'modern') {
+    if (subStyle === 'minimal') {
+      content = `
+        <rect x="${size/4}" y="${size/4}" width="${size/2}" height="${size/2}" fill="${mainColor}" />
+        <circle cx="${size/2}" cy="${size/2}" r="${size/6}" fill="white" />
+      `;
+    } else if (subStyle === 'tech') {
+      content = `
+        <rect x="10" y="10" width="80" height="80" fill="none" stroke="${mainColor}" stroke-width="4" />
+        <circle cx="50" cy="50" r="20" fill="${mainColor}" />
+      `;
+    } else if (subStyle === 'gradient') {
+      content = `
+        <defs>
+          <linearGradient id="modernGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${mainColor};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${mainColor};stop-opacity:0.4" />
+          </linearGradient>
+        </defs>
+        <path d="M10,10 L90,10 L90,90 L10,90 Z" fill="url(#modernGrad)" />
+      `;
+    }
   }
 
   return `
@@ -113,7 +162,7 @@ export const generateIconSvg = (brandName: string, options: IconOptions = {}): s
   `;
 };
 
-// Function to download icon in different formats
+// Download function remains unchanged
 export const downloadIcon = async (svg: string, format: 'svg' | 'png', filename: string) => {
   if (format === 'svg') {
     const blob = new Blob([svg], { type: 'image/svg+xml' });

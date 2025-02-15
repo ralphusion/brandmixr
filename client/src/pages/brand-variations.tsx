@@ -1,7 +1,7 @@
 import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, RefreshCw, Download } from "lucide-react";
+import { ArrowLeft, Download } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useState, useEffect } from "react";
 import { generateIconSvg, downloadIcon } from "@/lib/generateIcon";
@@ -10,6 +10,46 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+const ICON_STYLES = {
+  initials: [
+    { value: 'initials-simple', label: 'Simple Initials' },
+    { value: 'initials-rounded', label: 'Rounded Initials' },
+    { value: 'initials-gradient', label: 'Gradient Initials' }
+  ],
+  geometric: [
+    { value: 'geometric-circle', label: 'Circle' },
+    { value: 'geometric-square', label: 'Square' },
+    { value: 'geometric-hexagon', label: 'Hexagon' },
+    { value: 'geometric-triangle', label: 'Triangle' },
+    { value: 'geometric-diamond', label: 'Diamond' }
+  ],
+  abstract: [
+    { value: 'abstract-waves', label: 'Waves' },
+    { value: 'abstract-dots', label: 'Dots Pattern' },
+    { value: 'abstract-lines', label: 'Line Pattern' },
+    { value: 'abstract-mesh', label: 'Mesh Pattern' },
+    { value: 'abstract-swirl', label: 'Swirl Pattern' }
+  ],
+  modern: [
+    { value: 'modern-minimal', label: 'Minimal' },
+    { value: 'modern-tech', label: 'Tech Style' },
+    { value: 'modern-gradient', label: 'Modern Gradient' }
+  ],
+  decorative: [
+    { value: 'decorative-floral', label: 'Floral Pattern' },
+    { value: 'decorative-vintage', label: 'Vintage Style' },
+    { value: 'decorative-ornate', label: 'Ornate Design' }
+  ]
+};
+
+// Function to generate a random pleasing color
+const getRandomPleaseantColor = () => {
+  const hue = Math.floor(Math.random() * 360); // Random hue
+  const saturation = 60 + Math.floor(Math.random() * 20); // 60-80%
+  const lightness = 45 + Math.floor(Math.random() * 15); // 45-60%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+};
 
 const FONT_STYLES = [
   'uppercase tracking-wider font-bold',
@@ -62,9 +102,9 @@ const BACKGROUNDS = [
 export default function BrandVariations() {
   const [, navigate] = useLocation();
   const [logoSvg, setLogoSvg] = useState<string>("");
-  const [iconStyle, setIconStyle] = useState<'geometric' | 'initials' | 'abstract'>('geometric');
-  const [iconColor, setIconColor] = useState("#000000");
-  const [backgroundColor, setBackgroundColor] = useState("transparent");
+  const [iconStyle, setIconStyle] = useState<string>('initials-simple');
+  const [iconColor, setIconColor] = useState(getRandomPleaseantColor());
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
@@ -134,23 +174,32 @@ export default function BrandVariations() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          </div>
+        </div>
       </div>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-6">Brand Variations: {brandName}</h1>
+        <h1 className="text-3xl font-bold mb-6">Branding Studio: {brandName}</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div>
-            <Label htmlFor="icon-style">Icon Style</Label>
-            <Select value={iconStyle} onValueChange={(value: any) => setIconStyle(value)}>
+            <Label htmlFor="icon-style">Icon Options</Label>
+            <Select value={iconStyle} onValueChange={(value: string) => setIconStyle(value)}>
               <SelectTrigger id="icon-style">
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="geometric">Geometric</SelectItem>
-                <SelectItem value="initials">Initials</SelectItem>
-                <SelectItem value="abstract">Abstract</SelectItem>
+                {Object.entries(ICON_STYLES).map(([category, styles]) => (
+                  <div key={category}>
+                    <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </div>
+                    {styles.map((style) => (
+                      <SelectItem key={style.value} value={style.value}>
+                        {style.label}
+                      </SelectItem>
+                    ))}
+                  </div>
+                ))}
               </SelectContent>
             </Select>
           </div>
