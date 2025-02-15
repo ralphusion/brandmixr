@@ -12,6 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
