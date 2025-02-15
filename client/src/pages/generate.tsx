@@ -34,6 +34,7 @@ export default function Generate() {
   const [displayedNames, setDisplayedNames] = useState<GeneratedName[]>([]);
   const [page, setPage] = useState(1);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingMore, setIsGeneratingMore] = useState(false);
   const [filters, setFilters] = useState<FilterOptions>({
     nameLength: [3, 20],
     startingLetter: "",
@@ -119,7 +120,11 @@ export default function Generate() {
 
   const generateMutation = useMutation({
     mutationFn: async (data: GenerateNameRequest) => {
-      setIsGenerating(true);
+      if (generatedNames.length === 0) {
+        setIsGenerating(true);
+      } else {
+        setIsGeneratingMore(true);
+      }
       const res = await apiRequest("POST", "/api/generate", data);
       return res.json();
     },
@@ -128,10 +133,12 @@ export default function Generate() {
       const endIndex = page * NAMES_PER_PAGE;
       setDisplayedNames(prev => [...prev, ...data].slice(0, endIndex));
       setIsGenerating(false);
+      setIsGeneratingMore(false);
       sessionStorage.setItem('generatedNames', JSON.stringify([...generatedNames, ...data]));
     },
     onError: () => {
       setIsGenerating(false);
+      setIsGeneratingMore(false);
       toast({
         title: "Error",
         description: "Failed to generate names. Please try again.",
@@ -222,7 +229,7 @@ export default function Generate() {
         </div>
 
         <TabsContent value="generated">
-          {generateMutation.isPending && (
+          {isGenerating && (
             <div className="text-center py-12">
               <GeneratingAnimation />
             </div>
@@ -240,19 +247,21 @@ export default function Generate() {
                 </div>
               )}
               {displayedNames.length === applyFilters(generatedNames).length && (
-                <div className="mt-8 flex justify-center">
+                <div className="mt-8 flex flex-col items-center justify-center">
                   <Button
                     onClick={handleGenerateMore}
-                    disabled={isGenerating}
+                    disabled={isGeneratingMore}
+                    className="mb-4"
                   >
                     Generate More Names
                   </Button>
+                  {isGeneratingMore && <GeneratingAnimation />}
                 </div>
               )}
             </div>
           )}
 
-          {displayedNames.length === 0 && !generateMutation.isPending && (
+          {displayedNames.length === 0 && !isGenerating && (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No names match your filters</p>
             </div>
