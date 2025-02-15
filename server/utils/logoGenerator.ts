@@ -68,17 +68,20 @@ export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
 
     const pathData = pathMatch[1];
 
+    // Note the viewBox is now "0 0 24 24" to match Material Icons
     return `
-      <path 
-        d="${pathData}"
-        fill="url(#gradient-${primaryColor.substring(1)})"
-      />
-      <defs>
-        <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
-        </linearGradient>
-      </defs>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path 
+          d="${pathData}"
+          fill="url(#gradient-${primaryColor.substring(1)})"
+        />
+        <defs>
+          <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
+          </linearGradient>
+        </defs>
+      </svg>
     `;
   } catch (error) {
     console.error('Error generating logo:', error);
@@ -87,20 +90,23 @@ export async function generateSimpleLogo(config: LogoConfig): Promise<string> {
 
     // Fallback to a simple circle if icon generation fails
     return `
-      <path 
-        d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1z"
-        fill="url(#gradient-${primaryColor.substring(1)})"
-      />
-      <defs>
-        <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
-          <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
-        </linearGradient>
-      </defs>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path 
+          d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"
+          fill="url(#gradient-${primaryColor.substring(1)})"
+        />
+        <defs>
+          <linearGradient id="gradient-${primaryColor.substring(1)}" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${accentColor};stop-opacity:0.8" />
+          </linearGradient>
+        </defs>
+      </svg>
     `;
   }
 }
 
+// Text effects configuration for different styles
 const TEXT_EFFECTS = {
   modern: {
     letterSpacing: '0.05em',
