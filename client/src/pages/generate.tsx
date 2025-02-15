@@ -295,7 +295,7 @@ export default function Generate() {
                   name: n.name,
                   domain: n.domain || '',
                   domainAvailable: n.domainAvailable || false,
-                  trademarkExists: n.trademarkExists || null,
+                  trademarkExists: n.trademarkExists === null ? null : Boolean(n.trademarkExists),
                   similarTrademarks: n.similarTrademarks || []
                 }))}
                 onSave={(name) => {
@@ -304,6 +304,7 @@ export default function Generate() {
                     toggleSaveMutation.mutate(savedName);
                   }
                 }}
+                readOnly={true}
               />
             ) : (
               <p className="text-center text-muted-foreground py-12">
