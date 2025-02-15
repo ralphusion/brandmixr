@@ -7,6 +7,7 @@ import Input from "@/pages/input";
 import Generate from "@/pages/generate";
 import BrandVariations from "@/pages/brand-variations";
 import MoodBoard from "@/pages/mood-board";
+import LogoStudio from "@/pages/logo-studio";
 import NotFound from "@/pages/not-found";
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
           <Route path="/generate" component={Generate} />
           <Route path="/brand-variations" component={BrandVariations} />
           <Route path="/mood-board" component={MoodBoard} />
+          <Route path="/logo-studio" component={LogoStudio} />
           <Route component={NotFound} />
         </Switch>
         <Toaster />

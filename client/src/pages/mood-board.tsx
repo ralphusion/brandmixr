@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Type, SparkleIcon, Copy } from "lucide-react";
+import { ArrowLeft, Download, Type, SparkleIcon, Copy, PenTool } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -830,18 +830,27 @@ export default function MoodBoard() {
             </Button>
             <Logo />
           </div>
-          <Button
-            variant="outline"
-            onClick={() => setShowFontDialog(true)}
-            className="flex items-center gap-2"
-          >
-            <Type className="h-4 w-4" />
-            AI Font Recommendations
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate(`/logo-studio?name=${encodeURIComponent(brandName || '')}`)}
+              className="flex items-center gap-2"
+            >
+              <PenTool className="h-4 w-4" />
+              Logo Studio
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setShowFontDialog(true)}
+              className="flex items-center gap-2"
+            >
+              <Type className="h-4 w-4" />
+              AI FontRecommendations
+            </Button>
+          </div>
         </div>
 
-        <h1
-          className="text-3xl font-bold mb-6"
+        <h1 className="text-3xl font-bold mb-6"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
             fontWeight: fonts.primary.weight,
