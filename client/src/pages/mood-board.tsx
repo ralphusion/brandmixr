@@ -60,7 +60,7 @@ const ICON_STYLES = {
   ],
 };
 
-// Add these font configurations near the top of the file after existing constants
+// Update font families with more diverse options
 const FONT_FAMILIES = [
   { family: 'Playfair Display', style: 'normal', weight: '700' },
   { family: 'Montserrat', style: 'normal', weight: '600' },
@@ -74,10 +74,14 @@ const FONT_FAMILIES = [
   { family: 'Nunito', style: 'normal', weight: '800' },
   { family: 'Work Sans', style: 'normal', weight: '700' },
   { family: 'DM Serif Display', style: 'normal', weight: '400' },
-  { family: 'Roboto', style: 'normal', weight: '400' }, // Added Roboto
-  { family: 'Arial', style: 'normal', weight: '400' }, // Added Arial
-  { family: 'Times New Roman', style: 'normal', weight: '400' }, //Added Times New Roman
-  { family: 'Helvetica', style: 'normal', weight: '400' }, // Added Helvetica
+  { family: 'Roboto', style: 'normal', weight: '400' },
+  { family: 'Times New Roman', style: 'normal', weight: '700' },
+  { family: 'Helvetica', style: 'normal', weight: '700' },
+  { family: 'Georgia', style: 'italic', weight: '700' },
+  { family: 'Palatino', style: 'normal', weight: '700' },
+  { family: 'Garamond', style: 'italic', weight: '600' },
+  { family: 'Futura', style: 'normal', weight: '700' },
+  { family: 'Verdana', style: 'normal', weight: '700' }
 ];
 
 const TEXT_TRANSFORMS = [
@@ -403,7 +407,7 @@ export default function MoodBoard() {
     }
   }, [brandName, iconStyle, iconColor]);
 
-  // Update handleRegenerateLogo function to properly handle font loading
+  // Update handleRegenerateLogo function
   const handleRegenerateLogo = () => {
     if (!brandName) return;
 
@@ -433,23 +437,23 @@ export default function MoodBoard() {
     const textDecoration = TEXT_DECORATIONS[Math.floor(Math.random() * TEXT_DECORATIONS.length)];
     const letterSpacing = LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)];
 
-    // Create font style string
-    const newFontStyle = `
-      font-family: ${randomFont.family};
-      font-weight: ${randomFont.weight};
-      font-style: ${fontStyle};
-      text-transform: ${textTransform};
-      text-decoration: ${textDecoration};
-      letter-spacing: ${letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`};
-    `.trim();
+    // Create font style string with inline styles
+    const newFontStyle = {
+      fontFamily: randomFont.family,
+      fontWeight: randomFont.weight,
+      fontStyle,
+      textTransform,
+      textDecoration,
+      letterSpacing: letterSpacing === 'normal' ? 'normal' : `var(--letter-spacing-${letterSpacing})`,
+    };
 
     // Update all states
     setIconStyle(newStyle);
     setIconColor(newIconColor);
     setSelectedBackground(newBackground);
-    setSelectedFontStyle(newFontStyle);
+    setSelectedFontStyle(JSON.stringify(newFontStyle));
 
-    // Load the new font
+    // Load the font
     const fontSettings: FontSettings = {
       primary: {
         family: randomFont.family,
@@ -611,6 +615,7 @@ export default function MoodBoard() {
                     </Tooltip>
                   </div>
                 </div>
+                {/* Update the logo container section JSX */}
                 <div className={`flex items-center justify-center p-8 rounded-lg ${selectedBackground?.bg || 'bg-gray-50 dark:bg-gray-900'}`}>
                   <div className="flex flex-col items-center gap-6 logo-container bg-transparent">
                     <div className="w-24 h-24 bg-white/90 dark:bg-gray-800/90 rounded-xl p-4 shadow-sm">
@@ -623,8 +628,8 @@ export default function MoodBoard() {
                       )}
                     </div>
                     <h3
-                      className={`text-3xl ${selectedBackground?.text || ''} ${selectedFontStyle || ''}`}
-                      style={fonts?.primary && !selectedFontStyle ? {
+                      className={`text-3xl ${selectedBackground?.text || ''}`}
+                      style={selectedFontStyle ? JSON.parse(selectedFontStyle) : fonts?.primary ? {
                         fontFamily: fonts.primary.family,
                         fontWeight: fonts.primary.weight,
                         fontStyle: fonts.primary.style,
