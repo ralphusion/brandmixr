@@ -130,6 +130,8 @@ export default function BrandVariations() {
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
+  const industry = params.get('industry');
+  const style = params.get('style');
 
   useEffect(() => {
     if (!brandName) {
@@ -229,7 +231,14 @@ export default function BrandVariations() {
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
-            onClick={() => navigate(`/mood-board?name=${encodeURIComponent(brandName || '')}`)}
+            onClick={() => {
+              const queryParams = new URLSearchParams({
+                name: brandName || '',
+                industry: industry || '',
+                style: style || ''
+              }).toString();
+              navigate(`/mood-board?${queryParams}`);
+            }}
           >
             View Mood Board
           </Button>
