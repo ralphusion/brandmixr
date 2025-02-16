@@ -247,15 +247,19 @@ Platform: ${generatedPost.platform}
 // Main MoodBoard Component
 export default function MoodBoard() {
   const [, navigate] = useLocation();
-  const { brandName: brandNameFromContext, fonts, colors, isLoading, moodBoardData, handleExport, handleCopyToClipboard, handleRegenerate, regeneratingSection, selectedCardId, cardBackgrounds, logoSvg, moodBoardRef, setColors } = useBrandContext();
+  const { brandName: brandNameFromContext, setBrandName, fonts, colors, isLoading, moodBoardData, handleExport, handleCopyToClipboard, handleRegenerate, regeneratingSection, selectedCardId, cardBackgrounds, logoSvg, moodBoardRef, setColors } = useBrandContext();
 
   useEffect(() => {
-    if (!brandNameFromContext) {
+    const params = new URLSearchParams(window.location.search);
+    const nameFromUrl = params.get('name');
+    if (nameFromUrl) {
+      setBrandName(nameFromUrl);
+    } else if (!brandNameFromContext) {
       navigate('/');
     }
-  }, [brandNameFromContext, navigate]);
+  }, [brandNameFromContext, navigate, setBrandName]);
 
-  if (!brandNameFromContext) {
+  if (!brandNameFromContext && !window.location.search.includes('name=')) {
     return null;
   }
 

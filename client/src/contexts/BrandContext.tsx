@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useRef, ReactNode } from 'react';
+import { createContext, useContext, useState, useRef, ReactNode, useEffect } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { FontSettings } from "@/types/FontSettings";
 import html2canvas from 'html2canvas';
@@ -18,6 +18,7 @@ interface BrandContextType {
   logoSvg: string;
   moodBoardRef: React.RefObject<HTMLDivElement>;
   setColors: (colors: Array<{ hex: string; name: string }>) => void;
+  setBrandName: (name: string | null) => void;
 }
 
 const BrandContext = createContext<BrandContextType | undefined>(undefined);
@@ -34,6 +35,15 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const [logoSvg, setLogoSvg] = useState("");
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Initialize brand name from URL if available
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nameFromUrl = params.get('name');
+    if (nameFromUrl && !brandName) {
+      setBrandName(nameFromUrl);
+    }
+  }, []);
 
   const handleExport = async () => {
     if (!moodBoardRef.current) return;
@@ -149,6 +159,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
         logoSvg,
         moodBoardRef,
         setColors,
+        setBrandName,
       }}
     >
       {children}
