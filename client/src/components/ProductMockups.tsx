@@ -7,7 +7,7 @@ interface ProductMockupProps {
 }
 
 const ShoppingBag = ({ background }: { background?: string }) => (
-  <svg viewBox="0 0 200 260" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 200 260" className={`w-full h-full absolute inset-0 ${background}`}>
     <defs>
       <filter id="bagShadow" x="-50%" y="-50%" width="200%" height="200%">
         <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
@@ -28,18 +28,10 @@ const ShoppingBag = ({ background }: { background?: string }) => (
       y="70" 
       width="120" 
       height="160"
-      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
+      className={background}
       filter="url(#bagShadow)"
       rx="2"
-    >
-      <defs>
-        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
-          <stop offset="0%" className="stop-color-from" />
-          <stop offset="50%" className="stop-color-via" />
-          <stop offset="100%" className="stop-color-to" />
-        </linearGradient>
-      </defs>
-    </rect>
+    />
 
     {/* Handles */}
     <path 
@@ -62,49 +54,33 @@ const ShoppingBag = ({ background }: { background?: string }) => (
 );
 
 const BusinessCard = ({ background }: { background?: string }) => (
-  <svg viewBox="0 0 200 120" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 200 120" className={`w-full h-full absolute inset-0 ${background}`}>
     <rect 
       x="20" 
       y="20" 
       width="160" 
       height="80" 
       rx="4" 
-      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
-    >
-      <defs>
-        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
-          <stop offset="0%" className="stop-color-from" />
-          <stop offset="50%" className="stop-color-via" />
-          <stop offset="100%" className="stop-color-to" />
-        </linearGradient>
-      </defs>
-    </rect>
+      className={background}
+    />
   </svg>
 );
 
 const ProductPackage = ({ background }: { background?: string }) => (
-  <svg viewBox="0 0 200 300" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 200 300" className={`w-full h-full absolute inset-0 ${background}`}>
     <rect 
       x="40" 
       y="40" 
       width="120" 
       height="220" 
       rx="8" 
-      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
-    >
-      <defs>
-        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
-          <stop offset="0%" className="stop-color-from" />
-          <stop offset="50%" className="stop-color-via" />
-          <stop offset="100%" className="stop-color-to" />
-        </linearGradient>
-      </defs>
-    </rect>
+      className={background}
+    />
   </svg>
 );
 
 const Phone = ({ background }: { background?: string }) => (
-  <svg viewBox="0 0 120 240" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 120 240" className={`w-full h-full absolute inset-0 ${background}`}>
     {/* Phone Frame */}
     <rect 
       x="10" 
@@ -112,16 +88,8 @@ const Phone = ({ background }: { background?: string }) => (
       width="100" 
       height="220" 
       rx="20" 
-      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
-    >
-      <defs>
-        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
-          <stop offset="0%" className="stop-color-from" />
-          <stop offset="50%" className="stop-color-via" />
-          <stop offset="100%" className="stop-color-to" />
-        </linearGradient>
-      </defs>
-    </rect>
+      className={background}
+    />
     {/* Screen */}
     <rect 
       x="15" 
@@ -135,20 +103,12 @@ const Phone = ({ background }: { background?: string }) => (
 );
 
 const Laptop = ({ background }: { background?: string }) => (
-  <svg viewBox="0 0 400 280" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 400 280" className={`w-full h-full absolute inset-0 ${background}`}>
     {/* Screen */}
     <path 
       d="M40 20 L360 20 L360 220 L40 220 Z" 
-      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
-    >
-      <defs>
-        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
-          <stop offset="0%" className="stop-color-from" />
-          <stop offset="50%" className="stop-color-via" />
-          <stop offset="100%" className="stop-color-to" />
-        </linearGradient>
-      </defs>
-    </path>
+      className={background}
+    />
     {/* Base */}
     <path 
       d="M20 220 L380 220 L400 260 L0 260 Z" 
@@ -167,22 +127,14 @@ const Laptop = ({ background }: { background?: string }) => (
 );
 
 const Letterhead = ({ background }: { background?: string }) => (
-  <svg viewBox="0 0 200 280" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 200 280" className={`w-full h-full absolute inset-0 ${background}`}>
     <rect 
       x="20" 
       y="20" 
       width="160" 
       height="240" 
-      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
-    >
-      <defs>
-        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
-          <stop offset="0%" className="stop-color-from" />
-          <stop offset="50%" className="stop-color-via" />
-          <stop offset="100%" className="stop-color-to" />
-        </linearGradient>
-      </defs>
-    </rect>
+      className={background}
+    />
     <line x1="40" y1="100" x2="160" y2="100" stroke="white" strokeWidth="1" opacity="0.2"/>
     <line x1="40" y1="120" x2="160" y2="120" stroke="white" strokeWidth="1" opacity="0.2"/>
     <line x1="40" y1="140" x2="160" y2="140" stroke="white" strokeWidth="1" opacity="0.2"/>

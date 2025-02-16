@@ -723,46 +723,22 @@ export default function MoodBoard() {
     fonts: FontSettings | null;
   }) => {
     const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
+
     const textStyle = {
-      fontFamily: fonts?.primary?.family,
-      fontWeight: fonts?.primary?.weight,
-      fontStyle: fonts?.primary?.style,
-      color: 'white' // Ensure text is always white for contrast
+      fontFamily: fonts?.primary?.family || 'Inter',
+      fontWeight: fonts?.primary?.weight || '600',
+      fontStyle: fonts?.primary?.style || 'normal',
+      color: 'white' 
     };
 
     return (
       <Card className="shadow-md">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold" style={textStyle}>
+            <h2 className="text-xl font-semibold text-white" style={textStyle}>
               Brand Applications
             </h2>
           </div>
-
-          {/* Full Width Brand Display */}
-          {selectedCardId && (
-            <div className={`${selectedBackground} w-full h-48 flex items-center justify-center p-8 rounded-lg mb-8`}>
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-24 h-24 bg-white/90 dark:bg-white/80 rounded-xl p-4 shadow-lg">
-                  {logoSvg && (
-                    <img
-                      src={logoSvg}
-                      alt="Brand Logo"
-                      className="w-full h-full object-contain"
-                    />
-                  )}
-                </div>
-                <motion.h3
-                  className={`text-3xl text-center text-white ${
-                    FONT_STYLES_ARRAY[parseInt(selectedCardId.split('-')[1]) % FONT_STYLES_ARRAY.length]
-                  }`}
-                  style={textStyle}
-                >
-                  {brandName}
-                </motion.h3>
-              </div>
-            </div>
-          )}
 
           {/* Product Mockups Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -776,15 +752,15 @@ export default function MoodBoard() {
               <div className="absolute inset-0 flex items-center justify-center">
                 {logoSvg && (
                   <div className="flex flex-col items-center gap-4">
-                    <img src={logoSvg} alt="Logo on Shopping Bag" className="w-16 h-16 object-contain" />
-                    <motion.h4
-                      className={`text-sm text-center ${
+                    <img src={logoSvg} alt="Logo on Shopping Bag" className="w-16 h-16 object-contain bg-white/90 p-2 rounded-lg" />
+                    <h4
+                      className={`text-sm text-center text-white ${
                         FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                       }`}
                       style={textStyle}
                     >
                       {brandName}
-                    </motion.h4>
+                    </h4>
                   </div>
                 )}
               </div>
@@ -801,15 +777,15 @@ export default function MoodBoard() {
               <div className="absolute inset-0 flex items-center justify-center">
                 {logoSvg && (
                   <div className="flex flex-col items-center gap-4">
-                    <img src={logoSvg} alt="Logo on Business Card" className="w-12 h-12 object-contain" />
-                    <motion.h4
-                      className={`text-sm text-center ${
+                    <img src={logoSvg} alt="Logo on Business Card" className="w-12 h-12 object-contain bg-white/90 p-2 rounded-lg" />
+                    <h4
+                      className={`text-sm text-center text-white ${
                         FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                       }`}
                       style={textStyle}
                     >
                       {brandName}
-                    </motion.h4>
+                    </h4>
                   </div>
                 )}
               </div>
@@ -826,15 +802,15 @@ export default function MoodBoard() {
               <div className="absolute inset-0 flex items-center justify-center">
                 {logoSvg && (
                   <div className="flex flex-col items-center gap-4">
-                    <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain" />
-                    <motion.h4
-                      className={`text-sm text-center ${
+                    <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain bg-white/90 p-2 rounded-lg" />
+                    <h4
+                      className={`text-sm text-center text-white ${
                         FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                       }`}
                       style={textStyle}
                     >
                       {brandName}
-                    </motion.h4>
+                    </h4>
                   </div>
                 )}
               </div>
@@ -848,23 +824,22 @@ export default function MoodBoard() {
             <div className="bg-muted rounded-lg p-4 aspect-video relative overflow-hidden">
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="transform -rotate-12">
-                  <ProductMockup 
-                    type="phone" 
+                  <ProductMockup                     type="phone" 
                     className="w-48 h-96"
                     background={selectedBackground}
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     {logoSvg && (
                       <div className="flex flex-col items-center gap-4">
-                        <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />
-                        <motion.h4
-                          className={`text-sm text-center ${
+                        <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain bg-white/90 p-2 rounded-lg" />
+                        <h4
+                          className={`text-sm text-center text-white ${
                             FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                           }`}
                           style={textStyle}
                         >
                           {brandName}
-                        </motion.h4>
+                        </h4>
                       </div>
                     )}
                   </div>
@@ -885,15 +860,15 @@ export default function MoodBoard() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     {logoSvg && (
                       <div className="flex flex-col items-center gap-4">
-                        <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />
-                        <motion.h4
-                          className={`text-sm text-center ${
+                        <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain bg-white/90 p-2 rounded-lg" />
+                        <h4
+                          className={`text-sm text-center text-white ${
                             FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                           }`}
                           style={textStyle}
                         >
                           {brandName}
-                        </motion.h4>
+                        </h4>
                       </div>
                     )}
                   </div>
@@ -916,15 +891,15 @@ export default function MoodBoard() {
                 <div className="absolute inset-0 flex items-center justify-center transform -translate-y-8">
                   {logoSvg && (
                     <div className="flex flex-col items-center gap-4">
-                      <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain" />
-                      <motion.h4
-                        className={`text-lg text-center ${
+                      <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain bg-white/90 p-2 rounded-lg" />
+                      <h4
+                        className={`text-lg text-center text-white ${
                           FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                         }`}
                         style={textStyle}
                       >
                         {brandName}
-                      </motion.h4>
+                      </h4>
                     </div>
                   )}
                 </div>
@@ -939,15 +914,15 @@ export default function MoodBoard() {
                   <div className="absolute inset-0 flex items-center justify-center">
                     {logoSvg && (
                       <div className="flex flex-col items-center gap-4">
-                        <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain" />
-                        <motion.h4
-                          className={`text-xs text-center ${
+                        <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain bg-white/90 p-2 rounded-lg" />
+                        <h4
+                          className={`text-xs text-center text-white ${
                             FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                           }`}
                           style={textStyle}
                         >
                           {brandName}
-                        </motion.h4>
+                        </h4>
                       </div>
                     )}
                   </div>
