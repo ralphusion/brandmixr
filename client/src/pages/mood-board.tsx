@@ -768,14 +768,12 @@ export default function MoodBoard() {
     fonts: FontSettings | null;
     moodBoardData: MoodBoardData | undefined;
   }) => {
-    const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
     const selectedIndex = selectedCardId ? parseInt(selectedCardId.split('-')[1]) : 0;
 
     const textStyle = {
       fontFamily: fonts?.primary?.family || 'Inter',
       fontWeight: fonts?.primary?.weight || '600',
       fontStyle: fonts?.primary?.style || 'normal',
-      color: 'white'
     };
 
     const secondaryTextStyle = {
@@ -784,14 +782,50 @@ export default function MoodBoard() {
       fontStyle: fonts?.secondary?.style || 'normal',
     };
 
-    // Generate background styles from color palette
-    const generateGradient = (index: number) => {
-      if (!moodBoardData?.colors || moodBoardData.colors.length < 2) {
-        return selectedBackground || 'bg-gradient-to-br from-slate-800 to-slate-900';
+    // Enhanced color palette usage
+    const getColorScheme = () => {
+      if (!moodBoardData?.colors || moodBoardData.colors.length < 3) {
+        return {
+          primary: '#1a1a1a',
+          secondary: '#2a2a2a',
+          accent1: '#3a3a3a',
+          accent2: '#4a4a4a',
+          accent3: '#5a5a5a',
+          textLight: 'text-white',
+          textDark: 'text-gray-900'
+        };
       }
-      const color1 = moodBoardData.colors[index % moodBoardData.colors.length].hex;
-      const color2 = moodBoardData.colors[(index + 1) % moodBoardData.colors.length].hex;
-      return `bg-gradient-to-br from-[${color1}] via-[${color2}] to-[${color1}]`;
+
+      const colors = moodBoardData.colors;
+      return {
+        primary: colors[0].hex,
+        secondary: colors[1].hex,
+        accent1: colors[2].hex,
+        accent2: colors[3]?.hex || colors[0].hex,
+        accent3: colors[4]?.hex || colors[1].hex,
+        textLight: 'text-white',
+        textDark: 'text-gray-900'
+      };
+    };
+
+    const colorScheme = getColorScheme();
+
+    // Generate gradient backgrounds using color combinations
+    const generateGradient = (type: 'header' | 'hero' | 'about' | 'feature' | 'contact') => {
+      switch (type) {
+        case 'header':
+          return `bg-[${colorScheme.primary}]`;
+        case 'hero':
+          return `bg-gradient-to-br from-[${colorScheme.primary}] via-[${colorScheme.secondary}] to-[${colorScheme.primary}]`;
+        case 'about':
+          return `bg-gradient-to-br from-[${colorScheme.secondary}] via-[${colorScheme.accent1}] to-[${colorScheme.secondary}]`;
+        case 'feature':
+          return `bg-gradient-to-br from-[${colorScheme.accent2}] to-[${colorScheme.accent3}]`;
+        case 'contact':
+          return `bg-gradient-to-br from-[${colorScheme.primary}] to-[${colorScheme.accent1}]`;
+        default:
+          return `bg-gradient-to-br from-[${colorScheme.primary}] to-[${colorscheme.secondary}]`;
+      }
     };
 
     return (
@@ -806,7 +840,7 @@ export default function MoodBoard() {
           {selectedCardId && (
             <div className="space-y-8">
               {/* Navigation Bar */}
-              <div className={`${generateGradient(0)} w-full rounded-lg overflow-hidden`}>
+              <div className={`${generateGradient('header')} w-full rounded-lg overflow-hidden`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -818,7 +852,8 @@ export default function MoodBoard() {
                             className="w-full h-full object-contain"
                           />
                         )}
-                      </div>                      <span className="text-white font-semibold text-lg" style={textStyle}>
+                      </div>
+                      <span className={`${colorScheme.textLight} font-semibold text-lg`} style={textStyle}>
                         {brandName}
                       </span>
                     </div>
@@ -826,7 +861,7 @@ export default function MoodBoard() {
                       {['Home', 'About', 'Services', 'Contact'].map((item) => (
                         <span
                           key={item}
-                          className="text-white/90 hover:text-white cursor-pointer"
+                          className={`${colorScheme.textLight} opacity-90 hover:opacity-100 cursor-pointer`}
                           style={secondaryTextStyle}
                         >
                           {item}
@@ -838,32 +873,32 @@ export default function MoodBoard() {
               </div>
 
               {/* Hero Section */}
-              <div className={`${generateGradient(1)} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
+              <div className={`${generateGradient('hero')} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                   <div className="max-w-2xl">
                     <h1 
-                      className="text-4xl sm:text-5xl font-bold text-white mb-6"
+                      className={`text-4xl sm:text-5xl font-bold ${colorScheme.textLight} mb-6`}
                       style={textStyle}
                     >
                       Elevate Your Experience with {brandName}
                     </h1>
                     <p 
-                      className="text-xl text-white/90 mb-8"
+                      className={`text-xl ${colorScheme.textLight} opacity-90 mb-8`}
                       style={secondaryTextStyle}
                     >
                       Discover excellence through innovation and style. We bring your vision to life with precision and passion.
                     </p>
                     <div className="flex flex-wrap gap-4">
                       <Button 
-                        className="bg-white text-gray-900 hover:bg-white/90"
+                        className={`bg-white hover:bg-white/90 ${colorScheme.textDark}`}
                         style={secondaryTextStyle}
                       >
                         Get Started
                       </Button>
                       <Button 
                         variant="outline" 
-                        className="text-white border-white hover:bg-white/10"
+                        className={`${colorScheme.textLight} border-white hover:bg-white/10`}
                         style={secondaryTextStyle}
                       >
                         Learn More
@@ -874,18 +909,18 @@ export default function MoodBoard() {
               </div>
 
               {/* About Section */}
-              <div className={`${generateGradient(2)} w-full rounded-lg overflow-hidden relative p-8`}>
+              <div className={`${generateGradient('about')} w-full rounded-lg overflow-hidden relative p-8`}>
                 <div className="max-w-7xl mx-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                     <div>
                       <h2 
-                        className="text-3xl font-bold text-white mb-4"
+                        className={`text-3xl font-bold ${colorScheme.textLight} mb-4`}
                         style={textStyle}
                       >
                         About {brandName}
                       </h2>
                       <p 
-                        className="text-white/90 mb-6"
+                        className={`${colorScheme.textLight} opacity-90 mb-6`}
                         style={secondaryTextStyle}
                       >
                         {moodBoardData?.moodDescription || `At ${brandName}, we believe in creating exceptional experiences that resonate with our clients and their audiences. Our commitment to excellence drives everything we do.`}
@@ -894,7 +929,7 @@ export default function MoodBoard() {
                         {moodBoardData?.keywords?.slice(0, 5).map((keyword, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-white/10 rounded-full text-white text-sm"
+                            className={`px-3 py-1 bg-white/10 rounded-full ${colorScheme.textLight} text-sm`}
                             style={secondaryTextStyle}
                           >
                             {keyword}
@@ -903,7 +938,7 @@ export default function MoodBoard() {
                       </div>
                     </div>
                     <div className="relative h-64 rounded-lg overflow-hidden">
-                      <div className={`${generateGradient(3)} absolute inset-0 opacity-50`}></div>
+                      <div className={`${generateGradient('feature')} absolute inset-0 opacity-50`}></div>
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className="w-32 h-32 bg-white/90 rounded-2xl p-6">
                           {logoSvg && (
@@ -924,25 +959,25 @@ export default function MoodBoard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
                   <Card key={feature} className="overflow-hidden">
-                    <CardContent className={`${generateGradient((idx + 4) % (moodBoardData?.colors?.length || 5))} p-6 h-full flex flex-col items-center text-center`}>
+                    <CardContent className={`${generateGradient('feature')} p-6 h-full flex flex-col items-center text-center`}>
                       <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
                         <div className="w-6 h-6 text-gray-900">
                           {idx === 0 && <Building2 />}
-                          {idx === 1 && <SparkleIcon />}
-                          {idx === 2 && <Crown />}
+                          {idx === 1 && <Crown />}
+                          {idx === 2 && <SparkleIcon />}
                         </div>
                       </div>
                       <h3 
-                        className="text-xl font-semibold text-white mb-2"
+                        className={`text-xl font-semibold ${colorScheme.textLight} mb-2`}
                         style={textStyle}
                       >
                         {feature}
                       </h3>
                       <p 
-                        className="text-white/90"
+                        className={`${colorScheme.textLight} opacity-80`}
                         style={secondaryTextStyle}
                       >
-                        Experience unparalleled {feature.toLowerCase()} with our cutting-edge solutions and dedicated expertise.
+                        Experience unmatched {feature.toLowerCase()} with our cutting-edge solutions.
                       </p>
                     </CardContent>
                   </Card>
@@ -950,47 +985,25 @@ export default function MoodBoard() {
               </div>
 
               {/* Contact Section */}
-              <Card className={`${generateGradient(5)} overflow-hidden`}>
+              <Card className={`${generateGradient('contact')} overflow-hidden`}>
                 <CardContent className="p-6">
                   <h3 
-                    className="text-2xl font-semibold text-white mb-6"
+                    className={`text-2xl font-semibold ${colorScheme.textLight} mb-6`}
                     style={textStyle}
                   >
                     Get in Touch
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      {[
-                        { icon: <MapPin className="w-5 h-5" />, text: "123 Business Avenue, Suite 100" },
-                        { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
-                        { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
-                      ].map((item, idx) => (
-                        <div key={idx} className="flex items-center text-white/90 space-x-3">
-                          {item.icon}
-                          <span style={secondaryTextStyle}>{item.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input 
-                        placeholder="Name" 
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                      />
-                      <Input 
-                        placeholder="Email" 
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                      />
-                      <Input 
-                        placeholder="Message" 
-                        className="col-span-2 bg-white/10 border-white/20 text-white placeholder:text-white/50"
-                      />
-                      <Button 
-                        className="col-span-2 bg-white text-gray-900 hover:bg-white/90"
-                        style={secondaryTextStyle}
-                      >
-                        Send Message
-                      </Button>
-                    </div>
+                  <div className="space-y-4">
+                    {[
+                      { icon: <MapPin className="w-5 h-5" />, text: "123 Business Avenue, Suite 100" },
+                      { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
+                      { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
+                    ].map((item, idx) => (
+                      <div key={idx} className={`flex items-center ${colorScheme.textLight} opacity-90 space-x-3`}>
+                        {item.icon}
+                        <span style={secondaryTextStyle}>{item.text}</span>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>
