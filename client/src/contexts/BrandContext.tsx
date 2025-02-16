@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useRef, ReactNode } from 'react';
 import { useToast } from "@/hooks/use-toast";
 import { FontSettings } from "@/types/FontSettings";
+import html2canvas from 'html2canvas';
 
 interface BrandContextType {
   brandName: string | null;
@@ -31,11 +32,37 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const [cardBackgrounds, setCardBackgrounds] = useState<string[]>([]);
   const [logoSvg, setLogoSvg] = useState("");
-  const moodBoardRef = React.useRef<HTMLDivElement>(null);
+  const moodBoardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const handleExport = () => {
-    // Implementation
+  const handleExport = async () => {
+    if (!moodBoardRef.current) return;
+
+    try {
+      const canvas = await html2canvas(moodBoardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+      });
+
+      const dataUrl = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-moodboard.png`;
+      link.href = dataUrl;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast({
+        title: "Success",
+        description: "Mood board exported successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Export failed",
+        description: "Failed to export mood board",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCopyToClipboard = async (text: string, type: string) => {
@@ -54,8 +81,55 @@ export function BrandProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const handleRegenerate = (section: string) => {
-    // Implementation
+  const handleRegenerate = async (section: string) => {
+    setRegeneratingSection({ type: section });
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name');
+      const industry = params.get('industry');
+      const style = params.get('style');
+
+      if (!name || !industry || !style) {
+        throw new Error("Missing required parameters");
+      }
+
+      const response = await fetch(`/api/mood-board/regenerate-${section}?` + new URLSearchParams({
+        name,
+        industry,
+        style
+      }));
+
+      if (!response.ok) {
+        throw new Error(`Failed to regenerate ${section}`);
+      }
+
+      const data = await response.json();
+
+      switch (section) {
+        case 'colors':
+          setColors(data.colors);
+          break;
+        case 'mood':
+          setMoodBoardData((prev: any) => ({ ...prev, moodDescription: data.moodDescription }));
+          break;
+        case 'keywords':
+          setMoodBoardData((prev: any) => ({ ...prev, keywords: data.keywords }));
+          break;
+      }
+
+      toast({
+        title: "Success",
+        description: `${section.charAt(0).toUpperCase() + section.slice(1)} regenerated successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Regeneration failed",
+        description: error instanceof Error ? error.message : "Failed to regenerate content",
+        variant: "destructive",
+      });
+    } finally {
+      setRegeneratingSection(null);
+    }
   };
 
   return (
