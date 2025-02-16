@@ -46,7 +46,7 @@ type RegenerationSection = {
 
 const getRandomPleaseantColor = () => {
   return 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800';
-};
+}
 
 const ICON_STYLES = {
   initials: [
@@ -760,20 +760,21 @@ export default function MoodBoard() {
     return null;
   }
 
-  const ProductMockupsSection = ({ selectedCardId, cardBackgrounds, logoSvg, brandName, fonts, moodBoardData }: {
+  const ProductMockupsSection = ({ selectedCardId, cardBackgrounds, logoSvg, brandName, fonts }: {
     selectedCardId: string | null;
     cardBackgrounds: string[];
     logoSvg: string;
     brandName: string;
     fonts: FontSettings | null;
-    moodBoardData: MoodBoardData | undefined;
   }) => {
+    const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
     const selectedIndex = selectedCardId ? parseInt(selectedCardId.split('-')[1]) : 0;
 
     const textStyle = {
       fontFamily: fonts?.primary?.family || 'Inter',
       fontWeight: fonts?.primary?.weight || '600',
       fontStyle: fonts?.primary?.style || 'normal',
+      color: 'white'
     };
 
     const secondaryTextStyle = {
@@ -782,305 +783,159 @@ export default function MoodBoard() {
       fontStyle: fonts?.secondary?.style || 'normal',
     };
 
-    // Enhanced color palette usage
-    const getColorScheme = () => {
-      if (!moodBoardData?.colors || moodBoardData.colors.length < 3) {
-        return {
-          primary: '#1a1a1a',
-          secondary: '#2a2a2a',
-          accent1: '#3a3a3a',
-          accent2: '#4a4a4a',
-          accent3: '#5a5a5a',
-          textOnPrimary: 'text-white',
-          textOnLight: 'text-gray-900',
-          textOnDark: 'text-white'
-        };
-      }
-
-      const colors = moodBoardData.colors;
-
-      // Function to determine if a color is light
-      const isLight = (color: string) => {
-        const hex = color.replace('#', '');
-        const r = parseInt(hex.substr(0, 2), 16);
-        const g = parseInt(hex.substr(2, 2), 16);
-        const b = parseInt(hex.substr(4, 2), 16);
-        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-        return brightness > 155;
-      };
-
-      const primary = colors[0].hex;
-      const secondary = colors[1].hex;
-      const accent1 = colors[2].hex;
-      const accent2 = colors[3]?.hex || colors[0].hex;
-      const accent3 = colors[4]?.hex || colors[1].hex;
-
-      return {
-        primary,
-        secondary,
-        accent1,
-        accent2,
-        accent3,
-        textOnPrimary: isLight(primary) ? 'text-gray-900' : 'text-white',
-        textOnLight: 'text-gray-900',
-        textOnDark: 'text-white'
-      };
-    };
-
-    const colorScheme = getColorScheme();
-
-    // Generate gradient backgrounds using color combinations
-    const generateGradient = (type: 'header' | 'hero' | 'about' | 'feature' | 'contact') => {
-      const getTextColor = (backgroundColor: string) => {
-        const isLight = (color: string) => {
-          const hex = color.replace('#', '');
-          const r = parseInt(hex.substr(0, 2), 16);
-          const g = parseInt(hex.substr(2, 2), 16);
-          const b = parseInt(hex.substr(4, 2), 16);
-          const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-          return brightness > 155;
-        };
-
-        return isLight(backgroundColor) ? 'text-gray-900' : 'text-white';
-      };
-
-      switch (type) {
-        case 'header':
-          return {
-            background: `bg-[${colorScheme.primary}]`,
-            text: getTextColor(colorScheme.primary)
-          };
-        case 'hero':
-          return {
-            background: `bg-gradient-to-br from-[${colorScheme.primary}] via-[${colorScheme.secondary}] to-[${colorScheme.primary}]`,
-            text: getTextColor(colorScheme.primary)
-          };
-        case 'about':
-          return {
-            background: `bg-gradient-to-br from-[${colorScheme.secondary}] via-[${colorScheme.accent1}] to-[${colorScheme.secondary}]`,
-            text: getTextColor(colorScheme.secondary)
-          };
-        case 'feature':
-          return {
-            background: `bg-gradient-to-br from-[${colorScheme.accent2}] to-[${colorScheme.accent3}]`,
-            text: getTextColor(colorScheme.accent2)
-          };
-        case 'contact':
-          return {
-            background: `bg-gradient-to-br from-[${colorScheme.primary}] to-[${colorScheme.accent1}]`,
-            text: getTextColor(colorScheme.primary)
-          };
-        default:
-          return {
-            background: `bg-gradient-to-br from-[${colorScheme.primary}] to-[${colorScheme.secondary}]`,
-            text: getTextColor(colorScheme.primary)
-          };
-      }
-    };
-
-    // Update the JSX to use the new gradient system
     return (
       <Card className="shadow-md">
         <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground" style={textStyle}>
-              Brand Presence (Mockup Only)
+              Brand Website Preview
             </h2>
           </div>
 
           {selectedCardId && (
             <div className="space-y-8">
               {/* Navigation Bar */}
-              {(() => {
-                const headerStyle = generateGradient('header');
-                return (
-                  <div className={`${headerStyle.background} w-full rounded-lg overflow-hidden`}>
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-10 h-10 bg-white/90 dark:bg-white/80 rounded-lg p-2">
-                            {logoSvg && (
-                              <img
-                                src={logoSvg}
-                                alt="Brand Logo"
-                                className="w-full h-full object-contain"
-                              />
-                            )}
-                          </div>
-                          <span className={`${headerStyle.text} font-semibold text-lg`} style={textStyle}>
-                            {brandName}
-                          </span>
-                        </div>
-                        <nav className="hidden md:flex space-x-8">
-                          {['Home', 'About', 'Services', 'Contact'].map((item) => (
-                            <span
-                              key={item}
-                              className={`${headerStyle.text} opacity-90 hover:opacity-100 cursor-pointer`}
-                              style={secondaryTextStyle}
-                            >
-                              {item}
-                            </span>
-                          ))}
-                        </nav>
+              <div className={`${selectedBackground} w-full rounded-lg overflow-hidden`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-white/90 dark:bg-white/80 rounded-lg p-2">
+                        {logoSvg && (
+                          <img
+                            src={logoSvg}
+                            alt="Brand Logo"
+                            className="w-full h-full object-contain"
+                          />
+                        )}
                       </div>
+                      <span className="text-white font-semibold text-lg" style={textStyle}>
+                        {brandName}
+                      </span>
                     </div>
-                  </div>
-                );
-              })()}
-
-              {/* Hero Section */}
-              {(() => {
-                const heroStyle = generateGradient('hero');
-                return (
-                  <div className={`${heroStyle.background} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
-                    <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                      <div className="max-w-2xl">
-                        <h1
-                          className={`text-4xl sm:text-5xl font-bold ${heroStyle.text} mb-6`}
-                          style={textStyle}
-                        >
-                          Elevate Your Experience with {brandName}
-                        </h1>
-                        <p
-                          className={`text-xl ${heroStyle.text} opacity-90 mb-8`}
+                    <nav className="hidden md:flex space-x-8">
+                      {['Home', 'About', 'Services', 'Contact'].map((item) => (
+                        <span
+                          key={item}
+                          className="text-white/90 hover:text-white cursor-pointer"
                           style={secondaryTextStyle}
                         >
-                          Discover excellence through innovation and style. We bring your vision to life with precision and passion.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                          <Button
-                            className={`bg-white hover:bg-white/90 ${colorScheme.textOnLight}`}
-                            style={secondaryTextStyle}
-                          >
-                            Get Started
-                          </Button>
-                          <Button
-                            variant="outline"
-                            className={`${heroStyle.text} border-current hover:bg-white/10`}
-                            style={secondaryTextStyle}
-                          >
-                            Learn More
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
+                          {item}
+                        </span>
+                      ))}
+                    </nav>
                   </div>
-                );
-              })()}
+                </div>
+              </div>
 
-              {/* About Section */}
-              {(() => {
-                const aboutStyle = generateGradient('about');
-                return (
-                  <div className={`${aboutStyle.background} w-full rounded-lg overflow-hidden relative p-8`}>
-                    <div className="max-w-7xl mx-auto">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        <div>
-                          <h2
-                            className={`text-3xl font-bold ${aboutStyle.text} mb-4`}
-                            style={textStyle}
-                          >
-                            About {brandName}
-                          </h2>
-                          <p
-                            className={`${aboutStyle.text} opacity-90 mb-6`}
-                            style={secondaryTextStyle}
-                          >
-                            {moodBoardData?.moodDescription || `At ${brandName}, we believe in creating exceptional experiences that resonate with our clients and their audiences. Our commitment to excellence drives everything we do.`}
-                          </p>
-                          <div className="flex flex-wrap gap-3">
-                            {moodBoardData?.keywords?.slice(0, 5).map((keyword, idx) => (
-                              <span
-                                key={idx}
-                                className={`px-3 py-1 bg-white/10 rounded-full ${aboutStyle.text} text-sm`}
-                                style={secondaryTextStyle}
-                              >
-                                {keyword}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="relative h-64 rounded-lg overflow-hidden">
-                          <div className={`${aboutStyle.background} absolute inset-0 opacity-50`}></div>
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-32 h-32 bg-white/90 rounded-2xl p-6">
-                              {logoSvg && (
-                                <img
-                                  src={logoSvg}
-                                  alt="Brand Logo"
-                                  className="w-full h-full object-contain"
-                                />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+              {/* Hero Section */}
+              <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div><div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                  <div className="max-w-2xl">
+                    <h1 
+                      className="text-4xl sm:text-5xl font-bold text-white mb-6"
+                      style={textStyle}
+                    >
+                      Elevate Your Experience with {brandName}
+                    </h1>
+                    <p 
+                      className="text-xl text-white/90 mb-8"
+                      style={secondaryTextStyle}
+                    >
+                      Discover excellence through innovation and style. We bring your vision to life with precision and passion.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      <Button 
+                        className="bg-white text-gray-900 hover:bg-white/90"
+                        style={secondaryTextStyle}
+                      >
+                        Get Started
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="text-white border-white hover:bg-white/10"
+                        style={secondaryTextStyle}
+                      >
+                        Learn More
+                      </Button>
                     </div>
                   </div>
-                );
-              })()}
+                </div>
+              </div>
 
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
-                {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => {
-                  const featureStyle = generateGradient('feature');
-                  return (
-                    <Card key={feature} className="overflow-hidden">
-                      <CardContent className={`${featureStyle.background} p-6 h-full flex flex-col items-center text-center`}>
-                        <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
-                          <div className="w-6 h-6 text-gray-900">
-                            {idx === 0 && <Building2 />}
-                            {idx === 1 && <Crown />}
-                            {idx === 2 && <SparkleIcon />}
-                          </div>
+                {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
+                  <Card key={feature} className="overflow-hidden">
+                    <CardContent className={`${cardBackgrounds[(selectedIndex + idx) % cardBackgrounds.length]} p-6 h-full flex flex-col items-center text-center`}>
+                      <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
+                        <div className="w-6 h-6 text-gray-900">
+                          {idx === 0 && <Building2 />}
+                          {idx === 1 && <SparkleIcon />}
+                          {idx === 2 && <Crown />}
                         </div>
-                        <h3
-                          className={`text-xl font-semibold ${featureStyle.text} mb-2`}
-                          style={textStyle}
-                        >
-                          {feature}
-                        </h3>
-                        <p
-                          className={`${featureStyle.text} opacity-80`}
-                          style={secondaryTextStyle}
-                        >
-                          Experience unmatched {feature.toLowerCase()} with our cutting-edge solutions.
-                        </p>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
+                      </div>
+                      <h3 
+                        className="text-xl font-semibold text-white mb-2"
+                        style={textStyle}
+                      >
+                        {feature}
+                      </h3>
+                      <p 
+                        className="text-white/90"
+                        style={secondaryTextStyle}
+                      >
+                        Experience unparalleled {feature.toLowerCase()} with our cutting-edge solutions and dedicated expertise.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
 
               {/* Contact Section */}
-              {(() => {
-                const contactStyle = generateGradient('contact');
-                return (
-                  <Card className={`${contactStyle.background} overflow-hidden`}>
-                    <CardContent className="p-6">
-                      <h3
-                        className={`text-2xl font-semibold ${contactStyle.text} mb-6`}
-                        style={textStyle}
+              <Card className={`${selectedBackground} overflow-hidden`}>
+                <CardContent className="p-6">
+                  <h3 
+                    className="text-2xl font-semibold text-white mb-6"
+                    style={textStyle}
+                  >
+                    Get in Touch
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      {[
+                        { icon: <MapPin className="w-5 h-5" />, text: "123 Business Avenue, Suite 100" },
+                        { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
+                        { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center text-white/90 space-x-3">
+                          {item.icon}
+                          <span style={secondaryTextStyle}>{item.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input 
+                        placeholder="Name" 
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Input 
+                        placeholder="Email" 
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Input 
+                        placeholder="Message" 
+                        className="col-span-2 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Button 
+                        className="col-span-2 bg-white text-gray-900 hover:bg-white/90"
+                        style={secondaryTextStyle}
                       >
-                        Get in Touch
-                      </h3>
-                      <div className="space-y-4">
-                        {[
-                          { icon: <MapPin className="w-5 h-5" />, text: "123 Business Avenue, Suite 100" },
-                          { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
-                          { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
-                        ].map((item, idx) => (
-                          <div key={idx} className={`flex items-center ${contactStyle.text} opacity-90 space-x-3`}>
-                            {item.icon}
-                            <span style={secondaryTextStyle}>{item.text}</span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })()}
+                        Send Message
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
         </CardContent>
@@ -1349,7 +1204,7 @@ export default function MoodBoard() {
                       exit={{ opacity: 0 }}
                       className="prose dark:prose-invert"
                     >
-                      <p
+                      <p 
                         className="text-muted-foreground"
                         style={fonts?.secondary ? {
                           fontFamily: fonts.secondary.family,
@@ -1364,13 +1219,12 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
-            <ProductMockupsSection
-              selectedCardId={selectedCardId}
-              cardBackgrounds={cardBackgrounds}
-              logoSvg={logoSvg}
-              brandName={brandName}
-              fonts={fonts}
-              moodBoardData={moodBoardData}
+            <ProductMockupsSection 
+              selectedCardId={selectedCardId} 
+              cardBackgrounds={cardBackgrounds} 
+              logoSvg={logoSvg} 
+              brandName={brandName} 
+              fonts={fonts} 
             />
           </div>
         ) : (
