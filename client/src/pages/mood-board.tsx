@@ -647,7 +647,7 @@ export default function MoodBoard() {
     const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {Array(3).fill(null).map((_, index) => {
           const cardId = `variation-${index}`;
           const isSelected = selectedCardId === cardId;
@@ -671,10 +671,10 @@ export default function MoodBoard() {
 
   const BrandLogoSection = () => (
     <Card className="shadow-md">
-      <CardContent className="p-6">
+      <CardContent className="p-4 sm:p-6">
         <div className="flex justify-between items-center mb-4">
           <h2
-            className="text-xl font-semibold"
+            className="text-lg sm:text-xl font-semibold"
             style={fonts?.primary ? {
               fontFamily: fonts.primary.family,
               fontWeight: fonts.primary.weight,
@@ -689,10 +689,11 @@ export default function MoodBoard() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="h-10 w-10"
                   onClick={handleDownloadLogo}
                   disabled={!selectedCardId}
                 >
-                  <Download className="h-4 w-4" />
+                  <Download className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Download selected logo as PNG</TooltipContent>
@@ -702,9 +703,10 @@ export default function MoodBoard() {
                 <Button
                   variant="ghost"
                   size="sm"
+                  className="h-10 w-10"
                   onClick={handleRegenerateLogo}
                 >
-                  <SparkleIcon className="h-4 w-4" />
+                  <SparkleIcon className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Generate new variations</TooltipContent>
@@ -776,9 +778,9 @@ export default function MoodBoard() {
 
     return (
       <Card className="shadow-md">
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-foreground" style={textStyle}>
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground" style={textStyle}>
               Brand Applications
             </h2>
           </div>
@@ -821,23 +823,24 @@ export default function MoodBoard() {
 
   return (
     <TooltipProvider>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center">
+      <div className="container mx-auto py-4 sm:py-8 px-3 sm:px-4">
+        {/* Header section with improved mobile spacing */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <Button
               variant="ghost"
-              className="mr-4"
+              className="p-2 sm:mr-4"
               onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName || '')}`)}
             >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Brand Studio
+              <span className="hidden sm:inline">Back to Brand Studio</span>
+              <span className="sm:hidden">Back</span>
             </Button>
-            <Logo />
+            <Logo className="h-6 sm:h-8" />
           </div>
         </div>
 
         <h1
-          className="text-3xl font-bold mb-6"
+          className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
             fontWeight: fonts.primary.weight,
@@ -848,18 +851,182 @@ export default function MoodBoard() {
         </h1>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-6">
             <Skeleton className="h-[200px] rounded-lg" />
             <Skeleton className="h-[200px] rounded-lg" />
           </div>
-        ): moodBoardData ? (
-          <div className="grid grid-cols-1 gap-6" ref={moodBoardRef}>
-            <BrandLogoSection />
+        ) : moodBoardData ? (
+          <div className="grid grid-cols-1 gap-4 sm:gap-6" ref={moodBoardRef}>
+            {/* Brand Logo Section with improved mobile layout */}
             <Card className="shadow-md">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2
-                    className="text-xl font-semibold"
+                    className="text-lg sm:text-xl font-semibold"
+                    style={fonts?.primary ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    } : undefined}
+                  >
+                    Brand Logo
+                  </h2>
+                  <div className="flex gap-2">
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 w-10" // Larger touch target
+                          onClick={handleDownloadLogo}
+                          disabled={!selectedCardId}
+                        >
+                          <Download className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Download selected logo as PNG</TooltipContent>
+                    </Tooltip>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-10 w-10" // Larger touch target
+                          onClick={handleRegenerateLogo}
+                        >
+                          <SparkleIcon className="h-5 w-5" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>Generate new variations</TooltipContent>
+                    </Tooltip>
+                  </div>
+                </div>
+
+                {/* Color inputs with improved mobile layout */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+                  <div className="space-y-2">
+                    <Label htmlFor="icon-style" className="text-sm sm:text-base">Icon Options</Label>
+                    <Select value={iconStyle} onValueChange={handleStyleChange}>
+                      <SelectTrigger id="icon-style" className="h-12 sm:h-10">
+                        <SelectValue placeholder="Select style" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(ICON_STYLES).map(([category, styles]) => (
+                          <div key={category}>
+                            <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                              {category.charAt(0).toUpperCase() + category.slice(1)}
+                            </div>
+                            {styles.map((style) => (
+                              <SelectItem 
+                                key={style.value} 
+                                value={style.value}
+                                className="py-3 sm:py-2" // Larger touch target
+                              >
+                                {style.label}
+                              </SelectItem>
+                            ))}
+                          </div>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="logo-color" className="text-sm sm:text-base">Logo Color</Label>
+                    <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full h-12 sm:h-10 p-0 flex items-center justify-center"
+                        >
+                          <span className="text-foreground">{logoColor}</span>
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent 
+                        className="w-auto p-3" 
+                        onPointerDownOutside={(e) => e.preventDefault()}
+                        align="start"
+                        side="top"
+                      >
+                        <HexColorPicker
+                          color={logoColor}
+                          onChange={setLogoColor}
+                          style={{ width: '280px', height: '280px' }} // Larger for touch
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+
+                {/* Logo cards grid with improved responsive layout */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {Array(3).fill(null).map((_, index) => {
+                    const cardId = `variation-${index}`;
+                    const isSelected = selectedCardId === cardId;
+                    const fontStyle = JSON.parse(sessionStorage.getItem('fontStyles') || '[]')[index];
+
+                    return (
+                      <motion.div
+                        key={cardId}
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: index * 0.05 }}
+                        onClick={() => handleCardSelect(cardId)}
+                        className="touch-manipulation" // Better touch handling
+                      >
+                        <Card
+                          className={`${cardBackgrounds[index]} transition-transform hover:scale-105 active:scale-95 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                            isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+                          }`}
+                        >
+                          <CardContent
+                            className="p-6 flex flex-col items-center justify-center min-h-[250px] sm:min-h-[300px] gap-4"
+                            ref={isSelected ? selectedCardRef : null}
+                          >
+                            {logoSvg && (
+                              <motion.div
+                                className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-2 shadow-sm"
+                                whileHover={{ scale: 1.1 }}
+                                transition={{ type: "spring", stiffness: 300 }}
+                              >
+                                <img
+                                  src={logoSvg}
+                                  alt="Brand Icon"
+                                  className="w-full h-full object-contain"
+                                />
+                              </motion.div>
+                            )}
+                            <motion.h3
+                              className="text-2xl sm:text-3xl text-center text-white"
+                              style={{
+                                fontFamily: fontStyle?.fontFamily || 'Inter',
+                                fontWeight: fontStyle?.fontWeight || '600',
+                                fontStyle: 'normal',
+                                textTransform: fontStyle?.textTransform || 'none',
+                                letterSpacing: fontStyle?.letterSpacing || 'normal',
+                                color: 'white'
+                              }}
+                              whileHover={{ scale: 1.05 }}
+                              transition={{ type: "spring", stiffness: 300 }}
+                            >
+                              {brandName}
+                            </motion.h3>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Rest of the components with mobile optimizations */}
+            {/* Color Palette Section */}
+            <Card className="shadow-md">
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2
+                    className="text-lg sm:text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -874,9 +1041,10 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-10 w-10"
                           onClick={handleExport}
                         >
-                          <Download className="h-4 w-4" />
+                          <Download className="h-5 w-5" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Download color palette</TooltipContent>
@@ -886,10 +1054,11 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-10 w-10"
                           onClick={() => handleRegenerate('colors')}
                           disabled={regeneratingSection?.type === 'colors'}
                         >
-                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-5 w-5 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Generate new colors</TooltipContent>
@@ -900,7 +1069,7 @@ export default function MoodBoard() {
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
-                                            initial={{ opacity: 0 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className="space-y-2"
@@ -922,11 +1091,13 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
+
+            {/* Keywords Section */}
             <Card className="shadow-md">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2
-                    className="text-xl font-semibold"
+                    className="text-lg sm:text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -941,9 +1112,10 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-10 w-10"
                           onClick={() => handleCopyToClipboard(moodBoardData.keywords.join(', '), 'Keywords')}
                         >
-                          <Download className="h-4 w-4" />
+                          <Download className="h-5 w-5" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Copy keywords</TooltipContent>
@@ -953,10 +1125,11 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-10 w-10"
                           onClick={() => handleRegenerate('keywords')}
                           disabled={regeneratingSection?.type === 'keywords'}
                         >
-                          <SparkleIcon className={`h4 w-4 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-5 w-5 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Regenerate with AI</TooltipContent>
@@ -1003,11 +1176,12 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
+            {/* Brand Mood Section */}
             <Card className="shadow-md">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2
-                    className="text-xl font-semibold"
+                    className="text-lg sm:text-xl font-semibold"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -1022,9 +1196,10 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-10 w-10"
                           onClick={() => handleCopyToClipboard(moodBoardData.moodDescription, 'Mood description')}
                         >
-                          <Copy className="h-4 w-4" />
+                          <Copy className="h-5 w-5" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Copy description</TooltipContent>
@@ -1034,10 +1209,11 @@ export default function MoodBoard() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          className="h-10 w-10"
                           onClick={() => handleRegenerate('mood')}
                           disabled={regeneratingSection?.type === 'mood'}
                         >
-                          <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'mood' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon className={`h-5 w-5 ${regeneratingSection?.type === 'mood' ? 'animate-spin' : ''}`} />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Regenerate with AI</TooltipContent>
@@ -1089,7 +1265,6 @@ export default function MoodBoard() {
             <p className="text-muted-foreground">Failed to load mood board data</p>
           </div>
         )}
-
       </div>
     </TooltipProvider>
   );

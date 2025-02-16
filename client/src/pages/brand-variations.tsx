@@ -213,22 +213,25 @@ export default function BrandVariations() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center">
+    <div className="container mx-auto py-4 sm:py-8 px-3 sm:px-4">
+      {/* Header with improved mobile layout */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
           <Button
             variant="ghost"
-            className="mr-4"
+            className="p-2"
             onClick={() => navigate('/generate')}
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Generated Names
+            <span className="hidden sm:inline">Back to Generated Names</span>
+            <span className="sm:hidden">Back</span>
           </Button>
-          <Logo />
+          <Logo className="h-6 sm:h-8" />
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
           <Button
             variant="secondary"
+            className="text-sm sm:text-base"
             onClick={() => navigate(`/mood-board?name=${encodeURIComponent(brandName || '')}`)}
           >
             View Mood Board
@@ -237,18 +240,25 @@ export default function BrandVariations() {
             <DropdownMenuTrigger asChild>
               <Button
                 variant="outline"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-sm sm:text-base h-10"
                 disabled={!selectedCardId}
               >
                 <Download className="h-4 w-4" />
-                Download {selectedCardId ? 'Selected' : ''}
+                <span className="hidden sm:inline">Download {selectedCardId ? 'Selected' : ''}</span>
+                <span className="sm:hidden">Download</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => handleDownload('svg')}>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem 
+                onClick={() => handleDownload('svg')}
+                className="py-3 sm:py-2" // Larger touch target
+              >
                 Download SVG
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDownload('png')}>
+              <DropdownMenuItem 
+                onClick={() => handleDownload('png')}
+                className="py-3 sm:py-2" // Larger touch target
+              >
                 Download PNG
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -256,9 +266,9 @@ export default function BrandVariations() {
         </div>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-6 sm:mb-8">
         <h1
-          className="text-3xl font-bold mb-6"
+          className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
             fontWeight: fonts.primary.weight,
@@ -268,11 +278,12 @@ export default function BrandVariations() {
           Branding Studio: {brandName}
         </h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div>
-            <Label htmlFor="icon-style">Icon Options</Label>
+        {/* Controls with improved mobile layout */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <div className="space-y-2">
+            <Label htmlFor="icon-style" className="text-sm sm:text-base">Icon Options</Label>
             <Select value={iconStyle} onValueChange={(value: string) => setIconStyle(value)}>
-              <SelectTrigger id="icon-style">
+              <SelectTrigger id="icon-style" className="h-12 sm:h-10">
                 <SelectValue placeholder="Select style" />
               </SelectTrigger>
               <SelectContent>
@@ -282,7 +293,11 @@ export default function BrandVariations() {
                       {category.charAt(0).toUpperCase() + category.slice(1)}
                     </div>
                     {styles.map((style) => (
-                      <SelectItem key={style.value} value={style.value}>
+                      <SelectItem 
+                        key={style.value} 
+                        value={style.value}
+                        className="py-3 sm:py-2" // Larger touch target
+                      >
                         {style.label}
                       </SelectItem>
                     ))}
@@ -292,33 +307,34 @@ export default function BrandVariations() {
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="icon-color">Icon Color</Label>
+          <div className="space-y-2">
+            <Label htmlFor="icon-color" className="text-sm sm:text-base">Icon Color</Label>
             <Input
               id="icon-color"
               type="color"
               value={iconColor}
               onChange={(e) => setIconColor(e.target.value)}
-              className="h-10"
+              className="h-12 sm:h-10"
             />
           </div>
 
-          <div>
-            <Label htmlFor="background-color">Background Color</Label>
+          <div className="space-y-2">
+            <Label htmlFor="background-color" className="text-sm sm:text-base">Background Color</Label>
             <Input
               id="background-color"
               type="color"
               value={backgroundColor}
               onChange={(e) => setBackgroundColor(e.target.value)}
-              className="h-10"
+              className="h-12 sm:h-10"
             />
           </div>
         </div>
       </div>
 
+      {/* Variations grid with improved responsive layout */}
       <AnimatePresence mode="wait">
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -335,19 +351,20 @@ export default function BrandVariations() {
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.05 }}
                 onClick={() => handleCardSelect(cardId)}
+                className="touch-manipulation" // Better touch handling
               >
                 <Card
-                  className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
+                  className={`${style.bg} transition-transform hover:scale-105 active:scale-95 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
                     isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
                   }`}
                 >
                   <CardContent
-                    className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-4"
+                    className="p-4 sm:p-6 flex flex-col items-center justify-center min-h-[250px] sm:min-h-[300px] gap-4"
                     ref={isSelected ? selectedCardRef : null}
                   >
                     {logoSvg && (
                       <motion.div
-                        className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
+                        className="w-14 h-14 sm:w-16 sm:h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-gray-800/90 p-2 shadow-sm"
                         whileHover={{ scale: 1.1 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
@@ -359,7 +376,7 @@ export default function BrandVariations() {
                       </motion.div>
                     )}
                     <motion.h3
-                      className={`text-3xl text-center ${style.text} ${fontStyle}`}
+                      className={`text-2xl sm:text-3xl text-center ${style.text} ${fontStyle}`}
                       whileHover={{ scale: 1.05 }}
                       transition={{ type: "spring", stiffness: 300 }}
                     >
