@@ -38,13 +38,10 @@ interface MoodBoardData {
   colors: Array<{ hex: string; name: string }>;
   keywords: string[];
   moodDescription: string;
-  imagePrompts: string[];
-  images: string[];
 }
 
 type RegenerationSection = {
-  type: 'colors' | 'keywords' | 'mood' | 'image';
-  index?: number;
+  type: 'colors' | 'keywords' | 'mood';
 };
 
 const getRandomPleaseantColor = () => {
@@ -174,8 +171,6 @@ const CARD_GRADIENTS = [
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
-  const [imagesLoaded, setImagesLoaded] = useState(false);
-  const [imageLoadErrors, setImageLoadErrors] = useState<number[]>([]);
   const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -203,49 +198,11 @@ export default function MoodBoard() {
     enabled: !!brandName && !!formData.industry && !!formData.style,
   });
 
-
   useEffect(() => {
     if (moodBoardData?.colors) {
       setColors(moodBoardData.colors);
     }
   }, [moodBoardData?.colors]);
-
-  useEffect(() => {
-    if (!moodBoardData?.images?.length) return;
-    setImagesLoaded(false);
-    setImageLoadErrors([]);
-
-    const loadImages = async () => {
-      const timestamp = Date.now();
-      const imagePromises = moodBoardData.images.map((url, index) => {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          img.onload = () => resolve(index);
-          img.onerror = () => {
-            console.error(`Failed to load image at index ${index}`);
-            setImageLoadErrors(prev => [...prev, index]);
-            reject(new Error(`Failed to load image at index ${index}`));
-          };
-          // Add timestamp to URL to prevent caching
-          img.src = `${url}${url.includes('?') ? '&' : '?'}_t=${timestamp}`;
-        });
-      });
-
-      try {
-        await Promise.allSettled(imagePromises);
-        setImagesLoaded(true);
-      } catch (error) {
-        console.error("Failed to load images:", error);
-        toast({
-          title: "Image Loading Error",
-          description: "Some images failed to load. You can try regenerating them.",
-          variant: "destructive"
-        });
-      }
-    };
-
-    loadImages();
-  }, [moodBoardData?.images, toast]);
 
   const handleCopyToClipboard = async (text: string, type: string) => {
     try {
@@ -264,28 +221,7 @@ export default function MoodBoard() {
     }
   };
 
-  const handleDownloadImage = async (imageUrl: string, index: number) => {
-    try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-image-${index + 1}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      toast({
-        title: "Download failed",
-        description: "Failed to download the image",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRegenerate = async (section: RegenerationSection['type'], imageIndex?: number) => {
+  const handleRegenerate = async (section: RegenerationSection['type']) => {
     if (!brandName || !formData.industry || !formData.style) {
       toast({
         title: "Missing Information",
@@ -295,7 +231,7 @@ export default function MoodBoard() {
       return;
     }
 
-    setRegeneratingSection({ type: section, index: imageIndex });
+    setRegeneratingSection({ type: section });
 
     try {
       let endpoint = '';
@@ -304,7 +240,6 @@ export default function MoodBoard() {
         colors?: Array<{ hex: string; name: string }>;
         keywords?: string[];
         moodDescription?: string;
-        image?: string;
       } = {};
 
       switch (section) {
@@ -352,60 +287,6 @@ export default function MoodBoard() {
             moodDescription: updatedData.moodDescription,
           }));
           break;
-
-        case 'image':
-          if (typeof imageIndex !== 'number' || !moodBoardData) {
-            throw new Error('Invalid image index or missing mood board data');
-          }
-
-          endpoint = `/api/mood-board/regenerate-image`;
-
-          try {
-            response = await apiRequest("POST", endpoint, {
-              prompt: moodBoardData.imagePrompts[imageIndex],
-              style: formData.style,
-              index: imageIndex
-            });
-
-            if (!response.ok) {
-              throw new Error(`Failed to regenerate image: ${response.statusText}`);
-            }
-
-            updatedData = await response.json();
-
-            if (!updatedData.image) {
-              throw new Error('No image returned from server');
-            }
-
-            // Add cache-busting timestamp
-            const timestamp = Date.now();
-            const imageUrl = `${updatedData.image}${updatedData.image.includes('?') ? '&' : '?'}_t=${timestamp}`;
-
-            // Update query client with new image
-            queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => {
-              if (!oldData || !oldData.images) return oldData;
-
-              const newImages = [...oldData.images];
-              newImages[imageIndex] = imageUrl;
-
-              return {
-                ...oldData,
-                images: newImages,
-              };
-            });
-
-            // Reset loading states
-            setImagesLoaded(false);
-            setImageLoadErrors(prev => prev.filter(idx => idx !== imageIndex));
-
-            // Force a re-render of the images
-            await new Promise(resolve => setTimeout(resolve, 100));
-
-          } catch (error) {
-            console.error('Image regeneration error:', error);
-            throw new Error(error instanceof Error ? error.message : 'Failed to regenerate image');
-          }
-          break;
       }
 
       toast({
@@ -425,12 +306,8 @@ export default function MoodBoard() {
   };
 
   const handleDownload = async (format: 'png' | 'pdf') => {
-    if (!moodBoardRef.current || !brandName || !imagesLoaded) {
-      console.log("Cannot download: ", {
-        hasRef: !!moodBoardRef.current,
-        brandName,
-        imagesLoaded
-      });
+    if (!moodBoardRef.current || !brandName) {
+      console.log("Cannot download: missing reference or brand name");
       return;
     }
 
@@ -475,6 +352,11 @@ export default function MoodBoard() {
       }
     } catch (error) {
       console.error("Error during download:", error);
+      toast({
+        title: "Download failed",
+        description: "Failed to download the mood board",
+        variant: "destructive",
+      });
     }
   };
 
@@ -855,7 +737,7 @@ export default function MoodBoard() {
             fontFamily: fonts.primary.family,
             fontWeight: fonts.primary.weight,
             fontStyle: fonts.primary.style,
-          } :undefined}
+          } : undefined}
         >
           Brand Mood Board: {brandName}
         </h1>
@@ -1087,72 +969,6 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
-
-            {moodBoardData.images?.map((imageUrl, index) => (
-              <motion.div
-                key={index}
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: index * 0.2 }}
-              >
-                <Card className="shadow-md">
-                  <CardContent className="p-6">
-                    <div className="flex justify-end gap-2 mb-4">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDownloadImage(imageUrl, index)}
-                          >
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Download image</TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleRegenerate('image', index)}
-                            disabled={regeneratingSection?.type === 'image' && regeneratingSection.index === index}
-                          >
-                            <SparkleIcon className={`h-4 w-4 ${regeneratingSection?.type === 'image' && regeneratingSection.index === index ? 'animate-spin' : ''}`} />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>Regenerate with AI</TooltipContent>
-                      </Tooltip>
-                    </div>
-                    <AnimatePresence mode="wait">
-                      {regeneratingSection?.type === 'image' && regeneratingSection.index === index ? (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="aspect-video bg-muted/50 rounded-lg overflow-hidden flex items-center justify-center"
-                        >
-                          <Skeleton className="w-full h-full" />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          className="aspect-video bg-muted/50 rounded-lg overflow-hidden"
-                        >
-                          <img
-                            src={imageUrl}
-                            alt={`Mood image ${index + 1}`}
-                            className="w-full h-full object-contain"
-                          />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
           </div>
         ) : (
           <p className="text-center text-muted-foreground">
