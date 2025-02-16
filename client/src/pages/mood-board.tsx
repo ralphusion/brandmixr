@@ -455,10 +455,18 @@ export default function MoodBoard() {
     try {
       const canvas = await html2canvas(selectedCardRef.current, {
         backgroundColor: null,
-        scale: 2,
+        scale: 2, // Higher quality
         logging: false,
         useCORS: true,
         allowTaint: true,
+        onclone: (document, element) => {
+          // Ensure the gradient background is visible
+          const cardElement = element as HTMLElement;
+          cardElement.style.height = '300px'; // Match the original card height
+          cardElement.style.width = '100%';
+          cardElement.style.borderRadius = '0.5rem';
+          cardElement.style.overflow = 'hidden';
+        }
       });
 
       const dataUrl = canvas.toDataURL('image/png');
@@ -468,6 +476,11 @@ export default function MoodBoard() {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      toast({
+        title: "Success",
+        description: "Logo downloaded successfully",
+      });
     } catch (error) {
       console.error("Error during logo download:", error);
       toast({
