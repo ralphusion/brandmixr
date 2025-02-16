@@ -5,7 +5,7 @@ import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, SparkleIcon, Copy } from "lucide-react";
+import { ArrowLeft, Download, SparkleIcon, Copy, Building2, Mail, MapPin, Phone, Crown } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -768,6 +768,7 @@ export default function MoodBoard() {
     fonts: FontSettings | null;
   }) => {
     const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
+    const selectedIndex = selectedCardId ? parseInt(selectedCardId.split('-')[1]) : 0;
 
     const textStyle = {
       fontFamily: fonts?.primary?.family || 'Inter',
@@ -776,41 +777,167 @@ export default function MoodBoard() {
       color: 'white'
     };
 
+    const secondaryTextStyle = {
+      fontFamily: fonts?.secondary?.family || 'Inter',
+      fontWeight: fonts?.secondary?.weight || '400',
+      fontStyle: fonts?.secondary?.style || 'normal',
+    };
+
     return (
       <Card className="shadow-md">
         <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground" style={textStyle}>
-              Brand Applications
+              Brand Website Preview
             </h2>
           </div>
 
-          {/* Full Width Brand Display */}
           {selectedCardId && (
-            <div className={`${selectedBackground} w-full h-48 flex items-center justify-center p-8 rounded-lg mb-8`}>
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-24 h-24 bg-white/90 dark:bg-white/80 rounded-xl p-4 shadow-lg">
-                  {logoSvg && (
-                    <img
-                      src={logoSvg}
-                      alt="Brand Logo"
-                      className="w-full h-full object-contain"
-                    />
-                  )}
+            <div className="space-y-8">
+              {/* Navigation Bar */}
+              <div className={`${selectedBackground} w-full rounded-lg overflow-hidden`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-10 h-10 bg-white/90 dark:bg-white/80 rounded-lg p-2">
+                        {logoSvg && (
+                          <img
+                            src={logoSvg}
+                            alt="Brand Logo"
+                            className="w-full h-full object-contain"
+                          />
+                        )}
+                      </div>
+                      <span className="text-white font-semibold text-lg" style={textStyle}>
+                        {brandName}
+                      </span>
+                    </div>
+                    <nav className="hidden md:flex space-x-8">
+                      {['Home', 'About', 'Services', 'Contact'].map((item) => (
+                        <span
+                          key={item}
+                          className="text-white/90 hover:text-white cursor-pointer"
+                          style={secondaryTextStyle}
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </nav>
+                  </div>
                 </div>
-                <h3
-                  className={`text-3xl text-center text-white ${
-                    FONT_STYLES_ARRAY[parseInt(selectedCardId.split('-')[1]) % FONT_STYLES_ARRAY.length]
-                  }`}
-                  style={textStyle}
-                >
-                  {brandName}
-                </h3>
               </div>
+
+              {/* Hero Section */}
+              <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div><div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                  <div className="max-w-2xl">
+                    <h1 
+                      className="text-4xl sm:text-5xl font-bold text-white mb-6"
+                      style={textStyle}
+                    >
+                      Elevate Your Experience with {brandName}
+                    </h1>
+                    <p 
+                      className="text-xl text-white/90 mb-8"
+                      style={secondaryTextStyle}
+                    >
+                      Discover excellence through innovation and style. We bring your vision to life with precision and passion.
+                    </p>
+                    <div className="flex flex-wrap gap-4">
+                      <Button 
+                        className="bg-white text-gray-900 hover:bg-white/90"
+                        style={secondaryTextStyle}
+                      >
+                        Get Started
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="text-white border-white hover:bg-white/10"
+                        style={secondaryTextStyle}
+                      >
+                        Learn More
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Features Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
+                {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
+                  <Card key={feature} className="overflow-hidden">
+                    <CardContent className={`${cardBackgrounds[(selectedIndex + idx) % cardBackgrounds.length]} p-6 h-full flex flex-col items-center text-center`}>
+                      <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
+                        <div className="w-6 h-6 text-gray-900">
+                          {idx === 0 && <Building2 />}
+                          {idx === 1 && <SparkleIcon />}
+                          {idx === 2 && <Crown />}
+                        </div>
+                      </div>
+                      <h3 
+                        className="text-xl font-semibold text-white mb-2"
+                        style={textStyle}
+                      >
+                        {feature}
+                      </h3>
+                      <p 
+                        className="text-white/90"
+                        style={secondaryTextStyle}
+                      >
+                        Experience unparalleled {feature.toLowerCase()} with our cutting-edge solutions and dedicated expertise.
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+
+              {/* Contact Section */}
+              <Card className={`${selectedBackground} overflow-hidden`}>
+                <CardContent className="p-6">
+                  <h3 
+                    className="text-2xl font-semibold text-white mb-6"
+                    style={textStyle}
+                  >
+                    Get in Touch
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                      {[
+                        { icon: <MapPin className="w-5 h-5" />, text: "123 Business Avenue, Suite 100" },
+                        { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
+                        { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
+                      ].map((item, idx) => (
+                        <div key={idx} className="flex items-center text-white/90 space-x-3">
+                          {item.icon}
+                          <span style={secondaryTextStyle}>{item.text}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input 
+                        placeholder="Name" 
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Input 
+                        placeholder="Email" 
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Input 
+                        placeholder="Message" 
+                        className="col-span-2 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Button 
+                        className="col-span-2 bg-white text-gray-900 hover:bg-white/90"
+                        style={secondaryTextStyle}
+                      >
+                        Send Message
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           )}
-
-          {/* Future mockup implementations will go here */}
         </CardContent>
       </Card>
     );
@@ -858,167 +985,7 @@ export default function MoodBoard() {
         ) : moodBoardData ? (
           <div className="grid grid-cols-1 gap-4 sm:gap-6" ref={moodBoardRef}>
             {/* Brand Logo Section with improved mobile layout */}
-            <Card className="shadow-md">
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h2
-                    className="text-lg sm:text-xl font-semibold"
-                    style={fonts?.primary ? {
-                      fontFamily: fonts.primary.family,
-                      fontWeight: fonts.primary.weight,
-                      fontStyle: fonts.primary.style,
-                    } : undefined}
-                  >
-                    Brand Logo
-                  </h2>
-                  <div className="flex gap-2">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-10 w-10" // Larger touch target
-                          onClick={handleDownloadLogo}
-                          disabled={!selectedCardId}
-                        >
-                          <Download className="h-5 w-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Download selected logo as PNG</TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-10 w-10" // Larger touch target
-                          onClick={handleRegenerateLogo}
-                        >
-                          <SparkleIcon className="h-5 w-5" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>Generate new variations</TooltipContent>
-                    </Tooltip>
-                  </div>
-                </div>
-
-                {/* Color inputs with improved mobile layout */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                  <div className="space-y-2">
-                    <Label htmlFor="icon-style" className="text-sm sm:text-base">Icon Options</Label>
-                    <Select value={iconStyle} onValueChange={handleStyleChange}>
-                      <SelectTrigger id="icon-style" className="h-12 sm:h-10">
-                        <SelectValue placeholder="Select style" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(ICON_STYLES).map(([category, styles]) => (
-                          <div key={category}>
-                            <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                              {category.charAt(0).toUpperCase() + category.slice(1)}
-                            </div>
-                            {styles.map((style) => (
-                              <SelectItem 
-                                key={style.value} 
-                                value={style.value}
-                                className="py-3 sm:py-2" // Larger touch target
-                              >
-                                {style.label}
-                              </SelectItem>
-                            ))}
-                          </div>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="logo-color" className="text-sm sm:text-base">Logo Color</Label>
-                    <Popover open={colorPickerOpen} onOpenChange={setColorPickerOpen}>
-                      <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
-                          className="w-full h-12 sm:h-10 p-0 flex items-center justify-center"
-                        >
-                          <span className="text-foreground">{logoColor}</span>
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent 
-                        className="w-auto p-3" 
-                        onPointerDownOutside={(e) => e.preventDefault()}
-                        align="start"
-                        side="top"
-                      >
-                        <HexColorPicker
-                          color={logoColor}
-                          onChange={setLogoColor}
-                          style={{ width: '280px', height: '280px' }} // Larger for touch
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-
-                {/* Logo cards grid with improved responsive layout */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {Array(3).fill(null).map((_, index) => {
-                    const cardId = `variation-${index}`;
-                    const isSelected = selectedCardId === cardId;
-                    const fontStyle = JSON.parse(sessionStorage.getItem('fontStyles') || '[]')[index];
-
-                    return (
-                      <motion.div
-                        key={cardId}
-                        initial={{ scale: 0.9, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ delay: index * 0.05 }}
-                        onClick={() => handleCardSelect(cardId)}
-                        className="touch-manipulation" // Better touch handling
-                      >
-                        <Card
-                          className={`${cardBackgrounds[index]} transition-transform hover:scale-105 active:scale-95 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
-                            isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
-                          }`}
-                        >
-                          <CardContent
-                            className="p-6 flex flex-col items-center justify-center min-h-[250px] sm:min-h-[300px] gap-4"
-                            ref={isSelected ? selectedCardRef : null}
-                          >
-                            {logoSvg && (
-                              <motion.div
-                                className="w-16 h-16 mb-2 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-2 shadow-sm"
-                                whileHover={{ scale: 1.1 }}
-                                transition={{ type: "spring", stiffness: 300 }}
-                              >
-                                <img
-                                  src={logoSvg}
-                                  alt="Brand Icon"
-                                  className="w-full h-full object-contain"
-                                />
-                              </motion.div>
-                            )}
-                            <motion.h3
-                              className="text-2xl sm:text-3xl text-center text-white"
-                              style={{
-                                fontFamily: fontStyle?.fontFamily || 'Inter',
-                                fontWeight: fontStyle?.fontWeight || '600',
-                                fontStyle: 'normal',
-                                textTransform: fontStyle?.textTransform || 'none',
-                                letterSpacing: fontStyle?.letterSpacing || 'normal',
-                                color: 'white'
-                              }}
-                              whileHover={{ scale: 1.05 }}
-                              transition={{ type: "spring", stiffness: 300 }}
-                            >
-                              {brandName}
-                            </motion.h3>
-                          </CardContent>
-                        </Card>
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              </CardContent>
-            </Card>
+            <BrandLogoSection />
 
             {/* Rest of the components with mobile optimizations */}
             {/* Color Palette Section */}

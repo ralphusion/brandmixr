@@ -104,6 +104,13 @@ const ICON_STYLES = {
   ]
 };
 
+interface IconStyle {
+    style: string;
+    color: string;
+    backgroundColor: string;
+
+}
+
 interface FontRecommendation {
   primary: {
     family: string;
@@ -139,10 +146,11 @@ export default function BrandVariations() {
     generateLogo();
   }, [brandName, iconStyle, iconColor, backgroundColor]);
 
+  // Update the generateLogo function to handle the IconStyle type correctly
   const generateLogo = () => {
     if (!brandName) return;
     const svg = generateIconSvg(brandName, {
-      style: iconStyle,
+      style: iconStyle as IconStyle,
       color: iconColor,
       backgroundColor
     });
