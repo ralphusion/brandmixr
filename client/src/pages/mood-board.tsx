@@ -760,12 +760,13 @@ export default function MoodBoard() {
     return null;
   }
 
-  const ProductMockupsSection = ({ selectedCardId, cardBackgrounds, logoSvg, brandName, fonts }: {
+  const ProductMockupsSection = ({ selectedCardId, cardBackgrounds, logoSvg, brandName, fonts, moodBoardData }: {
     selectedCardId: string | null;
     cardBackgrounds: string[];
     logoSvg: string;
     brandName: string;
     fonts: FontSettings | null;
+    moodBoardData: MoodBoardData | undefined;
   }) => {
     const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
     const selectedIndex = selectedCardId ? parseInt(selectedCardId.split('-')[1]) : 0;
@@ -783,19 +784,29 @@ export default function MoodBoard() {
       fontStyle: fonts?.secondary?.style || 'normal',
     };
 
+    // Generate background styles from color palette
+    const generateGradient = (index: number) => {
+      if (!moodBoardData?.colors || moodBoardData.colors.length < 2) {
+        return selectedBackground || 'bg-gradient-to-br from-slate-800 to-slate-900';
+      }
+      const color1 = moodBoardData.colors[index % moodBoardData.colors.length].hex;
+      const color2 = moodBoardData.colors[(index + 1) % moodBoardData.colors.length].hex;
+      return `bg-gradient-to-br from-[${color1}] via-[${color2}] to-[${color1}]`;
+    };
+
     return (
       <Card className="shadow-md">
         <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-foreground" style={textStyle}>
-              Brand Website Preview
+              Brand Presence (Mockup Only)
             </h2>
           </div>
 
           {selectedCardId && (
             <div className="space-y-8">
               {/* Navigation Bar */}
-              <div className={`${selectedBackground} w-full rounded-lg overflow-hidden`}>
+              <div className={`${generateGradient(0)} w-full rounded-lg overflow-hidden`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -807,8 +818,7 @@ export default function MoodBoard() {
                             className="w-full h-full object-contain"
                           />
                         )}
-                      </div>
-                      <span className="text-white font-semibold text-lg" style={textStyle}>
+                      </div>                      <span className="text-white font-semibold text-lg" style={textStyle}>
                         {brandName}
                       </span>
                     </div>
@@ -828,8 +838,9 @@ export default function MoodBoard() {
               </div>
 
               {/* Hero Section */}
-              <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div><div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+              <div className={`${generateGradient(1)} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                   <div className="max-w-2xl">
                     <h1 
                       className="text-4xl sm:text-5xl font-bold text-white mb-6"
@@ -862,11 +873,58 @@ export default function MoodBoard() {
                 </div>
               </div>
 
+              {/* About Section */}
+              <div className={`${generateGradient(2)} w-full rounded-lg overflow-hidden relative p-8`}>
+                <div className="max-w-7xl mx-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <div>
+                      <h2 
+                        className="text-3xl font-bold text-white mb-4"
+                        style={textStyle}
+                      >
+                        About {brandName}
+                      </h2>
+                      <p 
+                        className="text-white/90 mb-6"
+                        style={secondaryTextStyle}
+                      >
+                        {moodBoardData?.moodDescription || `At ${brandName}, we believe in creating exceptional experiences that resonate with our clients and their audiences. Our commitment to excellence drives everything we do.`}
+                      </p>
+                      <div className="flex flex-wrap gap-3">
+                        {moodBoardData?.keywords?.slice(0, 5).map((keyword, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-white/10 rounded-full text-white text-sm"
+                            style={secondaryTextStyle}
+                          >
+                            {keyword}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="relative h-64 rounded-lg overflow-hidden">
+                      <div className={`${generateGradient(3)} absolute inset-0 opacity-50`}></div>
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-32 h-32 bg-white/90 rounded-2xl p-6">
+                          {logoSvg && (
+                            <img
+                              src={logoSvg}
+                              alt="Brand Logo"
+                              className="w-full h-full object-contain"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
                   <Card key={feature} className="overflow-hidden">
-                    <CardContent className={`${cardBackgrounds[(selectedIndex + idx) % cardBackgrounds.length]} p-6 h-full flex flex-col items-center text-center`}>
+                    <CardContent className={`${generateGradient((idx + 4) % (moodBoardData?.colors?.length || 5))} p-6 h-full flex flex-col items-center text-center`}>
                       <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
                         <div className="w-6 h-6 text-gray-900">
                           {idx === 0 && <Building2 />}
@@ -892,7 +950,7 @@ export default function MoodBoard() {
               </div>
 
               {/* Contact Section */}
-              <Card className={`${selectedBackground} overflow-hidden`}>
+              <Card className={`${generateGradient(5)} overflow-hidden`}>
                 <CardContent className="p-6">
                   <h3 
                     className="text-2xl font-semibold text-white mb-6"
@@ -1225,6 +1283,7 @@ export default function MoodBoard() {
               logoSvg={logoSvg} 
               brandName={brandName} 
               fonts={fonts} 
+              moodBoardData={moodBoardData}
             />
           </div>
         ) : (
