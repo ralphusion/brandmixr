@@ -134,12 +134,21 @@ export default function BrandVariations() {
   const style = params.get('style');
 
   useEffect(() => {
-    if (!brandName) {
+    if (!brandName || !industry || !style) {
       navigate('/');
       return;
     }
+
+    // Store form data in session storage
+    const formData = {
+      name: brandName,
+      industry: industry,
+      style: style
+    };
+    sessionStorage.setItem('generatorFormData', JSON.stringify(formData));
+
     generateLogo();
-  }, [brandName, iconStyle, iconColor, backgroundColor]);
+  }, [brandName, industry, style, iconStyle, iconColor, backgroundColor]);
 
   const generateLogo = () => {
     if (!brandName) return;
