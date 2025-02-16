@@ -947,33 +947,151 @@ export default function MoodBoard() {
                       exit={{ opacity: 0 }}
                       className="space-y-2"
                     >
-                      <Skeleton className="h-4 w-full" />
-                      <Skeleton className="h-4 w-5/6" />
-                      <Skeleton className="h-4 w-4/6" />
+                      <Skeleton className="h-24 w-full rounded-lg" />
                     </motion.div>
                   ) : (
-                    <motion.p
+                    <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="text-muted-foreground leading-relaxed"
-                      style={fonts?.secondary ? {
-                        fontFamily: fonts.secondary.family,
-                        fontWeight: fonts.secondary.weight,
-                        fontStyle: fonts.secondary.style,
-                      } : undefined}
+                      className="prose dark:prose-invert"
                     >
-                      {moodBoardData.moodDescription}
-                    </motion.p>
+                      <p 
+                        className="text-muted-foreground"
+                        style={fonts?.secondary ? {
+                          fontFamily: fonts.secondary.family,
+                          fontWeight: fonts.secondary.weight,
+                          fontStyle: fonts.secondary.style,
+                        } : undefined}
+                      >
+                        {moodBoardData.moodDescription}
+                      </p>
+                    </motion.div>
                   )}
                 </AnimatePresence>
               </CardContent>
             </Card>
+
+            {/* New Mood Scene Card */}
+            <Card className="shadow-md">
+              <CardContent className="p-6">
+                <div className="flex justify-between items-center mb-6">
+                  <h2
+                    className="text-xl font-semibold"
+                    style={fonts?.primary ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    } : undefined}
+                  >
+                    Mood Scene
+                  </h2>
+                </div>
+
+                <div className="space-y-8">
+                  {/* Full Width Logo Display */}
+                  <div className="rounded-lg overflow-hidden">
+                    {selectedCardId && (
+                      <div className={`${cardBackgrounds[1]} w-full h-48 flex items-center justify-center`}>
+                        <div className="w-24 h-24 bg-white/90 dark:bg-white/80 rounded-xl p-4 shadow-lg">
+                          {logoSvg && (
+                            <img
+                              src={logoSvg}
+                              alt="Brand Logo"
+                              className="w-full h-full object-contain"
+                            />
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Product Mockups */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-3/4 h-full relative">
+                          <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16">
+                            {logoSvg && <img src={logoSvg} alt="Logo on Shopping Bag" className="w-full h-full object-contain" />}
+                          </div>
+                          <div className="w-full h-full bg-gradient-to-b from-muted-foreground/10 to-muted-foreground/5 rounded-t-xl"></div>
+                        </div>
+                      </div>
+                      <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Shopping Bag</span>
+                    </div>
+
+                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-64 h-36 bg-white rounded-lg shadow-lg transform rotate-12 flex items-center justify-center">
+                          {logoSvg && <img src={logoSvg} alt="Logo on Business Card" className="w-12 h-12 object-contain" />}
+                        </div>
+                      </div>
+                      <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Business Card</span>
+                    </div>
+
+                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-32 h-48 bg-white rounded-lg shadow-lg flex items-center justify-center">
+                          {logoSvg && <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain" />}
+                        </div>
+                      </div>
+                      <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Product Package</span>
+                    </div>
+                  </div>
+
+                  {/* Mobile App Mockups */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-muted rounded-lg p-4 aspect-video relative overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-48 h-96 bg-white rounded-3xl shadow-lg transform -rotate-12 flex items-center justify-center">
+                          <div className="w-40 h-80 bg-gradient-to-b from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center">
+                            {logoSvg && <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Mobile App View 1</span>
+                    </div>
+
+                    <div className="bg-muted rounded-lg p-4 aspect-video relative overflow-hidden">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="w-48 h-96 bg-white rounded-3xl shadow-lg transform rotate-12 flex items-center justify-center">
+                          <div className="w-40 h-80 bg-gradient-to-b from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center">
+                            {logoSvg && <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Mobile App View 2</span>
+                    </div>
+                  </div>
+
+                  {/* Website/Laptop Mockup */}
+                  <div className="bg-muted rounded-lg p-4 aspect-video relative overflow-hidden">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="relative w-full max-w-3xl">
+                        {/* Laptop */}
+                        <div className="w-full h-64 bg-white rounded-lg shadow-xl transform perspective-1000 rotate-x-12">
+                          <div className="w-full h-full bg-gradient-to-b from-primary/10 to-primary/5 rounded-lg p-4 flex items-center justify-center">
+                            {logoSvg && <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain" />}
+                          </div>
+                        </div>
+                        {/* Letterhead */}
+                        <div className="absolute -right-8 bottom-8 w-48 h-64 bg-white rounded-lg shadow-lg transform rotate-12">
+                          <div className="w-full h-full p-4 flex items-center justify-center">
+                            {logoSvg && <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain" />}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Website &amp; Letterhead</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         ) : (
-          <p className="text-center text-muted-foreground">
-            Failed to load mood board data. Please make sure you have selected a brand name and style.
-          </p>
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">Failed to load mood board data</p>
+          </div>
         )}
 
       </div>
