@@ -249,7 +249,7 @@ interface SocialPost {
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
-  const { 
+  const {
     brandName: brandNameFromContext,
     setBrandName,
     fonts,
@@ -271,22 +271,21 @@ export default function MoodBoard() {
   // Load mood board data
   useEffect(() => {
     const loadMoodBoardData = async () => {
-      const params = new URLSearchParams(window.location.search);
-      const name = params.get('name');
-      const industry = params.get('industry');
-      const style = params.get('style');
-
-      if (!name || !industry || !style) {
-        toast({
-          title: "Missing parameters",
-          description: "Please provide brand name, industry, and style",
-          variant: "destructive"
-        });
-        navigate('/');
-        return;
-      }
-
       try {
+        // Get form data from session storage
+        const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
+        const { name, industry, style } = formData;
+
+        if (!name || !industry || !style) {
+          toast({
+            title: "Missing parameters",
+            description: "Please provide brand name, industry, and style",
+            variant: "destructive"
+          });
+          navigate('/');
+          return;
+        }
+
         const response = await fetch(`/api/mood-board?${new URLSearchParams({
           name,
           industry,
@@ -310,23 +309,20 @@ export default function MoodBoard() {
       }
     };
 
-    if (brandNameFromContext || window.location.search.includes('name=')) {
-      loadMoodBoardData();
-    }
-  }, [brandNameFromContext, navigate, toast, setColors, setMoodBoardData]);
+    loadMoodBoardData();
+  }, [navigate, toast, setColors, setMoodBoardData]);
 
-  // Set brand name from URL
+  // Set brand name from session storage
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const nameFromUrl = params.get('name');
-    if (nameFromUrl) {
-      setBrandName(nameFromUrl);
-    } else if (!brandNameFromContext) {
+    const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
+    if (formData.name) {
+      setBrandName(formData.name);
+    } else {
       navigate('/');
     }
-  }, [brandNameFromContext, navigate, setBrandName]);
+  }, [setBrandName, navigate]);
 
-  if (!brandNameFromContext && !window.location.search.includes('name=')) {
+  if (!brandNameFromContext) {
     return null;
   }
 

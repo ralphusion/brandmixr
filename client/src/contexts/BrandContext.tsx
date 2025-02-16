@@ -37,12 +37,22 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const moodBoardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Initialize brand name from URL if available
+  // Initialize brand name and form data from URL if available
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const nameFromUrl = params.get('name');
-    if (nameFromUrl && !brandName) {
+    const industryFromUrl = params.get('industry');
+    const styleFromUrl = params.get('style');
+
+    if (nameFromUrl) {
       setBrandName(nameFromUrl);
+      // Store form data in session storage
+      const formData = {
+        name: nameFromUrl,
+        industry: industryFromUrl,
+        style: styleFromUrl
+      };
+      sessionStorage.setItem('generatorFormData', JSON.stringify(formData));
     }
   }, []);
 
@@ -95,10 +105,8 @@ export function BrandProvider({ children }: { children: ReactNode }) {
   const handleRegenerate = async (section: string) => {
     setRegeneratingSection({ type: section });
     try {
-      const params = new URLSearchParams(window.location.search);
-      const name = params.get('name');
-      const industry = params.get('industry');
-      const style = params.get('style');
+      const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
+      const { name, industry, style } = formData;
 
       if (!name || !industry || !style) {
         throw new Error("Missing required parameters");
