@@ -28,7 +28,7 @@ const ShoppingBag = ({ background }: { background?: string }) => (
       y="70" 
       width="120" 
       height="160" 
-      className={background}
+      className={background || "fill-background"}
       filter="url(#bagShadow)"
       rx="2"
     />
@@ -37,18 +37,20 @@ const ShoppingBag = ({ background }: { background?: string }) => (
     <path 
       d="M65 70 C65 40 80 30 85 30 C90 30 105 40 105 70" 
       fill="none" 
-      stroke="#333333" 
+      stroke="currentColor" 
       strokeWidth="6"
       strokeLinecap="round"
+      className="text-foreground"
     />
 
     {/* Right Handle */}
     <path 
       d="M95 70 C95 40 110 30 115 30 C120 30 135 40 135 70" 
       fill="none" 
-      stroke="#333333" 
+      stroke="currentColor" 
       strokeWidth="6"
       strokeLinecap="round"
+      className="text-foreground"
     />
   </svg>
 );
@@ -61,9 +63,7 @@ const BusinessCard = ({ background }: { background?: string }) => (
       width="160" 
       height="80" 
       rx="4" 
-      className={background}
-      stroke="#e5e7eb" 
-      strokeWidth="1"
+      className={background || "fill-background"}
     />
   </svg>
 );
@@ -76,9 +76,7 @@ const ProductPackage = ({ background }: { background?: string }) => (
       width="120" 
       height="220" 
       rx="8" 
-      className={background}
-      stroke="#e5e7eb" 
-      strokeWidth="2"
+      className={background || "fill-background"}
     />
   </svg>
 );
@@ -91,11 +89,16 @@ const Phone = ({ background }: { background?: string }) => (
       width="100" 
       height="220" 
       rx="20" 
-      className={background}
-      stroke="#374151" 
-      strokeWidth="2"
+      className={background || "fill-background"}
     />
-    <rect x="15" y="15" width="90" height="210" rx="16" fill="white"/>
+    <rect 
+      x="15" 
+      y="15" 
+      width="90" 
+      height="210" 
+      rx="16" 
+      className="fill-background"
+    />
   </svg>
 );
 
@@ -103,12 +106,20 @@ const Laptop = ({ background }: { background?: string }) => (
   <svg viewBox="0 0 400 280" className="w-full h-full absolute inset-0">
     <path 
       d="M40 20 L360 20 L360 220 L40 220 Z" 
-      className={background}
-      stroke="#374151" 
-      strokeWidth="2"
+      className={background || "fill-background"}
     />
-    <path d="M20 220 L380 220 L400 260 L0 260 Z" fill="#374151"/>
-    <rect x="45" y="25" width="310" height="190" rx="2" fill="white"/>
+    <path 
+      d="M20 220 L380 220 L400 260 L0 260 Z" 
+      className="fill-muted-foreground"
+    />
+    <rect 
+      x="45" 
+      y="25" 
+      width="310" 
+      height="190" 
+      rx="2" 
+      className="fill-background"
+    />
   </svg>
 );
 
@@ -119,13 +130,11 @@ const Letterhead = ({ background }: { background?: string }) => (
       y="20" 
       width="160" 
       height="240" 
-      className={background}
-      stroke="#e5e7eb" 
-      strokeWidth="1"
+      className={background || "fill-background"}
     />
-    <line x1="40" y1="100" x2="160" y2="100" stroke="#e5e7eb" strokeWidth="1"/>
-    <line x1="40" y1="120" x2="160" y2="120" stroke="#e5e7eb" strokeWidth="1"/>
-    <line x1="40" y1="140" x2="160" y2="140" stroke="#e5e7eb" strokeWidth="1"/>
+    <line x1="40" y1="100" x2="160" y2="100" stroke="currentColor" strokeWidth="1" className="text-muted"/>
+    <line x1="40" y1="120" x2="160" y2="120" stroke="currentColor" strokeWidth="1" className="text-muted"/>
+    <line x1="40" y1="140" x2="160" y2="140" stroke="currentColor" strokeWidth="1" className="text-muted"/>
   </svg>
 );
 
