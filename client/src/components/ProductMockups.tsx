@@ -5,34 +5,47 @@ const ShoppingBag = () => (
     <defs>
       <linearGradient id="bagGradient" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style={{ stopColor: '#ffffff', stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: '#f8f8f8', stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: '#fafafa', stopOpacity: 1 }} />
       </linearGradient>
-      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-        <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.1"/>
+      <filter id="bagShadow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur in="SourceAlpha" stdDeviation="2"/>
+        <feOffset dx="4" dy="6"/>
+        <feComponentTransfer>
+          <feFuncA type="linear" slope="0.15"/>
+        </feComponentTransfer>
+        <feMerge>
+          <feMergeNode/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
       </filter>
     </defs>
+
     {/* Main Bag Body */}
-    <path 
-      d="M40 80 L160 80 L150 240 L50 240 Z" 
+    <rect 
+      x="40" 
+      y="70" 
+      width="120" 
+      height="160" 
       fill="url(#bagGradient)" 
-      stroke="#e5e7eb" 
-      strokeWidth="1"
-      filter="url(#shadow)"
+      filter="url(#bagShadow)"
+      rx="2"
     />
+
     {/* Left Handle */}
     <path 
-      d="M60 80 C60 60 70 40 80 40 C90 40 90 60 90 80" 
+      d="M65 70 C65 40 80 30 85 30 C90 30 105 40 105 70" 
       fill="none" 
-      stroke="#d1d5db" 
-      strokeWidth="1"
+      stroke="#333333" 
+      strokeWidth="6"
       strokeLinecap="round"
     />
+
     {/* Right Handle */}
     <path 
-      d="M110 80 C110 60 120 40 130 40 C140 40 140 60 140 80" 
+      d="M95 70 C95 40 110 30 115 30 C120 30 135 40 135 70" 
       fill="none" 
-      stroke="#d1d5db" 
-      strokeWidth="1"
+      stroke="#333333" 
+      strokeWidth="6"
       strokeLinecap="round"
     />
   </svg>
