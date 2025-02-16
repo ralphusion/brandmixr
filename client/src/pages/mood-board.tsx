@@ -453,21 +453,52 @@ export default function MoodBoard() {
     }
 
     try {
-      const canvas = await html2canvas(selectedCardRef.current, {
+      // Create a clone of the card for capturing
+      const cloneContainer = document.createElement('div');
+      cloneContainer.style.position = 'absolute';
+      cloneContainer.style.left = '-9999px';
+      cloneContainer.style.width = '400px'; // Fixed width for consistent output
+      document.body.appendChild(cloneContainer);
+
+      // Clone the card content
+      const clone = selectedCardRef.current.cloneNode(true) as HTMLElement;
+      clone.style.width = '400px';
+      clone.style.height = '300px';
+      clone.style.padding = '24px';
+      clone.style.display = 'flex';
+      clone.style.flexDirection = 'column';
+      clone.style.alignItems = 'center';
+      clone.style.justifyContent = 'center';
+      clone.style.position = 'relative';
+      clone.style.borderRadius = '8px';
+      clone.style.overflow = 'hidden';
+
+      // Ensure the background gradient is preserved
+      const cardBackground = cardBackgrounds[parseInt(selectedCardId?.split('-')[1] || '0')];
+      clone.className = `${cardBackground} shadow-lg`;
+
+      cloneContainer.appendChild(clone);
+
+      const canvas = await html2canvas(clone, {
         backgroundColor: null,
-        scale: 2, // Higher quality
+        scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: true,
-        onclone: (document, element) => {
-          // Ensure the gradient background is visible
-          const cardElement = element as HTMLElement;
-          cardElement.style.height = '300px'; // Match the original card height
-          cardElement.style.width = '100%';
-          cardElement.style.borderRadius = '0.5rem';
-          cardElement.style.overflow = 'hidden';
+        width: 400,
+        height: 300,
+        onclone: (_, element) => {
+          // Additional styling fixes for the cloned element
+          const imgElements = element.getElementsByTagName('img');
+          for (let img of imgElements) {
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+          }
         }
       });
+
+      // Clean up the temporary elements
+      document.body.removeChild(cloneContainer);
 
       const dataUrl = canvas.toDataURL('image/png');
       const link = document.createElement('a');
@@ -479,7 +510,7 @@ export default function MoodBoard() {
 
       toast({
         title: "Success",
-        description: "Logo downloaded successfully",
+        description: "Logo downloaded successfully with background",
       });
     } catch (error) {
       console.error("Error during logo download:", error);
@@ -821,7 +852,7 @@ export default function MoodBoard() {
             <Skeleton className="h-[200px] rounded-lg" />
             <Skeleton className="h-[200px] rounded-lg" />
           </div>
-        ) : moodBoardData ? (
+        ): moodBoardData ? (
           <div className="grid grid-cols-1 gap-6" ref={moodBoardRef}>
             <BrandLogoSection />
             <Card className="shadow-md">
