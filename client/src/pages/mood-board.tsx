@@ -722,21 +722,47 @@ export default function MoodBoard() {
     brandName: string;
     fonts: FontSettings | null;
   }) => {
+    const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
+    const textStyle = {
+      fontFamily: fonts?.primary?.family,
+      fontWeight: fonts?.primary?.weight,
+      fontStyle: fonts?.primary?.style,
+      color: 'white' // Ensure text is always white for contrast
+    };
+
     return (
       <Card className="shadow-md">
         <CardContent className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2
-              className="text-xl font-semibold"
-              style={fonts?.primary ? {
-                fontFamily: fonts.primary.family,
-                fontWeight: fonts.primary.weight,
-                fontStyle: fonts.primary.style,
-              } : undefined}
-            >
+            <h2 className="text-xl font-semibold" style={textStyle}>
               Brand Applications
             </h2>
           </div>
+
+          {/* Full Width Brand Display */}
+          {selectedCardId && (
+            <div className={`${selectedBackground} w-full h-48 flex items-center justify-center p-8 rounded-lg mb-8`}>
+              <div className="flex flex-col items-center gap-4">
+                <div className="w-24 h-24 bg-white/90 dark:bg-white/80 rounded-xl p-4 shadow-lg">
+                  {logoSvg && (
+                    <img
+                      src={logoSvg}
+                      alt="Brand Logo"
+                      className="w-full h-full object-contain"
+                    />
+                  )}
+                </div>
+                <motion.h3
+                  className={`text-3xl text-center text-white ${
+                    FONT_STYLES_ARRAY[parseInt(selectedCardId.split('-')[1]) % FONT_STYLES_ARRAY.length]
+                  }`}
+                  style={textStyle}
+                >
+                  {brandName}
+                </motion.h3>
+              </div>
+            </div>
+          )}
 
           {/* Product Mockups Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -745,7 +771,7 @@ export default function MoodBoard() {
               <ProductMockup 
                 type="shopping-bag" 
                 className="w-full h-full"
-                background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                background={selectedBackground}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 {logoSvg && (
@@ -755,12 +781,7 @@ export default function MoodBoard() {
                       className={`text-sm text-center ${
                         FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                       }`}
-                      style={fonts?.primary ? {
-                        fontFamily: fonts.primary.family,
-                        fontWeight: fonts.primary.weight,
-                        fontStyle: fonts.primary.style,
-                        color: 'white'
-                      } : undefined}
+                      style={textStyle}
                     >
                       {brandName}
                     </motion.h4>
@@ -775,7 +796,7 @@ export default function MoodBoard() {
               <ProductMockup 
                 type="business-card" 
                 className="w-full h-full transform rotate-12"
-                background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                background={selectedBackground}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 {logoSvg && (
@@ -785,12 +806,7 @@ export default function MoodBoard() {
                       className={`text-sm text-center ${
                         FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                       }`}
-                      style={fonts?.primary ? {
-                        fontFamily: fonts.primary.family,
-                        fontWeight: fonts.primary.weight,
-                        fontStyle: fonts.primary.style,
-                        color: 'white'
-                      } : undefined}
+                      style={textStyle}
                     >
                       {brandName}
                     </motion.h4>
@@ -805,7 +821,7 @@ export default function MoodBoard() {
               <ProductMockup 
                 type="product" 
                 className="w-full h-full"
-                background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                background={selectedBackground}
               />
               <div className="absolute inset-0 flex items-center justify-center">
                 {logoSvg && (
@@ -815,12 +831,7 @@ export default function MoodBoard() {
                       className={`text-sm text-center ${
                         FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                       }`}
-                      style={fonts?.primary ? {
-                        fontFamily: fonts.primary.family,
-                        fontWeight: fonts.primary.weight,
-                        fontStyle: fonts.primary.style,
-                        color: 'white'
-                      } : undefined}
+                      style={textStyle}
                     >
                       {brandName}
                     </motion.h4>
@@ -840,7 +851,7 @@ export default function MoodBoard() {
                   <ProductMockup 
                     type="phone" 
                     className="w-48 h-96"
-                    background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                    background={selectedBackground}
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     {logoSvg && (
@@ -850,12 +861,7 @@ export default function MoodBoard() {
                           className={`text-sm text-center ${
                             FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                           }`}
-                          style={fonts?.primary ? {
-                            fontFamily: fonts.primary.family,
-                            fontWeight: fonts.primary.weight,
-                            fontStyle: fonts.primary.style,
-                            color: 'white'
-                          } : undefined}
+                          style={textStyle}
                         >
                           {brandName}
                         </motion.h4>
@@ -874,7 +880,7 @@ export default function MoodBoard() {
                   <ProductMockup 
                     type="phone" 
                     className="w-48 h-96"
-                    background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                    background={selectedBackground}
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     {logoSvg && (
@@ -884,12 +890,7 @@ export default function MoodBoard() {
                           className={`text-sm text-center ${
                             FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                           }`}
-                          style={fonts?.primary ? {
-                            fontFamily: fonts.primary.family,
-                            fontWeight: fonts.primary.weight,
-                            fontStyle: fonts.primary.style,
-                            color: 'white'
-                          } : undefined}
+                          style={textStyle}
                         >
                           {brandName}
                         </motion.h4>
@@ -910,7 +911,7 @@ export default function MoodBoard() {
                 <ProductMockup 
                   type="laptop" 
                   className="w-full transform perspective-1000 rotate-x-12"
-                  background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                  background={selectedBackground}
                 />
                 <div className="absolute inset-0 flex items-center justify-center transform -translate-y-8">
                   {logoSvg && (
@@ -920,12 +921,7 @@ export default function MoodBoard() {
                         className={`text-lg text-center ${
                           FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                         }`}
-                        style={fonts?.primary ? {
-                          fontFamily: fonts.primary.family,
-                          fontWeight: fonts.primary.weight,
-                          fontStyle: fonts.primary.style,
-                          color: 'white'
-                        } : undefined}
+                        style={textStyle}
                       >
                         {brandName}
                       </motion.h4>
@@ -938,7 +934,7 @@ export default function MoodBoard() {
                   <ProductMockup 
                     type="letterhead" 
                     className="w-full h-full transform rotate-12"
-                    background={selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined}
+                    background={selectedBackground}
                   />
                   <div className="absolute inset-0 flex items-center justify-center">
                     {logoSvg && (
@@ -948,12 +944,7 @@ export default function MoodBoard() {
                           className={`text-xs text-center ${
                             FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
                           }`}
-                          style={fonts?.primary ? {
-                            fontFamily: fonts.primary.family,
-                            fontWeight: fonts.primary.weight,
-                            fontStyle: fonts.primary.style,
-                            color: 'white'
-                          } : undefined}
+                          style={textStyle}
                         >
                           {brandName}
                         </motion.h4>
