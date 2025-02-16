@@ -130,25 +130,15 @@ export default function BrandVariations() {
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get('name');
-  const industry = params.get('industry');
-  const style = params.get('style');
 
   useEffect(() => {
-    if (!brandName || !industry || !style) {
+    if (!brandName) {
       navigate('/');
       return;
     }
 
-    // Store form data in session storage
-    const formData = {
-      name: brandName,
-      industry: industry,
-      style: style
-    };
-    sessionStorage.setItem('generatorFormData', JSON.stringify(formData));
-
     generateLogo();
-  }, [brandName, industry, style, iconStyle, iconColor, backgroundColor]);
+  }, [brandName, iconStyle, iconColor, backgroundColor]);
 
   const generateLogo = () => {
     if (!brandName) return;
@@ -241,10 +231,12 @@ export default function BrandVariations() {
           <Button
             variant="secondary"
             onClick={() => {
+              // Get form data from session storage
+              const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
               const queryParams = new URLSearchParams({
                 name: brandName || '',
-                industry: industry || '',
-                style: style || ''
+                industry: formData.industry || '',
+                style: formData.style || ''
               }).toString();
               navigate(`/mood-board?${queryParams}`);
             }}
