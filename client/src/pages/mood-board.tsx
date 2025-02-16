@@ -20,6 +20,7 @@ import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { SiInstagram, SiLinkedin, SiTwitter, SiFacebook } from "react-icons/si";
 
 interface FontSettings {
   primary: {
@@ -167,6 +168,14 @@ const CARD_GRADIENTS = [
   'bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800',
   'bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800'
 ];
+
+// Add this new interface for social post data
+interface SocialPost {
+  caption: string;
+  hashtags: string[];
+  imageUrl: string;
+  platform: string;
+}
 
 export default function MoodBoard() {
   const [, navigate] = useLocation();
@@ -819,6 +828,229 @@ export default function MoodBoard() {
     return null;
   }
 
+  const SocialMediaPostGenerator = ({ brandName, fonts, colors }: {
+    brandName: string;
+    fonts: FontSettings | null;
+    colors: Array<{ hex: string; name: string }>;
+  }) => {
+    const [selectedPlatform, setSelectedPlatform] = useState<string>('instagram');
+    const [tone, setTone] = useState<string>('professional');
+    const [generatedPost, setGeneratedPost] = useState<SocialPost | null>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const { toast } = useToast();
+    const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
+
+    const platforms = [
+      { id: 'instagram', name: 'Instagram', icon: SiInstagram },
+      { id: 'linkedin', name: 'LinkedIn', icon: SiLinkedin },
+{ id: 'twitter', name: 'Twitter', icon: SiTwitter },
+      { id: 'facebook', name: 'Facebook', icon: SiFacebook },
+    ];
+
+    const tones = [
+      { value: 'professional', label: 'Professional' },
+      { value: 'casual', label: 'Casual' },
+      { value: 'friendly', label: 'Friendly' },
+      { value: 'humorous', label: 'Humorous' },
+    ];
+
+    const generatePost = async () => {
+      setIsGenerating(true);
+      try {
+        const response = await fetch('/api/social-posts/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            brandName,
+            industry: formData.industry,
+            style: formData.style,
+            platform: selectedPlatform,
+            tone
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to generate post');
+        const data = await response.json();
+        setGeneratedPost(data);
+        toast({
+          title: "Success",
+          description: "Social media post generated successfully",
+        });
+      } catch (error) {
+        console.error('Error generating post:', error);
+        toast({
+          title: "Generation failed",
+          description: error instanceof Error ? error.message : "Failed to generate post",
+          variant: "destructive",
+        });
+      } finally {
+        setIsGenerating(false);
+      }
+    };
+
+    const handleDownload = async () => {
+      if (!generatedPost) return;
+
+      try {
+        const element = document.createElement('a');
+        const content = `
+Caption: ${generatedPost.caption}
+
+Hashtags:
+${generatedPost.hashtags.join(' ')}
+
+Platform: ${generatedPost.platform}
+        `;
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        element.href = URL.createObjectURL(blob);
+        element.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${generatedPost.platform}-post.txt`;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+
+        // Download image if available
+        if (generatedPost.imageUrl) {
+          const imgElement = document.createElement('a');
+          imgElement.href = generatedPost.imageUrl;
+          imgElement.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-${generatedPost.platform}-image.png`;
+          document.body.appendChild(imgElement);
+          imgElement.click();
+          document.body.removeChild(imgElement);
+        }
+      } catch (error) {
+        console.error('Error downloading post:', error);
+        toast({
+          title: "Download failed",
+          description: "Failed to download the post content",
+          variant: "destructive",
+        });
+      }
+    };
+
+    return (
+      <Card className="shadow-md">
+        <CardContent className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2
+              className="text-xl font-semibold"
+              style={fonts?.primary ? {
+                fontFamily: fonts.primary.family,
+                fontWeight: fonts.primary.weight,
+                fontStyle: fonts.primary.style,
+              } : undefined}
+            >
+              Social Media Post Generator
+            </h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleDownload}
+              disabled={!generatedPost}
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="space-y-4">
+              <div>
+                <Label>Platform</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {platforms.map((platform) => {
+                    const Icon = platform.icon;
+                    return (
+                      <Button
+                        key={platform.id}
+                        variant={selectedPlatform === platform.id ? "default" : "outline"}
+                        className="w-full"
+                        onClick={() => setSelectedPlatform(platform.id)}
+                      >
+                        <Icon className="h-4 w-4 mr-2" />
+                        {platform.name}
+                      </Button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <Label>Tone</Label>
+                <Select value={tone} onValueChange={setTone}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select tone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {tones.map((t) => (
+                      <SelectItem key={t.value} value={t.value}>
+                        {t.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <Button
+                className="w-full"
+                onClick={generatePost}
+                disabled={isGenerating}
+              >
+                {isGenerating ? (
+                  <>Generating...</>
+                ) : (
+                  <>Generate Post</>
+                )}
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {generatedPost && (
+                <div className="space-y-4">
+                  <div>
+                    <Label>Caption</Label>
+                    <div className="mt-1 p-3 bg-muted rounded-md">
+                      {generatedPost.caption}
+                    </div>
+                  </div>
+                  <div>
+                    <Label>Hashtags</Label>
+                    <div className="mt-1 p-3 bg-muted rounded-md flex flex-wrap gap-2">
+                      {generatedPost.hashtags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="text-primary"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {generatedPost.imageUrl && (
+                    <div>
+                      <Label>Generated Image</Label>
+                      <div className="mt-1 rounded-md overflow-hidden">
+                        <img
+                          src={generatedPost.imageUrl}
+                          alt="Generated social media post"
+                          className="w-full h-auto"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
+  if (!brandName) {
+    navigate('/');
+    return null;
+  }
+
   return (
     <TooltipProvider>
       <div className="container mx-auto py-8 px-4">
@@ -852,7 +1084,7 @@ export default function MoodBoard() {
             <Skeleton className="h-[200px] rounded-lg" />
             <Skeleton className="h-[200px] rounded-lg" />
           </div>
-        ): moodBoardData ? (
+        ) : moodBoardData ? (
           <div className="grid grid-cols-1 gap-6" ref={moodBoardRef}>
             <BrandLogoSection />
             <Card className="shadow-md">
@@ -900,7 +1132,7 @@ export default function MoodBoard() {
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
-                                            initial={{ opacity: 0 }}
+                      initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className="space-y-2"
@@ -1061,7 +1293,7 @@ export default function MoodBoard() {
                       exit={{ opacity: 0 }}
                       className="prose dark:prose-invert"
                     >
-                      <p 
+                      <p
                         className="text-muted-foreground"
                         style={fonts?.secondary ? {
                           fontFamily: fonts.secondary.family,
@@ -1076,12 +1308,17 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
-            <ProductMockupsSection 
-              selectedCardId={selectedCardId} 
-              cardBackgrounds={cardBackgrounds} 
-              logoSvg={logoSvg} 
-              brandName={brandName} 
-              fonts={fonts} 
+            <ProductMockupsSection
+              selectedCardId={selectedCardId}
+              cardBackgrounds={cardBackgrounds}
+              logoSvg={logoSvg}
+              brandName={brandName}
+              fonts={fonts}
+            />
+            <SocialMediaPostGenerator
+              brandName={brandName || ''}
+              fonts={fonts}
+              colors={colors}
             />
           </div>
         ) : (
