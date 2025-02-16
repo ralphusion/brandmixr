@@ -20,6 +20,7 @@ import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { ProductMockup } from "@/components/ProductMockups";
 
 interface FontSettings {
   primary: {
@@ -972,7 +973,7 @@ export default function MoodBoard() {
               </CardContent>
             </Card>
 
-            {/* New Mood Scene Card */}
+            {/* Mood Scene Card */}
             <Card className="shadow-md">
               <CardContent className="p-6">
                 <div className="flex justify-between items-center mb-6">
@@ -989,18 +990,35 @@ export default function MoodBoard() {
                 </div>
 
                 <div className="space-y-8">
-                  {/* Full Width Logo Display */}
+                  {/* Full Width Brand Display */}
                   <div className="rounded-lg overflow-hidden">
                     {selectedCardId && (
-                      <div className={`${cardBackgrounds[1]} w-full h-48 flex items-center justify-center`}>
-                        <div className="w-24 h-24 bg-white/90 dark:bg-white/80 rounded-xl p-4 shadow-lg">
-                          {logoSvg && (
-                            <img
-                              src={logoSvg}
-                              alt="Brand Logo"
-                              className="w-full h-full object-contain"
-                            />
-                          )}
+                      <div 
+                        className={`${cardBackgrounds[1]} w-full h-48 flex items-center justify-center p-8`}
+                        ref={selectedCardRef}
+                      >
+                        <div className="flex flex-col items-center gap-4">
+                          <div className="w-24 h-24 bg-white/90 dark:bg-white/80 rounded-xl p-4 shadow-lg">
+                            {logoSvg && (
+                              <img
+                                src={logoSvg}
+                                alt="Brand Logo"
+                                className="w-full h-full object-contain"
+                              />
+                            )}
+                          </div>
+                          <motion.h3
+                            className={`text-3xl text-center text-white ${
+                              FONT_STYLES_ARRAY[parseInt(selectedCardId.split('-')[1]) % FONT_STYLES_ARRAY.length]
+                            }`}
+                            style={fonts?.primary ? {
+                              fontFamily: fonts.primary.family,
+                              fontWeight: fonts.primary.weight,
+                              fontStyle: fonts.primary.style,
+                            } : undefined}
+                          >
+                            {brandName}
+                          </motion.h3>
                         </div>
                       </div>
                     )}
@@ -1008,32 +1026,73 @@ export default function MoodBoard() {
 
                   {/* Product Mockups */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-3/4 h-full relative">
-                          <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16">
-                            {logoSvg && <img src={logoSvg} alt="Logo on Shopping Bag" className="w-full h-full object-contain" />}
+                    {/* Shopping Bag */}
+                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden group">
+                      <ProductMockup type="shopping-bag" className="w-full h-full" />
+                      <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16">
+                        {logoSvg && (
+                          <div className="relative">
+                            <img src={logoSvg} alt="Logo on Shopping Bag" className="w-full h-full object-contain" />
+                            <motion.h4
+                              className="text-xs text-center mt-2 text-muted-foreground"
+                              style={fonts?.primary ? {
+                                fontFamily: fonts.primary.family,
+                                fontWeight: fonts.primary.weight,
+                                fontStyle: fonts.primary.style,
+                              } : undefined}
+                            >
+                              {brandName}
+                            </motion.h4>
                           </div>
-                          <div className="w-full h-full bg-gradient-to-b from-muted-foreground/10 to-muted-foreground/5 rounded-t-xl"></div>
-                        </div>
+                        )}
                       </div>
                       <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Shopping Bag</span>
                     </div>
 
-                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
+                    {/* Business Card */}
+                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden group">
+                      <ProductMockup type="business-card" className="w-full h-full" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-64 h-36 bg-white rounded-lg shadow-lg transform rotate-12 flex items-center justify-center">
-                          {logoSvg && <img src={logoSvg} alt="Logo on Business Card" className="w-12 h-12 object-contain" />}
+                        <div className="transform rotate-12">
+                          {logoSvg && (
+                            <div className="flex flex-col items-center gap-2">
+                              <img src={logoSvg} alt="Logo on Business Card" className="w-12 h-12 object-contain" />
+                              <motion.h4
+                                className="text-xs text-center text-muted-foreground"
+                                style={fonts?.primary ? {
+                                  fontFamily: fonts.primary.family,
+                                  fontWeight: fonts.primary.weight,
+                                  fontStyle: fonts.primary.style,
+                                } : undefined}
+                              >
+                                {brandName}
+                              </motion.h4>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Business Card</span>
                     </div>
 
-                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
+                    {/* Product Package */}
+                    <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden group">
+                      <ProductMockup type="product" className="w-full h-full" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-32 h-48 bg-white rounded-lg shadow-lg flex items-center justify-center">
-                          {logoSvg && <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain" />}
-                        </div>
+                        {logoSvg && (
+                          <div className="flex flex-col items-center gap-2">
+                            <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain" />
+                            <motion.h4
+                              className="text-xs text-center text-muted-foreground"
+                              style={fonts?.primary ? {
+                                fontFamily: fonts.primary.family,
+                                fontWeight: fonts.primary.weight,
+                                fontStyle: fonts.primary.style,
+                              } : undefined}
+                            >
+                              {brandName}
+                            </motion.h4>
+                          </div>
+                        )}
                       </div>
                       <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Product Package</span>
                     </div>
@@ -1041,22 +1100,58 @@ export default function MoodBoard() {
 
                   {/* Mobile App Mockups */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Phone View 1 */}
                     <div className="bg-muted rounded-lg p-4 aspect-video relative overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-48 h-96 bg-white rounded-3xl shadow-lg transform -rotate-12 flex items-center justify-center">
-                          <div className="w-40 h-80 bg-gradient-to-b from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center">
-                            {logoSvg && <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />}
+                        <div className="transform -rotate-12">
+                          <ProductMockup type="phone" className="w-48 h-96" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-2">
+                              {logoSvg && (
+                                <>
+                                  <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />
+                                  <motion.h4
+                                    className="text-xs text-center text-muted-foreground"
+                                    style={fonts?.primary ? {
+                                      fontFamily: fonts.primary.family,
+                                      fontWeight: fonts.primary.weight,
+                                      fontStyle: fonts.primary.style,
+                                    } : undefined}
+                                  >
+                                    {brandName}
+                                  </motion.h4>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                       <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Mobile App View 1</span>
                     </div>
 
+                    {/* Phone View 2 */}
                     <div className="bg-muted rounded-lg p-4 aspect-video relative overflow-hidden">
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-48 h-96 bg-white rounded-3xl shadow-lg transform rotate-12 flex items-center justify-center">
-                          <div className="w-40 h-80 bg-gradient-to-b from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center">
-                            {logoSvg && <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />}
+                        <div className="transform rotate-12">
+                          <ProductMockup type="phone" className="w-48 h-96" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="flex flex-col items-center gap-2">
+                              {logoSvg && (
+                                <>
+                                  <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />
+                                  <motion.h4
+                                    className="text-xs text-center text-muted-foreground"
+                                    style={fonts?.primary ? {
+                                      fontFamily: fonts.primary.family,
+                                      fontWeight: fonts.primary.weight,
+                                      fontStyle: fonts.primary.style,
+                                    } : undefined}
+                                  >
+                                    {brandName}
+                                  </motion.h4>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -1069,15 +1164,44 @@ export default function MoodBoard() {
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="relative w-full max-w-3xl">
                         {/* Laptop */}
-                        <div className="w-full h-64 bg-white rounded-lg shadow-xl transform perspective-1000 rotate-x-12">
-                          <div className="w-full h-full bg-gradient-to-b from-primary/10 to-primary/5 rounded-lg p-4 flex items-center justify-center">
-                            {logoSvg && <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain" />}
-                          </div>
+                        <ProductMockup type="laptop" className="w-full transform perspective-1000 rotate-x-12" />
+                        <div className="absolute inset-0 flex items-center justify-center transform -translate-y-8">
+                          {logoSvg && (
+                            <div className="flex flex-col items-center gap-2">
+                              <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain" />
+                              <motion.h4
+                                className="text-lg text-center text-muted-foreground"
+                                style={fonts?.primary ? {
+                                  fontFamily: fonts.primary.family,
+                                  fontWeight: fonts.primary.weight,
+                                  fontStyle: fonts.primary.style,
+                                } : undefined}
+                              >
+                                {brandName}
+                              </motion.h4>
+                            </div>
+                          )}
                         </div>
+
                         {/* Letterhead */}
-                        <div className="absolute -right-8 bottom-8 w-48 h-64 bg-white rounded-lg shadow-lg transform rotate-12">
-                          <div className="w-full h-full p-4 flex items-center justify-center">
-                            {logoSvg && <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain" />}
+                        <div className="absolute -right-8 bottom-8 w-48 h-64">
+                          <ProductMockup type="letterhead" className="w-full h-full transform rotate-12" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            {logoSvg && (
+                              <div className="flex flex-col items-center gap-2 transform -translate-y-16">
+                                <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain" />
+                                <motion.h4
+                                  className="text-xs text-center text-muted-foreground"
+                                  style={fonts?.primary ? {
+                                    fontFamily: fonts.primary.family,
+                                    fontWeight: fonts.primary.weight,
+                                    fontStyle: fonts.primary.style,
+                                  } : undefined}
+                                >
+                                  {brandName}
+                                </motion.h4>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1087,6 +1211,7 @@ export default function MoodBoard() {
                 </div>
               </CardContent>
             </Card>
+
           </div>
         ) : (
           <div className="text-center py-12">
