@@ -1023,22 +1023,24 @@ export default function MoodBoard() {
                       </div>
                     )}
                   </div>
-
                   {/* Product Mockups */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Shopping Bag */}
                     <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden group">
                       <ProductMockup type="shopping-bag" className="w-full h-full" />
-                      <div className="absolute top-1/4 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16">
+                      <div className="absolute inset-0 flex items-center justify-center">
                         {logoSvg && (
-                          <div className="relative">
-                            <img src={logoSvg} alt="Logo on Shopping Bag" className="w-full h-full object-contain" />
+                          <div className="flex flex-col items-center gap-4">
+                            <img src={logoSvg} alt="Logo on Shopping Bag" className="w-16 h-16 object-contain" />
                             <motion.h4
-                              className="text-xs text-center mt-2 text-muted-foreground"
+                              className={`text-sm text-center ${
+                                FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                              }`}
                               style={fonts?.primary ? {
                                 fontFamily: fonts.primary.family,
                                 fontWeight: fonts.primary.weight,
                                 fontStyle: fonts.primary.style,
+                                color: '#333333'
                               } : undefined}
                             >
                               {brandName}
@@ -1053,16 +1055,19 @@ export default function MoodBoard() {
                     <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden group">
                       <ProductMockup type="business-card" className="w-full h-full" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="transform rotate-12">
+                        <div className={`transform rotate-12 p-6 ${cardBackgrounds[1]}`}>
                           {logoSvg && (
-                            <div className="flex flex-col items-center gap-2">
+                            <div className="flex flex-col items-center gap-4">
                               <img src={logoSvg} alt="Logo on Business Card" className="w-12 h-12 object-contain" />
                               <motion.h4
-                                className="text-xs text-center text-muted-foreground"
+                                className={`text-sm text-center ${
+                                  FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                                }`}
                                 style={fonts?.primary ? {
                                   fontFamily: fonts.primary.family,
                                   fontWeight: fonts.primary.weight,
                                   fontStyle: fonts.primary.style,
+                                  color: 'white'
                                 } : undefined}
                               >
                                 {brandName}
@@ -1078,21 +1083,26 @@ export default function MoodBoard() {
                     <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden group">
                       <ProductMockup type="product" className="w-full h-full" />
                       <div className="absolute inset-0 flex items-center justify-center">
-                        {logoSvg && (
-                          <div className="flex flex-col items-center gap-2">
-                            <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain" />
-                            <motion.h4
-                              className="text-xs text-center text-muted-foreground"
-                              style={fonts?.primary ? {
-                                fontFamily: fonts.primary.family,
-                                fontWeight: fonts.primary.weight,
-                                fontStyle: fonts.primary.style,
-                              } : undefined}
-                            >
-                              {brandName}
-                            </motion.h4>
-                          </div>
-                        )}
+                        <div className={`p-6 rounded-lg ${cardBackgrounds[1]}`}>
+                          {logoSvg && (
+                            <div className="flex flex-col items-center gap-4">
+                              <img src={logoSvg} alt="Logo on Product" className="w-16 h-16 object-contain" />
+                              <motion.h4
+                                className={`text-sm text-center ${
+                                  FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                                }`}
+                                style={fonts?.primary ? {
+                                  fontFamily: fonts.primary.family,
+                                  fontWeight: fonts.primary.weight,
+                                  fontStyle: fonts.primary.style,
+                                  color: 'white'
+                                } : undefined}
+                              >
+                                {brandName}
+                              </motion.h4>
+                            </div>
+                          )}
+                        </div>
                       </div>
                       <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Product Package</span>
                     </div>
@@ -1106,16 +1116,19 @@ export default function MoodBoard() {
                         <div className="transform -rotate-12">
                           <ProductMockup type="phone" className="w-48 h-96" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex flex-col items-center gap-2">
+                            <div className={`flex flex-col items-center gap-4 p-6 ${cardBackgrounds[1]}`}>
                               {logoSvg && (
                                 <>
                                   <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />
                                   <motion.h4
-                                    className="text-xs text-center text-muted-foreground"
+                                    className={`text-sm text-center ${
+                                      FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                                    }`}
                                     style={fonts?.primary ? {
                                       fontFamily: fonts.primary.family,
                                       fontWeight: fonts.primary.weight,
                                       fontStyle: fonts.primary.style,
+                                      color: 'white'
                                     } : undefined}
                                   >
                                     {brandName}
@@ -1135,16 +1148,19 @@ export default function MoodBoard() {
                         <div className="transform rotate-12">
                           <ProductMockup type="phone" className="w-48 h-96" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="flex flex-col items-center gap-2">
+                            <div className={`flex flex-col items-center gap-4 p-6 ${cardBackgrounds[1]}`}>
                               {logoSvg && (
                                 <>
                                   <img src={logoSvg} alt="Logo in Mobile App" className="w-16 h-16 object-contain" />
                                   <motion.h4
-                                    className="text-xs text-center text-muted-foreground"
+                                    className={`text-sm text-center ${
+                                      FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                                    }`}
                                     style={fonts?.primary ? {
                                       fontFamily: fonts.primary.family,
                                       fontWeight: fonts.primary.weight,
                                       fontStyle: fonts.primary.style,
+                                      color: 'white'
                                     } : undefined}
                                   >
                                     {brandName}
@@ -1166,48 +1182,59 @@ export default function MoodBoard() {
                         {/* Laptop */}
                         <ProductMockup type="laptop" className="w-full transform perspective-1000 rotate-x-12" />
                         <div className="absolute inset-0 flex items-center justify-center transform -translate-y-8">
-                          {logoSvg && (
-                            <div className="flex flex-col items-center gap-2">
-                              <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain" />
-                              <motion.h4
-                                className="text-lg text-center text-muted-foreground"
-                                style={fonts?.primary ? {
-                                  fontFamily: fonts.primary.family,
-                                  fontWeight: fonts.primary.weight,
-                                  fontStyle: fonts.primary.style,
-                                } : undefined}
-                              >
-                                {brandName}
-                              </motion.h4>
-                            </div>
-                          )}
+                          <div className={`flex flex-col items-center gap-4 p-6 ${cardBackgrounds[1]}`}>
+                            {logoSvg && (
+                              <>
+                                <img src={logoSvg} alt="Logo on Website" className="w-24 h-24 object-contain" />
+                                <motion.h4
+                                  className={`text-lg text-center ${
+                                    FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                                  }`}
+                                  style={fonts?.primary ? {
+                                    fontFamily: fonts.primary.family,
+                                    fontWeight: fonts.primary.weight,
+                                    fontStyle: fonts.primary.style,
+                                    color: 'white'
+                                  } : undefined}
+                                >
+                                  {brandName}
+                                </motion.h4>
+                              </>
+                            )}
+                          </div>
                         </div>
 
                         {/* Letterhead */}
                         <div className="absolute -right-8 bottom-8 w-48 h-64">
                           <ProductMockup type="letterhead" className="w-full h-full transform rotate-12" />
                           <div className="absolute inset-0 flex items-center justify-center">
-                            {logoSvg && (
-                              <div className="flex flex-col items-center gap-2 transform -translate-y-16">
-                                <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain" />
-                                <motion.h4
-                                  className="text-xs text-center text-muted-foreground"
-                                  style={fonts?.primary ? {
-                                    fontFamily: fonts.primary.family,
-                                    fontWeight: fonts.primary.weight,
-                                    fontStyle: fonts.primary.style,
-                                  } : undefined}
-                                >
-                                  {brandName}
-                                </motion.h4>
-                              </div>
-                            )}
+                            <div className={`flex flex-col items-center gap-4 p-6 ${cardBackgrounds[1]}`}>
+                              {logoSvg && (
+                                <>
+                                  <img src={logoSvg} alt="Logo on Letterhead" className="w-16 h-16 object-contain" />
+                                  <motion.h4
+                                    className={`text-xs text-center ${
+                                      FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
+                                    }`}
+                                    style={fonts?.primary ? {
+                                      fontFamily: fonts.primary.family,
+                                      fontWeight: fonts.primary.weight,
+                                      fontStyle: fonts.primary.style,
+                                      color: 'white'
+                                    } : undefined}
+                                  >
+                                    {brandName}
+                                  </motion.h4>
+                                </>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
                     </div>
                     <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Website &amp; Letterhead</span>
                   </div>
+
                 </div>
               </CardContent>
             </Card>
