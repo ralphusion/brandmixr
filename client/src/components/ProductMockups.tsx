@@ -1,16 +1,40 @@
 import { motion } from "framer-motion";
 
-// SVG Components for product mockups
 const ShoppingBag = () => (
-  <svg viewBox="0 0 200 200" className="w-full h-full absolute inset-0">
+  <svg viewBox="0 0 200 260" className="w-full h-full absolute inset-0">
     <defs>
       <linearGradient id="bagGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style={{ stopColor: '#f3f4f6', stopOpacity: 1 }} />
-        <stop offset="100%" style={{ stopColor: '#e5e7eb', stopOpacity: 1 }} />
+        <stop offset="0%" style={{ stopColor: '#ffffff', stopOpacity: 1 }} />
+        <stop offset="100%" style={{ stopColor: '#f8f8f8', stopOpacity: 1 }} />
       </linearGradient>
+      <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="2" dy="2" stdDeviation="3" floodOpacity="0.1"/>
+      </filter>
     </defs>
-    <path d="M40 60 L160 60 L140 180 L60 180 Z" fill="url(#bagGradient)" stroke="#d1d5db" strokeWidth="2"/>
-    <path d="M60 60 Q80 20 100 20 Q120 20 140 60" fill="none" stroke="#d1d5db" strokeWidth="2"/>
+    {/* Main Bag Body */}
+    <path 
+      d="M40 80 L160 80 L150 240 L50 240 Z" 
+      fill="url(#bagGradient)" 
+      stroke="#e5e7eb" 
+      strokeWidth="1"
+      filter="url(#shadow)"
+    />
+    {/* Left Handle */}
+    <path 
+      d="M60 80 C60 60 70 40 80 40 C90 40 90 60 90 80" 
+      fill="none" 
+      stroke="#d1d5db" 
+      strokeWidth="1"
+      strokeLinecap="round"
+    />
+    {/* Right Handle */}
+    <path 
+      d="M110 80 C110 60 120 40 130 40 C140 40 140 60 140 80" 
+      fill="none" 
+      stroke="#d1d5db" 
+      strokeWidth="1"
+      strokeLinecap="round"
+    />
   </svg>
 );
 
