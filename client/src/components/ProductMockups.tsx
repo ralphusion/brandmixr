@@ -28,10 +28,18 @@ const ShoppingBag = ({ background }: { background?: string }) => (
       y="70" 
       width="120" 
       height="160"
-      className={background || "bg-muted"} 
+      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
       filter="url(#bagShadow)"
       rx="2"
-    />
+    >
+      <defs>
+        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
+          <stop offset="0%" className="stop-color-from" />
+          <stop offset="50%" className="stop-color-via" />
+          <stop offset="100%" className="stop-color-to" />
+        </linearGradient>
+      </defs>
+    </rect>
 
     {/* Handles */}
     <path 
@@ -40,7 +48,7 @@ const ShoppingBag = ({ background }: { background?: string }) => (
       stroke="white"
       strokeWidth="6"
       strokeLinecap="round"
-      className="opacity-80"
+      opacity="0.8"
     />
     <path 
       d="M95 70 C95 40 110 30 115 30 C120 30 135 40 135 70" 
@@ -48,7 +56,7 @@ const ShoppingBag = ({ background }: { background?: string }) => (
       stroke="white"
       strokeWidth="6"
       strokeLinecap="round"
-      className="opacity-80"
+      opacity="0.8"
     />
   </svg>
 );
@@ -61,8 +69,16 @@ const BusinessCard = ({ background }: { background?: string }) => (
       width="160" 
       height="80" 
       rx="4" 
-      className={background || "bg-muted"}
-    />
+      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
+    >
+      <defs>
+        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
+          <stop offset="0%" className="stop-color-from" />
+          <stop offset="50%" className="stop-color-via" />
+          <stop offset="100%" className="stop-color-to" />
+        </linearGradient>
+      </defs>
+    </rect>
   </svg>
 );
 
@@ -74,8 +90,16 @@ const ProductPackage = ({ background }: { background?: string }) => (
       width="120" 
       height="220" 
       rx="8" 
-      className={background || "bg-muted"}
-    />
+      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
+    >
+      <defs>
+        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
+          <stop offset="0%" className="stop-color-from" />
+          <stop offset="50%" className="stop-color-via" />
+          <stop offset="100%" className="stop-color-to" />
+        </linearGradient>
+      </defs>
+    </rect>
   </svg>
 );
 
@@ -88,8 +112,16 @@ const Phone = ({ background }: { background?: string }) => (
       width="100" 
       height="220" 
       rx="20" 
-      className={background || "bg-muted"}
-    />
+      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
+    >
+      <defs>
+        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
+          <stop offset="0%" className="stop-color-from" />
+          <stop offset="50%" className="stop-color-via" />
+          <stop offset="100%" className="stop-color-to" />
+        </linearGradient>
+      </defs>
+    </rect>
     {/* Screen */}
     <rect 
       x="15" 
@@ -97,7 +129,7 @@ const Phone = ({ background }: { background?: string }) => (
       width="90" 
       height="210" 
       rx="16" 
-      className="fill-white/10"
+      fill="rgba(255, 255, 255, 0.1)"
     />
   </svg>
 );
@@ -107,12 +139,20 @@ const Laptop = ({ background }: { background?: string }) => (
     {/* Screen */}
     <path 
       d="M40 20 L360 20 L360 220 L40 220 Z" 
-      className={background || "bg-muted"}
-    />
+      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
+    >
+      <defs>
+        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
+          <stop offset="0%" className="stop-color-from" />
+          <stop offset="50%" className="stop-color-via" />
+          <stop offset="100%" className="stop-color-to" />
+        </linearGradient>
+      </defs>
+    </path>
     {/* Base */}
     <path 
       d="M20 220 L380 220 L400 260 L0 260 Z" 
-      className="fill-white/20"
+      fill="rgba(255, 255, 255, 0.2)"
     />
     {/* Display Area */}
     <rect 
@@ -121,7 +161,7 @@ const Laptop = ({ background }: { background?: string }) => (
       width="310" 
       height="190" 
       rx="2" 
-      className="fill-white/10"
+      fill="rgba(255, 255, 255, 0.1)"
     />
   </svg>
 );
@@ -133,11 +173,19 @@ const Letterhead = ({ background }: { background?: string }) => (
       y="20" 
       width="160" 
       height="240" 
-      className={background || "bg-muted"}
-    />
-    <line x1="40" y1="100" x2="160" y2="100" stroke="white" strokeWidth="1" className="opacity-20"/>
-    <line x1="40" y1="120" x2="160" y2="120" stroke="white" strokeWidth="1" className="opacity-20"/>
-    <line x1="40" y1="140" x2="160" y2="140" stroke="white" strokeWidth="1" className="opacity-20"/>
+      fill={`url('#${background?.replace(/[^a-zA-Z0-9]/g, '_')}')`}
+    >
+      <defs>
+        <linearGradient id={background?.replace(/[^a-zA-Z0-9]/g, '_')} gradientTransform="rotate(45)">
+          <stop offset="0%" className="stop-color-from" />
+          <stop offset="50%" className="stop-color-via" />
+          <stop offset="100%" className="stop-color-to" />
+        </linearGradient>
+      </defs>
+    </rect>
+    <line x1="40" y1="100" x2="160" y2="100" stroke="white" strokeWidth="1" opacity="0.2"/>
+    <line x1="40" y1="120" x2="160" y2="120" stroke="white" strokeWidth="1" opacity="0.2"/>
+    <line x1="40" y1="140" x2="160" y2="140" stroke="white" strokeWidth="1" opacity="0.2"/>
   </svg>
 );
 

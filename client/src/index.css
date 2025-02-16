@@ -11,3 +11,88 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 }
+
+/* SVG Gradient Colors */
+.bg-gradient-to-br.from-slate-800.via-slate-700.to-slate-800 {
+  .stop-color-from {
+    stop-color: #1e293b;
+  }
+  .stop-color-via {
+    stop-color: #334155;
+  }
+  .stop-color-to {
+    stop-color: #1e293b;
+  }
+}
+
+.bg-gradient-to-br.from-blue-600.via-indigo-600.to-blue-700 {
+  .stop-color-from {
+    stop-color: #2563eb;
+  }
+  .stop-color-via {
+    stop-color: #4f46e5;
+  }
+  .stop-color-to {
+    stop-color: #1d4ed8;
+  }
+}
+
+.bg-gradient-to-br.from-emerald-600.via-teal-600.to-emerald-700 {
+  .stop-color-from {
+    stop-color: #059669;
+  }
+  .stop-color-via {
+    stop-color: #0d9488;
+  }
+  .stop-color-to {
+    stop-color: #047857;
+  }
+}
+
+.bg-gradient-to-br.from-violet-500.via-purple-500.to-violet-600 {
+  .stop-color-from {
+    stop-color: #8b5cf6;
+  }
+  .stop-color-via {
+    stop-color: #a855f7;
+  }
+  .stop-color-to {
+    stop-color: #7c3aed;
+  }
+}
+
+.bg-gradient-to-br.from-gray-900.via-slate-800.to-gray-900 {
+  .stop-color-from {
+    stop-color: #111827;
+  }
+  .stop-color-via {
+    stop-color: #1e293b;
+  }
+  .stop-color-to {
+    stop-color: #111827;
+  }
+}
+
+.bg-gradient-to-br.from-indigo-700.via-purple-700.to-indigo-800 {
+  .stop-color-from {
+    stop-color: #4338ca;
+  }
+  .stop-color-via {
+    stop-color: #7e22ce;
+  }
+  .stop-color-to {
+    stop-color: #3730a3;
+  }
+}
+
+.bg-gradient-to-br.from-teal-700.via-emerald-700.to-teal-800 {
+  .stop-color-from {
+    stop-color: #0f766e;
+  }
+  .stop-color-via {
+    stop-color: #047857;
+  }
+  .stop-color-to {
+    stop-color: #115e59;
+  }
+}
