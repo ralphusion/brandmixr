@@ -20,7 +20,6 @@ import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { ProductMockup } from "@/components/ProductMockups";
 
 interface FontSettings {
   primary: {
@@ -765,37 +764,7 @@ export default function MoodBoard() {
             </div>
           )}
 
-          {/* Product Mockups Grid */}
-          <div className="grid grid-cols-1 gap-4">
-            {/* Shopping Bag */}
-            <div className="bg-muted rounded-lg p-4 aspect-square relative overflow-hidden">
-              <ProductMockup 
-                type="shopping-bag" 
-                className="w-full h-full"
-                background={selectedBackground}
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                {logoSvg && (
-                  <div className="flex flex-col items-center gap-4">
-                    <img 
-                      src={logoSvg} 
-                      alt="Logo on Shopping Bag" 
-                      className="w-16 h-16 object-contain bg-white/90 p-2 rounded-lg" 
-                    />
-                    <h4
-                      className={`text-sm text-center text-white ${
-                        FONT_STYLES_ARRAY[parseInt(selectedCardId?.split('-')[1] || '0') % FONT_STYLES_ARRAY.length]
-                      }`}
-                      style={textStyle}
-                    >
-                      {brandName}
-                    </h4>
-                  </div>
-                )}
-              </div>
-              <span className="absolute bottom-2 left-4 text-sm text-muted-foreground">Shopping Bag</span>
-            </div>
-          </div>
+          {/* Future mockup implementations will go here */}
         </CardContent>
       </Card>
     );
@@ -887,7 +856,7 @@ export default function MoodBoard() {
                 <AnimatePresence mode="wait">
                   {regeneratingSection?.type === 'colors' ? (
                     <motion.div
-                      initial={{ opacity: 0 }}
+                                            initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className="space-y-2"
