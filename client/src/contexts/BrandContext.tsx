@@ -19,6 +19,7 @@ interface BrandContextType {
   moodBoardRef: React.RefObject<HTMLDivElement>;
   setColors: (colors: Array<{ hex: string; name: string }>) => void;
   setBrandName: (name: string | null) => void;
+  setMoodBoardData: (data: any) => void;
 }
 
 const BrandContext = createContext<BrandContextType | undefined>(undefined);
@@ -160,6 +161,7 @@ export function BrandProvider({ children }: { children: ReactNode }) {
         moodBoardRef,
         setColors,
         setBrandName,
+        setMoodBoardData,
       }}
     >
       {children}

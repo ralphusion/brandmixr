@@ -2,7 +2,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Download, ArrowLeft, Copy } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { SiInstagram, SiLinkedin, SiX, SiFacebook } from "react-icons/si";
@@ -18,15 +18,7 @@ import { ProductMockupsSection } from "@/components/ProductMockupsSection";
 import { BrandLogoSection } from "@/components/BrandLogoSection";
 import { SparkleIcon } from "@/components/SparkleIcon";
 
-// Interface for social post data
-interface SocialPost {
-  caption: string;
-  hashtags: string[];
-  imageUrl: string;
-  platform: string;
-}
-
-// Social Media Post Generator Component
+// Social Media Post Generator Component (Unchanged from original)
 const SocialMediaPostGenerator = ({ brandName, fonts, colors }: {
   brandName: string;
   fonts: FontSettings | null;
@@ -244,11 +236,86 @@ Platform: ${generatedPost.platform}
   );
 };
 
+// Interface for social post data (Unchanged from original)
+interface SocialPost {
+  caption: string;
+  hashtags: string[];
+  imageUrl: string;
+  platform: string;
+}
+
+
 // Main MoodBoard Component
 export default function MoodBoard() {
   const [, navigate] = useLocation();
-  const { brandName: brandNameFromContext, setBrandName, fonts, colors, isLoading, moodBoardData, handleExport, handleCopyToClipboard, handleRegenerate, regeneratingSection, selectedCardId, cardBackgrounds, logoSvg, moodBoardRef, setColors } = useBrandContext();
+  const { toast } = useToast();
+  const { 
+    brandName: brandNameFromContext,
+    setBrandName,
+    fonts,
+    colors,
+    setColors,
+    isLoading,
+    moodBoardData,
+    setMoodBoardData,
+    handleExport,
+    handleCopyToClipboard,
+    handleRegenerate,
+    regeneratingSection,
+    selectedCardId,
+    cardBackgrounds,
+    logoSvg,
+    moodBoardRef
+  } = useBrandContext();
 
+  // Load mood board data
+  useEffect(() => {
+    const loadMoodBoardData = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const name = params.get('name');
+      const industry = params.get('industry');
+      const style = params.get('style');
+
+      if (!name || !industry || !style) {
+        toast({
+          title: "Missing parameters",
+          description: "Please provide brand name, industry, and style",
+          variant: "destructive"
+        });
+        navigate('/');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/mood-board?${new URLSearchParams({
+          name,
+          industry,
+          style
+        })}`);
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch mood board data');
+        }
+
+        const data = await response.json();
+        setMoodBoardData(data);
+        setColors(data.colors || []);
+      } catch (error) {
+        console.error('Error loading mood board:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load mood board data. Please try again.",
+          variant: "destructive"
+        });
+      }
+    };
+
+    if (brandNameFromContext || window.location.search.includes('name=')) {
+      loadMoodBoardData();
+    }
+  }, [brandNameFromContext, navigate, toast, setColors, setMoodBoardData]);
+
+  // Set brand name from URL
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const nameFromUrl = params.get('name');
