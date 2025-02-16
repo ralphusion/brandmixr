@@ -8,8 +8,6 @@ import { apiRouter } from "./routes/api";
 import { checkDomainAvailability } from "./utils/domain";
 import { checkTrademarkAvailability } from "./utils/trademark";
 import { generateSimpleLogo } from "./utils/logoGenerator";
-import openai from 'openai'; // Added import
-
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API Routes
@@ -359,71 +357,6 @@ app.post("/api/generate-logo", async (req, res) => {
       res.json(recommendations);
     } catch (error) {
       console.error("Error generating font recommendations:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
-    }
-  });
-
-  app.post("/api/social-posts/generate", async (req, res) => {
-    try {
-      const { brandName, industry, style, platform, tone } = req.body;
-
-      if (!brandName || !industry || !platform) {
-        return res.status(400).json({
-          error: "Missing required parameters",
-          details: {
-            brandName: !brandName ? "missing" : "present",
-            industry: !industry ? "missing" : "present",
-            platform: !platform ? "missing" : "present"
-          }
-        });
-      }
-
-      // Generate social media post content using OpenAI
-      const prompt = `Create a ${tone || 'professional'} social media post for ${platform} for a ${industry} brand named "${brandName}". 
-      The brand style is ${style || 'modern and professional'}. 
-      Include:
-      1. A creative and engaging caption
-      2. Relevant hashtags
-      3. A description of what the accompanying image should look like`;
-
-      const response = await openai.chat.completions.create({
-        model: "gpt-4-turbo-preview",
-        messages: [{
-          role: "system",
-          content: "You are a professional social media manager and brand strategist."
-        }, {
-          role: "user",
-          content: prompt
-        }],
-        response_format: { type: "json_object" }
-      }).catch(err => {
-        console.error("OpenAI API error:", err);
-        throw new Error("Failed to generate social media post. OpenAI API error.");
-      });
-
-
-      const content = JSON.parse(response.choices[0].message.content);
-
-      // Generate an image for the post using DALL-E
-      const imagePrompt = content.imageDescription;
-      const imageResult = await generateLogoWithDalle(brandName, imagePrompt).catch(err => {
-        console.error("DALL-E API error:", err);
-        throw new Error("Failed to generate image. DALL-E API error.");
-      });
-
-      res.json({
-        caption: content.caption,
-        hashtags: content.hashtags,
-        imageUrl: imageResult.url,
-        platform
-      });
-
-    } catch (error) {
-      console.error("Error generating social media post:", error);
       if (error instanceof Error) {
         res.status(400).json({ error: error.message });
       } else {

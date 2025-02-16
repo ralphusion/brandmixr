@@ -136,7 +136,6 @@ export default function BrandVariations() {
       navigate('/');
       return;
     }
-
     generateLogo();
   }, [brandName, iconStyle, iconColor, backgroundColor]);
 
@@ -230,16 +229,7 @@ export default function BrandVariations() {
         <div className="flex items-center gap-4">
           <Button
             variant="secondary"
-            onClick={() => {
-              // Get form data from session storage
-              const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
-              const queryParams = new URLSearchParams({
-                name: brandName || '',
-                industry: formData.industry || '',
-                style: formData.style || ''
-              }).toString();
-              navigate(`/mood-board?${queryParams}`);
-            }}
+            onClick={() => navigate(`/mood-board?name=${encodeURIComponent(brandName || '')}`)}
           >
             View Mood Board
           </Button>
