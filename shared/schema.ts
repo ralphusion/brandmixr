@@ -100,11 +100,11 @@ export type InsertStylePreset = z.infer<typeof insertStylePresetSchema>;
 
 export const generateNameSchema = z.object({
   industry: z.string(),
-  description: z.string(),
+  description: z.string().optional(),
   keywords: z.array(z.string()),
   style: z.string(),
-  languageCode: z.string().optional(),
-  stylePresetId: z.number().optional(),
+  provider: z.enum(['openai', 'gemini', 'openrouter']),
+  model: z.string()
 });
 
 export type GenerateNameRequest = z.infer<typeof generateNameSchema>;

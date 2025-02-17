@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { generateNameSchema } from "@shared/schema";
 import { INDUSTRIES, BRAND_STYLES, PLACEHOLDER_DESCRIPTIONS } from "@/lib/constants";
+import { AIModel, OPENROUTER_MODELS } from "@shared/types";
 
 interface NameGeneratorFormProps {
   onGenerate: (data: any) => void;
@@ -23,7 +24,9 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
       industry: "",
       description: "",
       keywords: [],
-      style: "auto"
+      style: "auto",
+      provider: "openai",
+      model: "gpt-4"
     }
   });
 
@@ -126,6 +129,47 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
                 </FormItem>
               )}
             />
+
+            <div className="space-y-2">
+              <FormLabel className="dark:text-gray-200">AI Model Provider</FormLabel>
+              <Select defaultValue="openai" onValueChange={(value: AIModel) => {
+                form.setValue("provider", value);
+                form.setValue("model", value === "openai" ? "gpt-4" : 
+                            value === "gemini" ? "gemini-1.5-pro" : 
+                            "anthropic/claude-3-opus");
+              }}>
+                <FormControl>
+                  <SelectTrigger className="dark:border-gray-700">
+                    <SelectValue placeholder="Select model provider" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="openai">OpenAI</SelectItem>
+                  <SelectItem value="gemini">Google Gemini</SelectItem>
+                  <SelectItem value="openrouter">OpenRouter</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {form.watch("provider") === "openrouter" && (
+              <div className="space-y-2">
+                <FormLabel className="dark:text-gray-200">OpenRouter Model</FormLabel>
+                <Select defaultValue="anthropic/claude-3-opus" onValueChange={(value) => form.setValue("model", value)}>
+                  <FormControl>
+                    <SelectTrigger className="dark:border-gray-700">
+                      <SelectValue placeholder="Select OpenRouter model" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {OPENROUTER_MODELS.map((model) => (
+                      <SelectItem key={model.value} value={model.value}>
+                        {model.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <FormField
               control={form.control}

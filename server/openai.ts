@@ -6,6 +6,15 @@ import crypto from "crypto";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Initialize OpenRouter client
+const openrouter = new OpenAI({ 
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY
+});
+
+// Initialize Gemini client
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
+
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
 export async function generateMoodBoard(
   brandName: string,
@@ -72,8 +81,14 @@ export async function generateApiKey(name: string, rateLimit: number = 100): Pro
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
 export async function generateNames(request: GenerateNameRequest): Promise<string[]> {
-  if (!process.env.OPENAI_API_KEY) {
+  const { provider, model } = request;
+  
+  if (provider === 'openai' && !process.env.OPENAI_API_KEY) {
     throw new Error("OpenAI API key is not configured");
+  } else if (provider === 'openrouter' && !process.env.OPENROUTER_API_KEY) {
+    throw new Error("OpenRouter API key is not configured");
+  } else if (provider === 'gemini' && !process.env.GEMINI_API_KEY) {
+    throw new Error("Gemini API key is not configured");
   }
 
   const styleGuide = {
