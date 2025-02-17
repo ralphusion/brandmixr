@@ -203,26 +203,7 @@ app.post("/api/generate-logo", async (req, res) => {
 
       console.log("Generated mood board content:", moodBoard);
 
-      // Generate images using DALL-E for mood board
-      const generatedImages = await Promise.all(
-        moodBoard.imagePrompts.map(async (prompt) => {
-          try {
-            const result = await generateLogoWithDalle(name as string, prompt);
-            return result.url;
-          } catch (error) {
-            console.error("Error generating image:", error);
-            // Return a default image URL or pattern if DALL-E fails
-            return '/placeholder-image.svg';
-          }
-        })
-      );
-
-      console.log("Generated images:", generatedImages.length);
-
-      res.json({
-        ...moodBoard,
-        images: generatedImages
-      });
+      res.json(moodBoard);
     } catch (error) {
       console.error("Error generating mood board:", error);
       if (error instanceof Error) {

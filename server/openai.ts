@@ -167,38 +167,7 @@ Please respond with just the description text, no JSON formatting needed.`;
   }
 }
 
-export async function generateLogoWithDalle(brandName: string, style: string): Promise<{ url: string }> {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error("OpenAI API key is not configured");
-  }
 
-  try {
-    const prompt = `Create a simple, minimalistic icon for "${brandName}". The design should be:
-- Extremely minimalistic, using only essential geometric shapes (circles, squares, lines)
-- Single color design that works on both light and dark backgrounds
-- No text or lettering
-- Focus on a single memorable symbol that represents the brand's essence
-- Clean, bold lines and shapes
-- Professional and modern look
-Style guidance: ${style}`;
-
-    const response = await openai.images.generate({
-      model: "dall-e-3",
-      prompt,
-      n: 1,
-      size: "1024x1024",
-      quality: "standard",
-    });
-
-    return { url: response.data[0].url || '' };
-  } catch (error) {
-    console.error('Error generating logo:', error);
-    if (error instanceof Error && error.message.includes('API key')) {
-      throw new Error('OpenAI API key is invalid or not properly configured');
-    }
-    throw error;
-  }
-}
 
 export interface FontRecommendation {
   primary: {
