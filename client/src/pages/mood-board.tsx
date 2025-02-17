@@ -770,17 +770,24 @@ export default function MoodBoard() {
     const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
     const selectedIndex = selectedCardId ? parseInt(selectedCardId.split('-')[1]) : 0;
 
+    const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
+    const selectedFont = selectedCardId ? fontStyles[parseInt(selectedCardId.split('-')[1])] : null;
+
     const textStyle = {
-      fontFamily: fonts?.primary?.family || 'Inter',
-      fontWeight: fonts?.primary?.weight || '600',
-      fontStyle: fonts?.primary?.style || 'normal',
+      fontFamily: selectedFont?.fontFamily || fonts?.primary?.family || 'Inter',
+      fontWeight: selectedFont?.fontWeight || fonts?.primary?.weight || '600',
+      fontStyle: selectedFont?.fontStyle || 'normal',
+      textTransform: selectedFont?.textTransform || 'none',
+      letterSpacing: selectedFont?.letterSpacing || 'normal',
       color: 'white'
     };
 
     const secondaryTextStyle = {
-      fontFamily: fonts?.secondary?.family || 'Inter',
-      fontWeight: fonts?.secondary?.weight || '400',
-      fontStyle: fonts?.secondary?.style || 'normal',
+      fontFamily: selectedFont?.fontFamily || fonts?.secondary?.family || 'Inter',
+      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || '400',
+      fontStyle: selectedFont?.fontStyle || 'normal',
+      textTransform: 'none',
+      letterSpacing: 'normal',
     };
 
     return (
