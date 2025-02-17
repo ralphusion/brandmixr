@@ -3,6 +3,7 @@ import { type GenerateNameRequest } from "@shared/schema";
 import { db } from "./db";
 import { apiKeys } from "@shared/schema";
 import crypto from "crypto";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
