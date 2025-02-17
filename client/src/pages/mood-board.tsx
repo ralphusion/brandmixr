@@ -819,10 +819,9 @@ export default function MoodBoard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-white/90 dark:bg-white/80 rounded-lg p-2">
-                        {logoSvgand (
+                        {logoSvg && (
                           <img
-                            src={logoSvg}
-                            alt="Brand Logo"
+                            src={logoSvg                            alt="Brand Logo"
                             className="w-full h-full object-contain"
                           />
                         )}
