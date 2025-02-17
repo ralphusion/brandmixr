@@ -35,7 +35,11 @@ export function NameGeneratorForm({ onGenerate, isGenerating }: NameGeneratorFor
     const savedData = sessionStorage.getItem('generatorFormData');
     if (savedData) {
       const parsedData = JSON.parse(savedData);
-      form.reset(parsedData);
+      form.reset({
+        ...parsedData,
+        provider: parsedData.provider || "openai",
+        model: parsedData.model || "gpt-4"
+      });
       setDescription(parsedData.description || "");
     }
   }, []);
