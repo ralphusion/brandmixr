@@ -20,7 +20,14 @@ async function generateWithGemini(prompt: string) {
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
   const result = await model.generateContent(prompt);
   const response = await result.response;
-  return response.text();
+  const text = response.text();
+  
+  // Extract JSON from the response if it's wrapped in markdown code blocks
+  const jsonMatch = text.match(/```json\s*({[\s\S]*?})\s*```/) || text.match(/({[\s\S]*})/);
+  if (jsonMatch) {
+    return jsonMatch[1];
+  }
+  return text;
 }
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
