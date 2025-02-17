@@ -773,13 +773,14 @@ export default function MoodBoard() {
     const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
     const selectedFont = selectedCardId ? fontStyles[parseInt(selectedCardId.split('-')[1])] : null;
 
+    // Website mockup styling
     const textStyle = {
       fontFamily: selectedFont?.fontFamily || fonts?.primary?.family || 'Inter',
       fontWeight: selectedFont?.fontWeight || fonts?.primary?.weight || '600',
       fontStyle: selectedFont?.fontStyle || 'normal',
       textTransform: selectedFont?.textTransform || 'none',
       letterSpacing: selectedFont?.letterSpacing || 'normal',
-      color: 'white'
+      color: colors[0]?.hex || '#000000' // Using first color from palette for headers
     };
 
     const secondaryTextStyle = {
@@ -788,6 +789,7 @@ export default function MoodBoard() {
       fontStyle: selectedFont?.fontStyle || 'normal',
       textTransform: 'none',
       letterSpacing: 'normal',
+      color: '#000000'
     };
 
     return (
@@ -815,7 +817,7 @@ export default function MoodBoard() {
                           />
                         )}
                       </div>
-                      <span className="text-white font-semibold text-lg" style={textStyle}>
+                      <span className="text-black font-semibold text-lg" style={textStyle}>
                         {brandName}
                       </span>
                     </div>
@@ -823,7 +825,7 @@ export default function MoodBoard() {
                       {['Home', 'About', 'Services', 'Contact'].map((item) => (
                         <span
                           key={item}
-                          className="text-white/90 hover:text-white cursor-pointer"
+                          className="text-black/90 hover:text-black cursor-pointer"
                           style={secondaryTextStyle}
                         >
                           {item}
@@ -839,27 +841,31 @@ export default function MoodBoard() {
                 <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div><div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                   <div className="max-w-2xl">
                     <h1 
-                      className="text-4xl sm:text-5xl font-bold text-white mb-6"
+                      className="text-4xl sm:text-5xl font-bold text-black mb-6"
                       style={textStyle}
                     >
                       Elevate Your Experience with {brandName}
                     </h1>
                     <p 
-                      className="text-xl text-white/90 mb-8"
+                      className="text-xl text-black/90 mb-8"
                       style={secondaryTextStyle}
                     >
                       Discover excellence through innovation and style. We bring your vision to life with precision and passion.
                     </p>
                     <div className="flex flex-wrap gap-4">
                       <Button 
-                        className="bg-white text-gray-900 hover:bg-white/90"
+                        className="px-4 py-2 rounded"
+                        style={{ 
+                          backgroundColor: colors[1]?.hex || '#f0f0f0',
+                          color: '#ffffff'
+                        }}
                         style={secondaryTextStyle}
                       >
                         Get Started
                       </Button>
                       <Button 
                         variant="outline" 
-                        className="text-white border-white hover:bg-white/10"
+                        className="px-4 py-2 rounded border-black hover:bg-gray-100"
                         style={secondaryTextStyle}
                       >
                         Learn More
@@ -873,7 +879,7 @@ export default function MoodBoard() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
                   <Card key={feature} className="overflow-hidden">
-                    <CardContent className={`${cardBackgrounds[(selectedIndex + idx) % cardBackgrounds.length]} p-6 h-full flex flex-col items-center text-center`}>
+                    <CardContent className={`bg-gray-100 p-6 h-full flex flex-col items-center text-center`}>
                       <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
                         <div className="w-6 h-6 text-gray-900">
                           {idx === 0 && <Building2 />}
@@ -882,13 +888,13 @@ export default function MoodBoard() {
                         </div>
                       </div>
                       <h3 
-                        className="text-xl font-semibold text-white mb-2"
+                        className="text-xl font-semibold text-black mb-2"
                         style={textStyle}
                       >
                         {feature}
                       </h3>
                       <p 
-                        className="text-white/90"
+                        className="text-black/90"
                         style={secondaryTextStyle}
                       >
                         Experience unparalleled {feature.toLowerCase()} with our cutting-edge solutions and dedicated expertise.
@@ -899,10 +905,10 @@ export default function MoodBoard() {
               </div>
 
               {/* Contact Section */}
-              <Card className={`${selectedBackground} overflow-hidden`}>
+              <Card className={`bg-gray-100 overflow-hidden`}>
                 <CardContent className="p-6">
                   <h3 
-                    className="text-2xl font-semibold text-white mb-6"
+                    className="text-2xl font-semibold text-black mb-6"
                     style={textStyle}
                   >
                     Get in Touch
@@ -914,7 +920,7 @@ export default function MoodBoard() {
                         { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
                         { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
                       ].map((item, idx) => (
-                        <div key={idx} className="flex items-center text-white/90 space-x-3">
+                        <div key={idx} className="flex items-center text-black/90 space-x-3">
                           {item.icon}
                           <span style={secondaryTextStyle}>{item.text}</span>
                         </div>
@@ -923,18 +929,22 @@ export default function MoodBoard() {
                     <div className="grid grid-cols-2 gap-4">
                       <Input 
                         placeholder="Name" 
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        className="bg-white/10 border-gray-300 text-black placeholder:text-gray-400"
                       />
                       <Input 
                         placeholder="Email" 
-                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        className="bg-white/10 border-gray-300 text-black placeholder:text-gray-400"
                       />
                       <Input 
                         placeholder="Message" 
-                        className="col-span-2 bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                        className="col-span-2 bg-white/10 border-gray-300 text-black placeholder:text-gray-400"
                       />
                       <Button 
-                        className="col-span-2 bg-white text-gray-900 hover:bg-white/90"
+                        className="col-span-2 px-4 py-2 rounded"
+                        style={{ 
+                          backgroundColor: colors[1]?.hex || '#f0f0f0',
+                          color: '#ffffff'
+                        }}
                         style={secondaryTextStyle}
                       >
                         Send Message
@@ -974,7 +984,7 @@ export default function MoodBoard() {
         </div>
 
         <h1
-          className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6"
+          className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-black"
           style={fonts?.primary ? {
             fontFamily: fonts.primary.family,
             fontWeight: fonts.primary.weight,
@@ -1000,7 +1010,7 @@ export default function MoodBoard() {
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2
-                    className="text-lg sm:text-xl font-semibold"
+                    className="text-lg sm:text-xl font-semibold text-black"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -1071,7 +1081,7 @@ export default function MoodBoard() {
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2
-                    className="text-lg sm:text-xl font-semibold"
+                    className="text-lg sm:text-xl font-semibold text-black"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -1155,7 +1165,7 @@ export default function MoodBoard() {
               <CardContent className="p-4 sm:p-6">
                 <div className="flex justify-between items-center mb-4">
                   <h2
-                    className="text-lg sm:text-xl font-semibold"
+                    className="text-lg sm:text-xl font-semibold text-black"
                     style={fonts?.primary ? {
                       fontFamily: fonts.primary.family,
                       fontWeight: fonts.primary.weight,
@@ -1212,7 +1222,7 @@ export default function MoodBoard() {
                       className="prose dark:prose-invert"
                     >
                       <p 
-                        className="text-muted-foreground"
+                        className="text-black"
                         style={fonts?.secondary ? {
                           fontFamily: fonts.secondary.family,
                           fontWeight: fonts.secondary.weight,
