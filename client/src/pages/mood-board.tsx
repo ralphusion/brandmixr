@@ -244,7 +244,7 @@ export default function MoodBoard() {
 
       switch (section) {
         case 'colors':
-          endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || 'openai')}`;
           console.log('Regenerating colors with endpoint:', endpoint);
 
           response = await apiRequest("POST", endpoint);
@@ -267,7 +267,7 @@ export default function MoodBoard() {
           break;
 
         case 'keywords':
-          endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || 'openai')}`;
           response = await apiRequest("POST", endpoint);
           updatedData = await response.json();
 
@@ -278,7 +278,7 @@ export default function MoodBoard() {
           break;
 
         case 'mood':
-          endpoint = `/api/mood-board/regenerate-mood?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}`;
+          endpoint = `/api/mood-board/regenerate-mood?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || 'openai')}`;
           response = await apiRequest("POST", endpoint);
           updatedData = await response.json();
 
