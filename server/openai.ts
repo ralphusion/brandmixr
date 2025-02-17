@@ -34,13 +34,27 @@ async function generateWithGemini(prompt: string) {
 export async function generateMoodBoard(
   brandName: string,
   industry: string,
-  style: string
+  style: string,
+  provider: 'openai' | 'gemini' = 'openai'
 ): Promise<{
   colors: Array<{ hex: string; name: string }>;
   keywords: string[];
   moodDescription: string;
   imagePrompts: string[];
 }> {
+  if (provider === 'gemini') {
+    const prompt = `Create a brand mood board for "${brandName}" in the ${industry} industry. Return the response in JSON format with the following structure:
+{
+  "colors": [{"hex": "#......", "name": "color name"}],
+  "keywords": ["word1", "word2", ...],
+  "moodDescription": "description here",
+  "imagePrompts": ["prompt1", "prompt2", "prompt3"]
+}`;
+    
+    const response = await generateWithGemini(prompt);
+    return JSON.parse(response);
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     throw new Error("OpenAI API key is not configured");
   }

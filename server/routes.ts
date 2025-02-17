@@ -178,7 +178,7 @@ app.post("/api/generate-logo", async (req, res) => {
 
   app.get("/api/mood-board", async (req, res) => {
     try {
-      const { name, industry, style } = req.query;
+      const { name, industry, style, provider } = req.query;
 
       if (!name || !industry || !style) {
         console.error("Missing parameters:", { name, industry, style });
@@ -192,13 +192,14 @@ app.post("/api/generate-logo", async (req, res) => {
         });
       }
 
-      console.log("Generating mood board for:", { name, industry, style });
+      console.log("Generating mood board for:", { name, industry, style, provider });
 
       // Generate mood board content
       const moodBoard = await generateMoodBoard(
         name as string,
         industry as string,
-        style as string
+        style as string,
+        provider as 'openai' | 'gemini'
       );
 
       console.log("Generated mood board content:", moodBoard);
@@ -216,7 +217,7 @@ app.post("/api/generate-logo", async (req, res) => {
 
   app.post("/api/mood-board/regenerate-keywords", async (req, res) => {
     try {
-      const { name, industry, style } = req.query;
+      const { name, industry, style, provider } = req.query;
       if (!name || !industry || !style) {
         return res.status(400).json({ error: "Missing required parameters" });
       }
@@ -224,7 +225,8 @@ app.post("/api/generate-logo", async (req, res) => {
       const moodBoard = await generateMoodBoard(
         name as string,
         industry as string,
-        style as string
+        style as string,
+        provider as 'openai' | 'gemini'
       );
 
       res.json({
@@ -242,7 +244,7 @@ app.post("/api/generate-logo", async (req, res) => {
 
   app.post("/api/mood-board/regenerate-mood", async (req, res) => {
     try {
-      const { name, industry, style } = req.query;
+      const { name, industry, style, provider } = req.query;
       if (!name || !industry || !style) {
         return res.status(400).json({ error: "Missing required parameters" });
       }
@@ -250,7 +252,8 @@ app.post("/api/generate-logo", async (req, res) => {
       const moodBoard = await generateMoodBoard(
         name as string,
         industry as string,
-        style as string
+        style as string,
+        provider as 'openai' | 'gemini'
       );
 
       res.json({
@@ -290,7 +293,7 @@ app.post("/api/generate-logo", async (req, res) => {
 
   app.post("/api/mood-board/regenerate-colors", async (req, res) => {
     try {
-      const { name, industry, style } = req.query;
+      const { name, industry, style, provider } = req.query;
       if (!name || !industry || !style) {
         return res.status(400).json({ error: "Missing required parameters" });
       }
@@ -298,7 +301,8 @@ app.post("/api/generate-logo", async (req, res) => {
       const moodBoard = await generateMoodBoard(
         name as string,
         industry as string,
-        style as string
+        style as string,
+        provider as 'openai' | 'gemini'
       );
 
       res.json({

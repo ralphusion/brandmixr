@@ -190,9 +190,9 @@ export default function MoodBoard() {
   const { fonts, loadFonts } = useFonts();
 
   const { data: moodBoardData, isLoading } = useQuery<MoodBoardData>({
-    queryKey: ['/api/mood-board', brandName],
+    queryKey: ['/api/mood-board', brandName, formData.provider],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/mood-board?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}`);
+      const response = await apiRequest("GET", `/api/mood-board?name=${encodeURIComponent(brandName || '')}&industry=${encodeURIComponent(formData.industry || '')}&style=${encodeURIComponent(formData.style || '')}&provider=${encodeURIComponent(formData.provider || 'openai')}`);
       return response.json();
     },
     enabled: !!brandName && !!formData.industry && !!formData.style,
