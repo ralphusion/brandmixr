@@ -209,7 +209,11 @@ export default function Generate() {
   const handleGenerateMore = () => {
     const formData = sessionStorage.getItem('generatorFormData');
     if (formData) {
-      generateMutation.mutate(JSON.parse(formData));
+      const parsedData = JSON.parse(formData);
+      generateMutation.mutate({
+        ...parsedData,
+        style: parsedData.style || "auto" // Ensure style is preserved
+      });
     }
   };
 
