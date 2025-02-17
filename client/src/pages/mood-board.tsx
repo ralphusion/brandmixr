@@ -789,8 +789,18 @@ export default function MoodBoard() {
       fontStyle: selectedFont?.fontStyle || 'normal',
       textTransform: 'none',
       letterSpacing: 'normal',
-      color: '#000000'
+      color: colors[1]?.hex || '#000000' // Using second color from palette
     };
+
+    const tertiaryTextStyle = {
+      fontFamily: selectedFont?.fontFamily || fonts?.secondary?.family || 'Inter',
+      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || '400',
+      fontStyle: selectedFont?.fontStyle || 'normal',
+      textTransform: 'none',
+      letterSpacing: 'normal',
+      color: 'white' // Ensure good contrast
+    };
+
 
     return (
       <Card className="shadow-md">
@@ -809,7 +819,7 @@ export default function MoodBoard() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 bg-white/90 dark:bg-white/80 rounded-lg p-2">
-                        {logoSvg && (
+                        {logoSvgand (
                           <img
                             src={logoSvg}
                             alt="Brand Logo"
@@ -817,7 +827,7 @@ export default function MoodBoard() {
                           />
                         )}
                       </div>
-                      <span className="text-black font-semibold text-lg" style={textStyle}>
+                      <span className="text-white font-semibold text-lg" style={textStyle}>
                         {brandName}
                       </span>
                     </div>
@@ -825,8 +835,8 @@ export default function MoodBoard() {
                       {['Home', 'About', 'Services', 'Contact'].map((item) => (
                         <span
                           key={item}
-                          className="text-black/90 hover:text-black cursor-pointer"
-                          style={secondaryTextStyle}
+                          className="text-white/90 hover:text-white cursor-pointer"
+                          style={textStyle}
                         >
                           {item}
                         </span>
@@ -838,17 +848,18 @@ export default function MoodBoard() {
 
               {/* Hero Section */}
               <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
-                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div><div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
+                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                   <div className="max-w-2xl">
                     <h1 
-                      className="text-4xl sm:text-5xl font-bold text-black mb-6"
-                      style={textStyle}
+                      className="text-4xl sm:text-5xl font-bold mb-6"
+                      style={{...textStyle, color: colors[0]?.hex || '#000000'}}
                     >
                       Elevate Your Experience with {brandName}
                     </h1>
                     <p 
-                      className="text-xl text-black/90 mb-8"
-                      style={secondaryTextStyle}
+                      className="text-xl mb-8"
+                      style={{...textStyle, color: colors[0]?.hex || '#000000'}}
                     >
                       Discover excellence through innovation and style. We bring your vision to life with precision and passion.
                     </p>
@@ -856,17 +867,18 @@ export default function MoodBoard() {
                       <Button 
                         className="px-4 py-2 rounded"
                         style={{ 
-                          backgroundColor: colors[1]?.hex || '#f0f0f0',
+                          backgroundColor: colors[0]?.hex || '#000000',
                           color: '#ffffff'
                         }}
-                        style={secondaryTextStyle}
                       >
                         Get Started
                       </Button>
                       <Button 
-                        variant="outline" 
-                        className="px-4 py-2 rounded border-black hover:bg-gray-100"
-                        style={secondaryTextStyle}
+                        className="px-4 py-2 rounded"
+                        style={{ 
+                          backgroundColor: colors[1]?.hex || '#000000',
+                          color: '#ffffff'
+                        }}
                       >
                         Learn More
                       </Button>
@@ -930,22 +942,24 @@ export default function MoodBoard() {
                       <Input 
                         placeholder="Name" 
                         className="bg-white/10 border-gray-300 text-black placeholder:text-gray-400"
+                        style={secondaryTextStyle}
                       />
                       <Input 
                         placeholder="Email" 
                         className="bg-white/10 border-gray-300 text-black placeholder:text-gray-400"
+                        style={secondaryTextStyle}
                       />
                       <Input 
                         placeholder="Message" 
                         className="col-span-2 bg-white/10 border-gray-300 text-black placeholder:text-gray-400"
+                        style={secondaryTextStyle}
                       />
                       <Button 
                         className="col-span-2 px-4 py-2 rounded"
                         style={{ 
-                          backgroundColor: colors[1]?.hex || '#f0f0f0',
+                          backgroundColor: colors[0]?.hex || '#000000',
                           color: '#ffffff'
                         }}
-                        style={secondaryTextStyle}
                       >
                         Send Message
                       </Button>
