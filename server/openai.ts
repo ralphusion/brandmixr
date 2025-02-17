@@ -16,6 +16,13 @@ const openrouter = new OpenAI({
 // Initialize Gemini client
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
+async function generateWithGemini(prompt: string) {
+  const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return response.text();
+}
+
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
 export async function generateMoodBoard(
   brandName: string,
@@ -102,6 +109,30 @@ export async function generateNames(request: GenerateNameRequest): Promise<strin
   }[request.style];
 
   try {
+    if (provider === 'gemini') {
+      const geminiResponse = await generateWithGemini(`Generate 50 creative brand names based on the following criteria:
+      Industry: ${request.industry}
+      Business Description: ${request.description}
+      Keywords: ${request.keywords.join(", ")}
+      Style Guide: ${styleGuide}
+      
+      Create names that are:
+      - Memorable and easy to pronounce
+      - Relevant to the business and industry
+      - Suitable for a professional brand
+      - Unique and distinctive
+      - Available as a domain name (avoid common words)
+      
+      For the selected style "${request.style}", follow these specific guidelines:
+      ${styleGuide}
+      
+      Please respond with a JSON array of strings containing only the generated names.
+      Format: {"names": ["name1", "name2", ..., "name50"]}`);
+
+      const result = JSON.parse(geminiResponse) as { names: string[] };
+      return result.names;
+    }
+
     const prompt = `Generate 50 creative brand names based on the following criteria:
 Industry: ${request.industry}
 Business Description: ${request.description}
