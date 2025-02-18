@@ -901,7 +901,7 @@ export default function MoodBoard() {
                       </div>
                       <h3 
                         className="text-xl font-semibold text-black mb-2"
-                        style={textStyle}
+                        style={secondaryTextStyle}
                       >
                         {feature}
                       </h3>
@@ -921,7 +921,7 @@ export default function MoodBoard() {
                 <CardContent className="p-6">
                   <h3 
                     className="text-2xl font-semibold text-black mb-6"
-                    style={{...textStyle, color: colors[1]?.hex || '#000000'}}
+                    style={secondaryTextStyle}
                   >
                     Get in Touch
                   </h3>
