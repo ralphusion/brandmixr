@@ -867,7 +867,7 @@ export default function MoodBoard() {
                       <Button 
                         className="px-4 py-2 rounded"
                         style={{ 
-                          backgroundColor: colors[0]?.hex || '#000000',
+                          backgroundColor: colors[2]?.hex || '#000000',
                           color: '#ffffff'
                         }}
                       >
