@@ -939,8 +939,8 @@ export default function MoodBoard() {
                     key={index}
                     className="p-6 rounded-lg relative overflow-hidden"
                     style={{
-                      background: colors[index]?.hex || '#000000',
-                      color: isColorDark(colors[index]?.hex || '#000000') ? '#ffffff' : '#000000'
+                      background: index === 0 ? colors[3]?.hex : index === 1 ? colors[1]?.hex : colors[4]?.hex || '#000000',
+                      color: isColorDark(index === 0 ? colors[3]?.hex : index === 1 ? colors[1]?.hex : colors[4]?.hex || '#000000') ? '#ffffff' : '#000000'
                     }}
                   >
                     <div className="absolute top-4 right-4">
