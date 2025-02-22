@@ -158,6 +158,21 @@ const LETTER_SPACING = [
   'tighter'
 ];
 
+const BACKGROUNDS = [
+  {
+    bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
+    text: "text-emerald-800 dark:text-emerald-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-slate-800 to-gray-900",
+    text: "text-gray-100"
+  },
+  {
+    bg: "bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-950 dark:to-indigo-900",
+    text: "text-blue-800 dark:text-blue-100"
+  }
+];
+
 const CARD_GRADIENTS = [
   'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800',
   'bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700',
