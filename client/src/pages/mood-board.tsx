@@ -1,11 +1,27 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useLocation } from "wouter";
 import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, SparkleIcon, Copy, Building2, Mail, MapPin, Phone, Crown } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  SparkleIcon,
+  Copy,
+  Building2,
+  Mail,
+  MapPin,
+  Phone,
+  Crown,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,8 +29,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
-import html2canvas from 'html2canvas';
-import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
+import html2canvas from "html2canvas";
+import {
+  TooltipProvider,
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+} from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
 import { generateIconSvg } from "@/lib/generateIcon";
 
@@ -27,7 +48,11 @@ function isColorDark(hexColor: string) {
 }
 
 import { HexColorPicker } from "react-colorful";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { BACKGROUNDS } from "@/pages/brand-variations";
 
@@ -51,158 +76,157 @@ interface MoodBoardData {
 }
 
 type RegenerationSection = {
-  type: 'colors' | 'keywords' | 'mood';
+  type: "colors" | "keywords" | "mood";
 };
 
 const getRandomPleaseantColor = () => {
-  return 'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800';
-}
+  return "bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800";
+};
 
 const ICON_STYLES = {
   initials: [
-    { value: 'initials-simple', label: 'Simple Initials' },
-    { value: 'initials-rounded', label: 'Rounded Initials' },
-    { value: 'initials-gradient', label: 'Gradient Initials' }
+    { value: "initials-simple", label: "Simple Initials" },
+    { value: "initials-rounded", label: "Rounded Initials" },
+    { value: "initials-gradient", label: "Gradient Initials" },
   ],
   abstract: [
-    { value: 'abstract-waves', label: 'Waves' },
-    { value: 'abstract-dots', label: 'Dots Pattern' },
-    { value: 'abstract-lines', label: 'Line Pattern' },
-    { value: 'abstract-mesh', label: 'Mesh Pattern' },
-    { value: 'abstract-swirl', label: 'Swirl Pattern' }
-  ]
+    { value: "abstract-waves", label: "Waves" },
+    { value: "abstract-dots", label: "Dots Pattern" },
+    { value: "abstract-lines", label: "Line Pattern" },
+    { value: "abstract-mesh", label: "Mesh Pattern" },
+    { value: "abstract-swirl", label: "Swirl Pattern" },
+  ],
 };
 
 type IconStyle =
-  | 'initials-simple'
-  | 'initials-rounded'
-  | 'initials-gradient'
-  | 'abstract-waves'
-  | 'abstract-dots'
-  | 'abstract-lines'
-  | 'abstract-mesh'
-  | 'abstract-swirl';
-
+  | "initials-simple"
+  | "initials-rounded"
+  | "initials-gradient"
+  | "abstract-waves"
+  | "abstract-dots"
+  | "abstract-lines"
+  | "abstract-mesh"
+  | "abstract-swirl";
 
 const FONT_FAMILIES = [
   // Modern Sans-Serif
-  { family: 'Inter', style: 'normal', weight: '600' },
-  { family: 'Montserrat', style: 'normal', weight: '700' },
-  { family: 'Poppins', style: 'normal', weight: '700' },
-  { family: 'SF Pro Display', style: 'normal', weight: '600' },
-  { family: 'Helvetica Neue', style: 'normal', weight: '600' },
-  { family: 'Source Sans Pro', style: 'normal', weight: '600' },
-  { family: 'Nunito Sans', style: 'normal', weight: '700' },
-  { family: 'Work Sans', style: 'normal', weight: '600' },
+  { family: "Inter", style: "normal", weight: "600" },
+  { family: "Montserrat", style: "normal", weight: "700" },
+  { family: "Poppins", style: "normal", weight: "700" },
+  { family: "SF Pro Display", style: "normal", weight: "600" },
+  { family: "Helvetica Neue", style: "normal", weight: "600" },
+  { family: "Source Sans Pro", style: "normal", weight: "600" },
+  { family: "Nunito Sans", style: "normal", weight: "700" },
+  { family: "Work Sans", style: "normal", weight: "600" },
   // Additional Professional Fonts
-  { family: 'Roboto', style: 'normal', weight: '700' },
-  { family: 'Open Sans', style: 'normal', weight: '600' },
-  { family: 'Raleway', style: 'normal', weight: '600' },
-  { family: 'Lato', style: 'normal', weight: '700' },
-  { family: 'Ubuntu', style: 'normal', weight: '500' },
-  { family: 'DM Sans', style: 'normal', weight: '500' },
-  { family: 'Manrope', style: 'normal', weight: '600' },
+  { family: "Roboto", style: "normal", weight: "700" },
+  { family: "Open Sans", style: "normal", weight: "600" },
+  { family: "Raleway", style: "normal", weight: "600" },
+  { family: "Lato", style: "normal", weight: "700" },
+  { family: "Ubuntu", style: "normal", weight: "500" },
+  { family: "DM Sans", style: "normal", weight: "500" },
+  { family: "Manrope", style: "normal", weight: "600" },
   // Contemporary Sans
-  { family: 'Plus Jakarta Sans', style: 'normal', weight: '600' },
-  { family: 'Outfit', style: 'normal', weight: '600' },
-  { family: 'Albert Sans', style: 'normal', weight: '700' },
-  { family: 'Public Sans', style: 'normal', weight: '600' },
-  { family: 'Be Vietnam Pro', style: 'normal', weight: '600' },
+  { family: "Plus Jakarta Sans", style: "normal", weight: "600" },
+  { family: "Outfit", style: "normal", weight: "600" },
+  { family: "Albert Sans", style: "normal", weight: "700" },
+  { family: "Public Sans", style: "normal", weight: "600" },
+  { family: "Be Vietnam Pro", style: "normal", weight: "600" },
   // Geometric Sans
-  { family: 'Proxima Nova', style: 'normal', weight: '600' },
-  { family: 'Futura PT', style: 'normal', weight: '500' },
-  { family: 'Brandon Grotesque', style: 'normal', weight: '500' },
-  { family: 'Axiforma', style: 'normal', weight: '600' },
-  { family: 'Gilroy', style: 'normal', weight: '600' },
+  { family: "Proxima Nova", style: "normal", weight: "600" },
+  { family: "Futura PT", style: "normal", weight: "500" },
+  { family: "Brandon Grotesque", style: "normal", weight: "500" },
+  { family: "Axiforma", style: "normal", weight: "600" },
+  { family: "Gilroy", style: "normal", weight: "600" },
   // Corporate/Business
-  { family: 'Articulat CF', style: 'normal', weight: '700' },
-  { family: 'Sharp Grotesk', style: 'normal', weight: '600' },
-  { family: 'Factor A', style: 'normal', weight: '600' },
-  { family: 'Circular Std', style: 'normal', weight: '500' },
-  { family: 'Sofia Pro', style: 'normal', weight: '600' },
+  { family: "Articulat CF", style: "normal", weight: "700" },
+  { family: "Sharp Grotesk", style: "normal", weight: "600" },
+  { family: "Factor A", style: "normal", weight: "600" },
+  { family: "Circular Std", style: "normal", weight: "500" },
+  { family: "Sofia Pro", style: "normal", weight: "600" },
   // Tech/Modern
-  { family: 'Space Grotesk', style: 'normal', weight: '600' },
-  { family: 'JetBrains Mono', style: 'normal', weight: '600' },
-  { family: 'IBM Plex Sans', style: 'normal', weight: '600' },
-  { family: 'Geist', style: 'normal', weight: '600' },
-  { family: 'General Sans', style: 'normal', weight: '600' },
+  { family: "Space Grotesk", style: "normal", weight: "600" },
+  { family: "JetBrains Mono", style: "normal", weight: "600" },
+  { family: "IBM Plex Sans", style: "normal", weight: "600" },
+  { family: "Geist", style: "normal", weight: "600" },
+  { family: "General Sans", style: "normal", weight: "600" },
   // Neutral/Versatile
-  { family: 'Supreme', style: 'normal', weight: '500' },
-  { family: 'Cabinet Grotesk', style: 'normal', weight: '700' },
-  { family: 'Satoshi', style: 'normal', weight: '700' },
-  { family: 'Switzer', style: 'normal', weight: '600' },
-  { family: 'Hauora Sans', style: 'normal', weight: '600' }
+  { family: "Supreme", style: "normal", weight: "500" },
+  { family: "Cabinet Grotesk", style: "normal", weight: "700" },
+  { family: "Satoshi", style: "normal", weight: "700" },
+  { family: "Switzer", style: "normal", weight: "600" },
+  { family: "Hauora Sans", style: "normal", weight: "600" },
 ];
 
 const FONT_STYLES_ARRAY = [
-  'font-sans tracking-wide font-bold',
-  'font-sans uppercase tracking-[0.2em] font-black',
-  'font-sans tracking-tight font-bold',
-  'font-sans uppercase tracking-widest font-extrabold',
-  'font-sans uppercase tracking-[0.15em] font-bold',
-  'font-sans tracking-wide font-semibold'
+  "font-sans tracking-wide font-bold",
+  "font-sans uppercase tracking-[0.2em] font-black",
+  "font-sans tracking-tight font-bold",
+  "font-sans uppercase tracking-widest font-extrabold",
+  "font-sans uppercase tracking-[0.15em] font-bold",
+  "font-sans tracking-wide font-semibold",
 ];
 
-const TEXT_TRANSFORMS = [
-  'uppercase',
-  'none',
-  'capitalize'
-];
+const TEXT_TRANSFORMS = ["uppercase", "none", "capitalize"];
 
-const FONT_STYLES = [
-  'normal',
-  'italic'
-];
+const FONT_STYLES = ["normal", "italic"];
 
-const TEXT_DECORATIONS = [
-  'none',
-  'underline'
-];
+const TEXT_DECORATIONS = ["none", "underline"];
 
 const LETTER_SPACING = [
-  'normal',
-  'wide',
-  'wider',
-  'widest',
-  'tight',
-  'tighter'
+  "normal",
+  "wide",
+  "wider",
+  "widest",
+  "tight",
+  "tighter",
 ];
 
 const CARD_GRADIENTS = [
-  'bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800',
-  'bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700',
-  'bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700',
-  'bg-gradient-to-br from-violet-500 via-purple-500 to-violet-600',
-  'bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900',
-  'bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800',
-  'bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800'
+  "bg-gradient-to-br from-slate-800 via-slate-700 to-slate-800",
+  "bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-700",
+  "bg-gradient-to-br from-emerald-600 via-teal-600 to-emerald-700",
+  "bg-gradient-to-br from-violet-500 via-purple-500 to-violet-600",
+  "bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900",
+  "bg-gradient-to-br from-indigo-700 via-purple-700 to-indigo-800",
+  "bg-gradient-to-br from-teal-700 via-emerald-700 to-teal-800",
 ];
 
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
-  const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([]);
+  const [colors, setColors] = useState<Array<{ hex: string; name: string }>>(
+    [],
+  );
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [regeneratingSection, setRegeneratingSection] = useState<RegenerationSection | null>(null);
+  const [regeneratingSection, setRegeneratingSection] =
+    useState<RegenerationSection | null>(null);
   const [logoSvg, setLogoSvg] = useState<string>("");
-  const [iconStyle, setIconStyle] = useState<IconStyle>('initials-simple');
+  const [iconStyle, setIconStyle] = useState<IconStyle>("initials-simple");
   const [logoColor, setLogoColor] = useState("#000000");
-  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>(CARD_GRADIENTS.slice(0, 3));
+  const [cardBackgrounds, setCardBackgrounds] = useState<string[]>(
+    CARD_GRADIENTS.slice(0, 3),
+  );
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
 
   const params = new URLSearchParams(window.location.search);
-  const brandName = params.get('name');
-  const formData = JSON.parse(sessionStorage.getItem('generatorFormData') || '{}');
+  const brandName = params.get("name");
+  const formData = JSON.parse(
+    sessionStorage.getItem("generatorFormData") || "{}",
+  );
 
   const { fonts, loadFonts } = useFonts();
 
   const { data: moodBoardData, isLoading } = useQuery<MoodBoardData>({
-    queryKey: ['/api/mood-board', brandName, formData.provider],
+    queryKey: ["/api/mood-board", brandName, formData.provider],
     queryFn: async () => {
-      const response = await apiRequest("GET", `/api/mood-board?name=${encodeURIComponent(brandName || "")}&industry=${encodeURIComponent(formData.industry || "")}&style=${encodeURIComponent(formData.style || "")}&provider=${encodeURIComponent(formData.provider || "openai")}`);
+      const response = await apiRequest(
+        "GET",
+        `/api/mood-board?name=${encodeURIComponent(brandName || "")}&industry=${encodeURIComponent(formData.industry || "")}&style=${encodeURIComponent(formData.style || "")}&provider=${encodeURIComponent(formData.provider || "openai")}`,
+      );
       return response.json();
     },
     enabled: !!brandName && !!formData.industry && !!formData.style,
@@ -222,7 +246,7 @@ export default function MoodBoard() {
         description: `${type} copied to clipboard`,
       });
     } catch (err) {
-      console.error('Error copying to clipboard:', err);
+      console.error("Error copying to clipboard:", err);
       toast({
         title: "Failed to copy",
         description: "Please try again",
@@ -231,7 +255,7 @@ export default function MoodBoard() {
     }
   };
 
-  const handleRegenerate = async (section: RegenerationSection['type']) => {
+  const handleRegenerate = async (section: RegenerationSection["type"]) => {
     if (!brandName || !formData.industry || !formData.style) {
       toast({
         title: "Missing Information",
@@ -244,7 +268,7 @@ export default function MoodBoard() {
     setRegeneratingSection({ type: section });
 
     try {
-      let endpoint = '';
+      let endpoint = "";
       let response;
       let updatedData: {
         colors?: Array<{ hex: string; name: string }>;
@@ -253,49 +277,60 @@ export default function MoodBoard() {
       } = {};
 
       switch (section) {
-        case 'colors':
-          endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || 'openai')}`;
-          console.log('Regenerating colors with endpoint:', endpoint);
+        case "colors":
+          endpoint = `/api/mood-board/regenerate-colors?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || "openai")}`;
+          console.log("Regenerating colors with endpoint:", endpoint);
 
           response = await apiRequest("POST", endpoint);
 
           if (!response.ok) {
-            throw new Error(`Failed to regenerate colors: ${response.statusText}`);
+            throw new Error(
+              `Failed to regenerate colors: ${response.statusText}`,
+            );
           }
 
           updatedData = await response.json();
 
           if (!updatedData.colors || !Array.isArray(updatedData.colors)) {
-            throw new Error('Invalid color data received from server');
+            throw new Error("Invalid color data received from server");
           }
 
-          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
-            ...oldData,
-            colors: updatedData.colors,
-          }));
+          queryClient.setQueryData(
+            ["/api/mood-board", brandName],
+            (oldData: any) => ({
+              ...oldData,
+              colors: updatedData.colors,
+            }),
+          );
           setColors(updatedData.colors || []);
           break;
 
-        case 'keywords':
-          endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || 'openai')}`;
+        case "keywords":
+          endpoint = `/api/mood-board/regenerate-keywords?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || "openai")}`;
           response = await apiRequest("POST", endpoint);
           updatedData = await response.json();
 
-          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
-            ...oldData,
-            keywords: updatedData.keywords,
-          }));
+          queryClient.setQueryData(
+            ["/api/mood-board", brandName],
+            (oldData: any) => ({
+              ...oldData,
+              keywords: updatedData.keywords,
+            }),
+          );
           break;
 
-        case 'mood':
-          endpoint = `/api/mood-board/regenerate-mood?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || 'openai')}`;
+        case "mood":
+          endpoint = `/api/mood-board/regenerate-mood?name=${encodeURIComponent(brandName)}&industry=${encodeURIComponent(formData.industry)}&style=${encodeURIComponent(formData.style)}&provider=${encodeURIComponent(formData.provider || "openai")}`;
           response = await apiRequest("POST", endpoint);
           updatedData = await response.json();
 
-          queryClient.setQueryData(['/api/mood-board', brandName], (oldData: any) => ({
-            ...oldData,
-            moodDescription: updatedData.moodDescription,
-          }));
+          queryClient.setQueryData(
+            ["/api/mood-board", brandName],
+            (oldData: any) => ({
+              ...oldData,
+              moodDescription: updatedData.moodDescription,
+            }),
+          );
           break;
       }
 
@@ -304,10 +339,13 @@ export default function MoodBoard() {
         description: `Regenerated ${section} successfully`,
       });
     } catch (error) {
-      console.error('Regeneration error:', error);
+      console.error("Regeneration error:", error);
       toast({
         title: "Regeneration failed",
-        description: error instanceof Error ? error.message : "Failed to regenerate content",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to regenerate content",
         variant: "destructive",
       });
     } finally {
@@ -315,7 +353,7 @@ export default function MoodBoard() {
     }
   };
 
-  const handleDownload = async (format: 'png' | 'pdf') => {
+  const handleDownload = async (format: "png" | "pdf") => {
     if (!moodBoardRef.current || !brandName) {
       console.log("Cannot download: missing reference or brand name");
       return;
@@ -334,31 +372,33 @@ export default function MoodBoard() {
         windowHeight: moodBoardRef.current.scrollHeight,
       });
 
-      if (format === 'png') {
-        const dataUrl = canvas.toDataURL('image/png');
-        const link = document.createElement('a');
-        link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.png`;
+      if (format === "png") {
+        const dataUrl = canvas.toDataURL("image/png");
+        const link = document.createElement("a");
+        link.download = `${brandName.toLowerCase().replace(/\s+/g, "-")}-moodboard.png`;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
       } else {
-        const { jsPDF } = await import('jspdf');
+        const { jsPDF } = await import("jspdf");
         const pdf = new jsPDF({
-          orientation: 'landscape',
-          unit: 'px',
-          format: [canvas.width, canvas.height]
+          orientation: "landscape",
+          unit: "px",
+          format: [canvas.width, canvas.height],
         });
 
         pdf.addImage(
-          canvas.toDataURL('image/png'),
-          'PNG',
+          canvas.toDataURL("image/png"),
+          "PNG",
           0,
           0,
           canvas.width,
-          canvas.height
+          canvas.height,
         );
-        pdf.save(`${brandName.toLowerCase().replace(/\s+/g, '-')}-moodboard.pdf`);
+        pdf.save(
+          `${brandName.toLowerCase().replace(/\s+/g, "-")}-moodboard.pdf`,
+        );
       }
     } catch (error) {
       console.error("Error during download:", error);
@@ -371,15 +411,15 @@ export default function MoodBoard() {
   };
 
   useEffect(() => {
-    const savedConfig = sessionStorage.getItem('selectedLogoConfig');
+    const savedConfig = sessionStorage.getItem("selectedLogoConfig");
 
     if (savedConfig) {
       try {
         const parsedConfig = JSON.parse(savedConfig);
-        setIconStyle(parsedConfig.iconStyle || 'initials-simple');
-        setLogoColor(parsedConfig.iconColor || '#000000');
+        setIconStyle(parsedConfig.iconStyle || "initials-simple");
+        setLogoColor(parsedConfig.iconColor || "#000000");
       } catch (error) {
-        console.error('Error loading configuration:', error);
+        console.error("Error loading configuration:", error);
       }
     }
   }, []);
@@ -390,13 +430,12 @@ export default function MoodBoard() {
     }
   }, [brandName, iconStyle, logoColor]);
 
-
   const generateLogo = () => {
     if (!brandName) return;
     const svg = generateIconSvg(brandName, {
       style: iconStyle,
       color: logoColor,
-      backgroundColor: 'white'
+      backgroundColor: "white",
     });
     const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
     setLogoSvg(dataUrl);
@@ -407,11 +446,15 @@ export default function MoodBoard() {
 
     try {
       const styles = Object.keys(ICON_STYLES)
-        .flatMap(category => ICON_STYLES[category as keyof typeof ICON_STYLES])
-        .map(style => style.value);
+        .flatMap(
+          (category) => ICON_STYLES[category as keyof typeof ICON_STYLES],
+        )
+        .map((style) => style.value);
 
-      const availableStyles = styles.filter(style => style !== iconStyle);
-      const newStyle = availableStyles[Math.floor(Math.random() * availableStyles.length)] as IconStyle;
+      const availableStyles = styles.filter((style) => style !== iconStyle);
+      const newStyle = availableStyles[
+        Math.floor(Math.random() * availableStyles.length)
+      ] as IconStyle;
 
       const hue = Math.floor(Math.random() * 360);
       const saturation = 60 + Math.floor(Math.random() * 20);
@@ -421,33 +464,42 @@ export default function MoodBoard() {
       setIconStyle(newStyle);
       setLogoColor(newLogoColor);
 
-      const newFontStyles = Array(3).fill(null).map(() => {
-        const randomFont = FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
-        return {
-          fontFamily: randomFont.family,
-          fontWeight: randomFont.weight,
-          fontStyle: 'normal',
-          textTransform: TEXT_TRANSFORMS[Math.floor(Math.random() * TEXT_TRANSFORMS.length)],
-          letterSpacing: LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
-        };
-      });
+      const newFontStyles = Array(3)
+        .fill(null)
+        .map(() => {
+          const randomFont =
+            FONT_FAMILIES[Math.floor(Math.random() * FONT_FAMILIES.length)];
+          return {
+            fontFamily: randomFont.family,
+            fontWeight: randomFont.weight,
+            fontStyle: "normal",
+            textTransform:
+              TEXT_TRANSFORMS[
+                Math.floor(Math.random() * TEXT_TRANSFORMS.length)
+              ],
+            letterSpacing:
+              LETTER_SPACING[Math.floor(Math.random() * LETTER_SPACING.length)],
+          };
+        });
 
       const usedGradients = new Set();
-      const newBackgrounds = Array(3).fill(null).map(() => {
-        let gradient;
-        do {
-          gradient = CARD_GRADIENTS[Math.floor(Math.random() * CARD_GRADIENTS.length)];
-        } while (usedGradients.has(gradient));
-        usedGradients.add(gradient);
-        return gradient;
-      });
+      const newBackgrounds = Array(3)
+        .fill(null)
+        .map(() => {
+          let gradient;
+          do {
+            gradient =
+              CARD_GRADIENTS[Math.floor(Math.random() * CARD_GRADIENTS.length)];
+          } while (usedGradients.has(gradient));
+          usedGradients.add(gradient);
+          return gradient;
+        });
 
-      sessionStorage.setItem('fontStyles', JSON.stringify(newFontStyles));
+      sessionStorage.setItem("fontStyles", JSON.stringify(newFontStyles));
 
       setCardBackgrounds(newBackgrounds);
-
     } catch (error) {
-      console.error('Error regenerating logo:', error);
+      console.error("Error regenerating logo:", error);
       toast({
         title: "Generation failed",
         description: "Failed to generate new variations.",
@@ -464,27 +516,28 @@ export default function MoodBoard() {
 
     try {
       // Create a clone of the card for capturing
-      const cloneContainer = document.createElement('div');
-      cloneContainer.style.position = 'absolute';
-      cloneContainer.style.left = '-9999px';
-      cloneContainer.style.width = '400px'; // Fixed width for consistent output
+      const cloneContainer = document.createElement("div");
+      cloneContainer.style.position = "absolute";
+      cloneContainer.style.left = "-9999px";
+      cloneContainer.style.width = "400px"; // Fixed width for consistent output
       document.body.appendChild(cloneContainer);
 
       // Clone the card content
       const clone = selectedCardRef.current.cloneNode(true) as HTMLElement;
-      clone.style.width = '400px';
-      clone.style.height = '300px';
-      clone.style.padding = '24px';
-      clone.style.display = 'flex';
-      clone.style.flexDirection = 'column';
-      clone.style.alignItems = 'center';
-      clone.style.justifyContent = 'center';
-      clone.style.position = 'relative';
-      clone.style.borderRadius = '8px';
-      clone.style.overflow = 'hidden';
+      clone.style.width = "400px";
+      clone.style.height = "300px";
+      clone.style.padding = "24px";
+      clone.style.display = "flex";
+      clone.style.flexDirection = "column";
+      clone.style.alignItems = "center";
+      clone.style.justifyContent = "center";
+      clone.style.position = "relative";
+      clone.style.borderRadius = "8px";
+      clone.style.overflow = "hidden";
 
       // Ensure the background gradient is preserved
-      const cardBackground = cardBackgrounds[parseInt(selectedCardId?.split('-')[1] || '0')];
+      const cardBackground =
+        cardBackgrounds[parseInt(selectedCardId?.split("-")[1] || "0")];
       clone.className = `${cardBackground} shadow-lg`;
 
       cloneContainer.appendChild(clone);
@@ -499,20 +552,20 @@ export default function MoodBoard() {
         height: 300,
         onclone: (_, element) => {
           // Additional styling fixes for the cloned element
-          const imgElements = element.getElementsByTagName('img');
+          const imgElements = element.getElementsByTagName("img");
           for (let img of imgElements) {
-            img.style.maxWidth = '100%';
-            img.style.height = 'auto';
+            img.style.maxWidth = "100%";
+            img.style.height = "auto";
           }
-        }
+        },
       });
 
       // Clean up the temporary elements
       document.body.removeChild(cloneContainer);
 
-      const dataUrl = canvas.toDataURL('image/png');
-      const link = document.createElement('a');
-      link.download = `${brandName.toLowerCase().replace(/\s+/g, '-')}-logo.png`;
+      const dataUrl = canvas.toDataURL("image/png");
+      const link = document.createElement("a");
+      link.download = `${brandName.toLowerCase().replace(/\s+/g, "-")}-logo.png`;
       link.href = dataUrl;
       document.body.appendChild(link);
       link.click();
@@ -534,10 +587,13 @@ export default function MoodBoard() {
 
   const handleCardSelect = (cardId: string) => {
     setSelectedCardId(cardId);
-    sessionStorage.setItem('selectedLogoConfig', JSON.stringify({
-      iconStyle,
-      logoColor,
-    }));
+    sessionStorage.setItem(
+      "selectedLogoConfig",
+      JSON.stringify({
+        iconStyle,
+        logoColor,
+      }),
+    );
   };
 
   const handleStyleChange = (value: string) => {
@@ -548,10 +604,7 @@ export default function MoodBoard() {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       <div className="space-y-2">
         <Label htmlFor="icon-style">Icon Options</Label>
-        <Select
-          value={iconStyle}
-          onValueChange={handleStyleChange}
-        >
+        <Select value={iconStyle} onValueChange={handleStyleChange}>
           <SelectTrigger id="icon-style">
             <SelectValue placeholder="Select style" />
           </SelectTrigger>
@@ -583,11 +636,14 @@ export default function MoodBoard() {
               <span className="text-foreground">{logoColor}</span>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-3" onPointerDownOutside={(e) => e.preventDefault()}>
+          <PopoverContent
+            className="w-auto p-3"
+            onPointerDownOutside={(e) => e.preventDefault()}
+          >
             <HexColorPicker
               color={logoColor}
               onChange={setLogoColor}
-              style={{ width: '200px', height: '200px' }}
+              style={{ width: "200px", height: "200px" }}
             />
           </PopoverContent>
         </Popover>
@@ -595,7 +651,14 @@ export default function MoodBoard() {
     </div>
   );
 
-  const LogoCard = ({ index, cardId, isSelected, background, fontStyle, onSelect }: {
+  const LogoCard = ({
+    index,
+    cardId,
+    isSelected,
+    background,
+    fontStyle,
+    onSelect,
+  }: {
     index: number;
     cardId: string;
     isSelected: boolean;
@@ -611,7 +674,7 @@ export default function MoodBoard() {
       >
         <Card
           className={`${background} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer ${
-            isSelected ? 'ring-4 ring-primary ring-offset-2' : ''
+            isSelected ? "ring-4 ring-primary ring-offset-2" : ""
           }`}
           onClick={onSelect}
         >
@@ -635,12 +698,12 @@ export default function MoodBoard() {
             <motion.h3
               className="text-3xl text-center text-white"
               style={{
-                fontFamily: fontStyle?.fontFamily || 'Inter',
-                fontWeight: fontStyle?.fontWeight || '600',
-                fontStyle: 'normal',
-                textTransform: fontStyle?.textTransform || 'none',
-                letterSpacing: fontStyle?.letterSpacing || 'normal',
-                color: 'white'
+                fontFamily: fontStyle?.fontFamily || "Inter",
+                fontWeight: fontStyle?.fontWeight || "600",
+                fontStyle: "normal",
+                textTransform: fontStyle?.textTransform || "none",
+                letterSpacing: fontStyle?.letterSpacing || "normal",
+                color: "white",
               }}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 300 }}
@@ -654,27 +717,31 @@ export default function MoodBoard() {
   };
 
   const CardGrid = () => {
-    const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
+    const fontStyles = JSON.parse(sessionStorage.getItem("fontStyles") || "[]");
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {Array(3).fill(null).map((_, index) => {
-          const cardId = `variation-${index}`;
-          const isSelected = selectedCardId === cardId;
-          const fontStyle = fontStyles[index] || FONT_STYLES_ARRAY[index % FONT_STYLES_ARRAY.length];
+        {Array(3)
+          .fill(null)
+          .map((_, index) => {
+            const cardId = `variation-${index}`;
+            const isSelected = selectedCardId === cardId;
+            const fontStyle =
+              fontStyles[index] ||
+              FONT_STYLES_ARRAY[index % FONT_STYLES_ARRAY.length];
 
-          return (
-            <LogoCard
-              key={cardId}
-              index={index}
-              cardId={cardId}
-              isSelected={isSelected}
-              background={cardBackgrounds[index]}
-              fontStyle={fontStyle}
-              onSelect={() => handleCardSelect(cardId)}
-            />
-          );
-        })}
+            return (
+              <LogoCard
+                key={cardId}
+                index={index}
+                cardId={cardId}
+                isSelected={isSelected}
+                background={cardBackgrounds[index]}
+                fontStyle={fontStyle}
+                onSelect={() => handleCardSelect(cardId)}
+              />
+            );
+          })}
       </div>
     );
   };
@@ -685,11 +752,15 @@ export default function MoodBoard() {
         <div className="flex justify-between items-center mb-4">
           <h2
             className="text-lg sm:text-xl font-semibold"
-            style={fonts?.primary ? {
-              fontFamily: fonts.primary.family,
-              fontWeight: fonts.primary.weight,
-              fontStyle: fonts.primary.style,
-            } : undefined}
+            style={
+              fonts?.primary
+                ? {
+                    fontFamily: fonts.primary.family,
+                    fontWeight: fonts.primary.weight,
+                    fontStyle: fonts.primary.style,
+                  }
+                : undefined
+            }
           >
             Brand Logo
           </h2>
@@ -733,15 +804,15 @@ export default function MoodBoard() {
   const handleExport = () => {
     try {
       if (!colors || colors.length === 0) {
-        throw new Error('No colors available to export');
+        throw new Error("No colors available to export");
       }
 
       const colorData = JSON.stringify(colors, null, 2);
-      const blob = new Blob([colorData], { type: 'application/json' });
+      const blob = new Blob([colorData], { type: "application/json" });
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `${brandName?.toLowerCase().replace(/\s+/g, '-')}-palette.json`;
+      a.download = `${brandName?.toLowerCase().replace(/\s+/g, "-")}-palette.json`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -752,10 +823,13 @@ export default function MoodBoard() {
         description: "Color palette exported successfully",
       });
     } catch (error) {
-      console.error('Export error:', error);
+      console.error("Export error:", error);
       toast({
         title: "Export failed",
-        description: error instanceof Error ? error.message : "Failed to export color palette",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to export color palette",
         variant: "destructive",
       });
     }
@@ -766,72 +840,110 @@ export default function MoodBoard() {
   };
 
   if (!brandName) {
-    navigate('/');
+    navigate("/");
     return null;
   }
 
-  const ProductMockupsSection = ({ selectedCardId, cardBackgrounds, logoSvg, brandName, fonts }: {
+  const ProductMockupsSection = ({
+    selectedCardId,
+    cardBackgrounds,
+    logoSvg,
+    brandName,
+    fonts,
+  }: {
     selectedCardId: string | null;
     cardBackgrounds: string[];
     logoSvg: string;
     brandName: string;
     fonts: FontSettings | null;
   }) => {
-    const selectedBackground = selectedCardId ? cardBackgrounds[parseInt(selectedCardId.split('-')[1])] : undefined;
-    const selectedIndex = selectedCardId ? parseInt(selectedCardId.split('-')[1]) : 0;
+    const selectedBackground = selectedCardId
+      ? cardBackgrounds[parseInt(selectedCardId.split("-")[1])]
+      : undefined;
+    const selectedIndex = selectedCardId
+      ? parseInt(selectedCardId.split("-")[1])
+      : 0;
 
-    const fontStyles = JSON.parse(sessionStorage.getItem('fontStyles') || '[]');
-    const selectedFont = selectedCardId ? fontStyles[parseInt(selectedCardId.split('-')[1])] : null;
+    const fontStyles = JSON.parse(sessionStorage.getItem("fontStyles") || "[]");
+    const selectedFont = selectedCardId
+      ? fontStyles[parseInt(selectedCardId.split("-")[1])]
+      : null;
 
     // Website mockup styling
     const textStyle = {
-      fontFamily: selectedFont?.fontFamily || fonts?.primary?.family || 'Inter',
-      fontWeight: selectedFont?.fontWeight || fonts?.primary?.weight || '600',
-      fontStyle: selectedFont?.fontStyle || 'normal',
-      textTransform: selectedFont?.textTransform || 'none',
-      letterSpacing: selectedFont?.letterSpacing || 'normal',
-      color: colors[0]?.hex || '#000000' // Using first color from palette for headers
+      fontFamily: selectedFont?.fontFamily || fonts?.primary?.family || "Inter",
+      fontWeight: selectedFont?.fontWeight || fonts?.primary?.weight || "600",
+      fontStyle: selectedFont?.fontStyle || "normal",
+      textTransform: selectedFont?.textTransform || "none",
+      letterSpacing: selectedFont?.letterSpacing || "normal",
+      color: colors[0]?.hex || "#000000", // Using first color from palette for headers
     };
 
     const secondaryTextStyle = {
-      fontFamily: selectedFont?.fontFamily || fonts?.secondary?.family || 'Inter',
-      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || '400',
-      fontStyle: selectedFont?.fontStyle || 'normal',
-      textTransform: 'none',
-      letterSpacing: 'normal',
-      color: colors[1]?.hex || '#000000' // Using second color from palette
+      fontFamily:
+        selectedFont?.fontFamily || fonts?.secondary?.family || "Inter",
+      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || "400",
+      fontStyle: selectedFont?.fontStyle || "normal",
+      textTransform: "none",
+      letterSpacing: "normal",
+      color: colors[1]?.hex || "#000000", // Using second color from palette
     };
 
     const tertiaryTextStyle = {
-      fontFamily: selectedFont?.fontFamily || fonts?.secondary?.family || 'Inter',
-      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || '400',
-      fontStyle: selectedFont?.fontStyle || 'normal',
-      textTransform: 'none',
-      letterSpacing: 'normal',
-      color: 'white' // Ensure good contrast
+      fontFamily:
+        selectedFont?.fontFamily || fonts?.secondary?.family || "Inter",
+      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || "400",
+      fontStyle: selectedFont?.fontStyle || "normal",
+      textTransform: "none",
+      letterSpacing: "normal",
+      color: "white", // Ensure good contrast
     };
-
 
     const generateLightColor = (hexColor: string) => {
       // Placeholder - Replace with actual light color generation logic
       return `#f0f0f0`;
-    }
+    };
 
     const generateDarkColor = (hexColor: string) => {
       // Placeholder - Replace with actual dark color generation logic
       return `#333333`;
-    }
+    };
 
-    const brandStory = "This is a placeholder for the brand story.  It should be dynamically generated from the brand mood description using an LLM.";
-    const testimonials =[
-      { text: "This is a great product! I highly recommend it.", author: "John Doe", position: "CEO, Acme Corp" },
-      { text: "I'm so impressed with the quality and design.", author: "Jane Smith", position: "Software Engineer, Beta Solutions", },
-      { text: "This has changed the way I work!", author: "Peter Jones", position: "Marketing Manager, Gamma Industries" },
+    const brandStory =
+      "This is a placeholder for the brand story.  It should be dynamically generated from the brand mood description using an LLM.";
+    const testimonials = [
+      {
+        author: "John Doe",
+        position: "CEO, Acme Corp",
+        text: "This is a great product! I highly recommend it.",
+      },
+      {
+        author: "Jane Smith",
+        position: "CFO, Beta Inc.",
+        text: "I'm so impressed with the quality and design.",
+      },
+      {
+        author: "Peter Jones",
+        position: "CEO, Gamma GMBH",
+        text: "This has changed the way I work!",
+      },
     ];
 
-    const Icon = ({ icon, className, style }: {icon: any; className: string; style: any}) => {
+    const Icon = ({
+      icon,
+      className,
+      style,
+    }: {
+      icon: any;
+      className: string;
+      style: any;
+    }) => {
       // Placeholder - Replace with actual Icon component
-      return <div className={className} style={style}>{icon}</div>;
+      return (
+        <div className={className} style={style}>
+          {icon}
+        </div>
+      );
     };
 
     return (
@@ -840,11 +952,15 @@ export default function MoodBoard() {
           <div className="flex justify-between items-center mb-4">
             <h2
               className="text-lg sm:text-xl font-semibold text-black mb-4"
-              style={fonts?.primary ? {
-                fontFamily: fonts.primary.family,
-                fontWeight: fonts.primary.weight,
-                fontStyle: fonts.primary.style,
-              } : undefined}
+              style={
+                fonts?.primary
+                  ? {
+                      fontFamily: fonts.primary.family,
+                      fontWeight: fonts.primary.weight,
+                      fontStyle: fonts.primary.style,
+                    }
+                  : undefined
+              }
             >
               Brand Website Preview
             </h2>
@@ -853,28 +969,37 @@ export default function MoodBoard() {
           {selectedCardId && (
             <div className="space-y-8">
               {/* Hero Section */}
-              <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative mb-6`}>
+              <div
+                className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative mb-6`}
+              >
                 <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                   <div className="max-w-2xl">
                     <h1
                       className="text-4xl sm:text-5xl font-bold mb-6"
-                      style={{ ...textStyle, color: colors[0]?.hex || '#000000' }}
+                      style={{
+                        ...textStyle,
+                        color: colors[0]?.hex || "#000000",
+                      }}
                     >
                       Elevate Your Experience with {brandName}
                     </h1>
                     <p
                       className="text-xl mb-8"
-                      style={{ ...textStyle, color: colors[0]?.hex || '#000000' }}
+                      style={{
+                        ...textStyle,
+                        color: colors[0]?.hex || "#000000",
+                      }}
                     >
-                      Discover excellence through innovation and style. We bring your vision to life with precision and passion.
+                      Discover excellence through innovation and style. We bring
+                      your vision to life with precision and passion.
                     </p>
                     <div className="flex flex-wrap gap-4">
                       <Button
                         className="px-4 py-2 rounded"
                         style={{
-                          backgroundColor: colors[2]?.hex || '#000000',
-                          color: '#ffffff'
+                          backgroundColor: colors[2]?.hex || "#000000",
+                          color: "#ffffff",
                         }}
                       >
                         Get Started
@@ -882,9 +1007,9 @@ export default function MoodBoard() {
                       <Button
                         className="px-4 py-2 rounded"
                         style={{
-                          backgroundColor: 'transparent',
-                          border: `2px solid ${colors[2]?.hex || '#000000'}`,
-                          color: colors[2]?.hex || '#000000'
+                          backgroundColor: "transparent",
+                          border: `2px solid ${colors[2]?.hex || "#000000"}`,
+                          color: colors[2]?.hex || "#000000",
                         }}
                       >
                         Learn More
@@ -895,15 +1020,38 @@ export default function MoodBoard() {
               </div>
 
               {/* Brand Story Section */}
-              <div className="flex items-center gap-8 p-8 rounded-lg mb-8" style={{ backgroundColor: generateLightColor(colors[1]?.hex || '#f0f0f0') }}>
+              <div
+                className="flex items-center gap-8 p-8 rounded-lg mb-8"
+                style={{
+                  backgroundColor: generateLightColor(
+                    colors[1]?.hex || "#f0f0f0",
+                  ),
+                }}
+              >
                 <div className="w-1/3 flex justify-center">
-                  <svg className="w-32 h-32" viewBox="0 0 24 24" style={{ color: generateDarkColor(colors[1]?.hex || '#000000') }}>
-                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                  <svg
+                    className="w-32 h-32"
+                    viewBox="0 0 24 24"
+                    style={{
+                      color: generateDarkColor(colors[1]?.hex || "#000000"),
+                    }}
+                  >
+                    <path
+                      fill="currentColor"
+                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"
+                    />
                   </svg>
                 </div>
                 <div className="w-2/3">
-                  <h3 className="text-2xl mb-4" style={{ ...textStyle, color: colors[1]?.hex || '#000000' }}>Our Story</h3>
-                  <p style={secondaryTextStyle}>{moodBoardData?.moodDescription || 'Loading brand story...'}</p>
+                  <h3
+                    className="text-2xl mb-4"
+                    style={{ ...textStyle, color: colors[1]?.hex || "#000000" }}
+                  >
+                    Our Story
+                  </h3>
+                  <p style={secondaryTextStyle}>
+                    {moodBoardData?.moodDescription || "Loading brand story..."}
+                  </p>
                 </div>
               </div>
 
@@ -914,26 +1062,50 @@ export default function MoodBoard() {
                     key={index}
                     className="p-6 rounded-lg relative overflow-hidden"
                     style={{
-                      background: index === 0 ? colors[3]?.hex : index === 1 ? colors[1]?.hex : colors[4]?.hex || '#000000',
-                      color: isColorDark(index === 0 ? colors[3]?.hex : index === 1 ? colors[1]?.hex : colors[4]?.hex || '#000000') ? '#ffffff' : '#000000'
+                      background:
+                        index === 0
+                          ? colors[3]?.hex
+                          : index === 1
+                            ? colors[1]?.hex
+                            : colors[4]?.hex || "#000000",
+                      color: isColorDark(
+                        index === 0
+                          ? colors[3]?.hex
+                          : index === 1
+                            ? colors[1]?.hex
+                            : colors[4]?.hex || "#000000",
+                      )
+                        ? "#ffffff"
+                        : "#000000",
                     }}
                   >
                     <CardContent
                       className="p-6 flex flex-col items-center justify-center text-center h-full min-h-[200px] relative overflow-hidden"
                       style={{
                         background: `linear-gradient(135deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1))`,
-                        color: '#ffffff'
+                        color: "#ffffff",
                       }}
                     >
                       <div className="absolute top-4 right-4 z-10">
-                        <svg className="w-8 h-8 opacity-30" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#ffffff' }}>
-                          <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
+                        <svg
+                          className="w-8 h-8 opacity-30"
+                          viewBox="0 0 24 24"
+                          fill="currentColor"
+                          style={{ color: "#ffffff" }}
+                        >
+                          <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z" />
                         </svg>
                       </div>
-                      <p className="mb-6 text-white/90" style={textStyle}>{testimonial.text}</p>
+                      <p className="mb-6 text-white/90" style={textStyle}>
+                        {testimonial.text}
+                      </p>
                       <div className="border-t border-white/10 pt-4">
-                        <p className="text-white" style={textStyle}>{testimonial.author}</p>
-                        <p className="text-white/70 text-sm" style={textStyle}>{testimonial.position}</p>
+                        <p className="text-white" style={textStyle}>
+                          {testimonial.author}
+                        </p>
+                        <p className="text-white/70 text-sm" style={textStyle}>
+                          {testimonial.position}
+                        </p>
                       </div>
                     </CardContent>
                   </div>
@@ -942,9 +1114,11 @@ export default function MoodBoard() {
 
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
-                {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
+                {["Innovation", "Quality", "Excellence"].map((feature, idx) => (
                   <Card key={feature} className="overflow-hidden">
-                    <CardContent className={`bg-gray-100 p-6 h-full flex flex-col items-center text-center`}>
+                    <CardContent
+                      className={`bg-gray-100 p-6 h-full flex flex-col items-center text-center`}
+                    >
                       <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
                         <div className="w-6 h-6 text-gray-900">
                           {idx === 0 && <Building2 />}
@@ -958,11 +1132,9 @@ export default function MoodBoard() {
                       >
                         {feature}
                       </h3>
-                      <p
-                        className="text-black/90"
-                        style={secondaryTextStyle}
-                      >
-                        Experience unparalleled {feature.toLowerCase()} with our cutting-edge solutions and dedicated expertise.
+                      <p className="text-black/90" style={secondaryTextStyle}>
+                        Experience unparalleled {feature.toLowerCase()} with our
+                        cutting-edge solutions and dedicated expertise.
                       </p>
                     </CardContent>
                   </Card>
@@ -981,11 +1153,23 @@ export default function MoodBoard() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
                       {[
-                        { icon: <MapPin className="w-5 h-5" />, text: "123 Business Avenue, Suite 100" },
-                        { icon: <Phone className="w-5 h-5" />, text: "+1 (555) 123-4567" },
-                        { icon: <Mail className="w-5 h-5" />, text: `contact@${brandName.toLowerCase().replace(/\s+/g, '')}.com` }
+                        {
+                          icon: <MapPin className="w-5 h-5" />,
+                          text: "123 Business Avenue, Suite 100",
+                        },
+                        {
+                          icon: <Phone className="w-5 h-5" />,
+                          text: "+1 (555) 123-4567",
+                        },
+                        {
+                          icon: <Mail className="w-5 h-5" />,
+                          text: `contact@${brandName.toLowerCase().replace(/\s+/g, "")}.com`,
+                        },
                       ].map((item, idx) => (
-                        <div key={idx} className="flex items-center text-black/90 space-x-3">
+                        <div
+                          key={idx}
+                          className="flex items-center text-black/90 space-x-3"
+                        >
                           {item.icon}
                           <span style={secondaryTextStyle}>{item.text}</span>
                         </div>
@@ -1010,8 +1194,8 @@ export default function MoodBoard() {
                       <Button
                         className="col-span-2 px-4 py-2 rounded"
                         style={{
-                          backgroundColor: colors[2]?.hex || '#000000',
-                          color: '#ffffff'
+                          backgroundColor: colors[2]?.hex || "#000000",
+                          color: "#ffffff",
                         }}
                       >
                         Send Message
@@ -1028,7 +1212,7 @@ export default function MoodBoard() {
   };
 
   if (!brandName) {
-    navigate('/');
+    navigate("/");
     return null;
   }
 
@@ -1041,7 +1225,11 @@ export default function MoodBoard() {
             <Button
               variant="ghost"
               className="p-2 sm:mr-4"
-              onClick={() => navigate(`/brand-variations?name=${encodeURIComponent(brandName || '')}`)}
+              onClick={() =>
+                navigate(
+                  `/brand-variations?name=${encodeURIComponent(brandName || "")}`,
+                )
+              }
             >
               <span className="hidden sm:inline">Back to Brand Studio</span>
               <span className="sm:hidden">Back</span>
@@ -1053,11 +1241,15 @@ export default function MoodBoard() {
 
         <h1
           className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-black"
-          style={fonts?.primary ? {
-            fontFamily: fonts.primary.family,
-            fontWeight: fonts.primary.weight,
-            fontStyle: fonts.primary.style,
-          } : undefined}
+          style={
+            fonts?.primary
+              ? {
+                  fontFamily: fonts.primary.family,
+                  fontWeight: fonts.primary.weight,
+                  fontStyle: fonts.primary.style,
+                }
+              : undefined
+          }
         >
           Brand Mood Board: {brandName}
         </h1>
@@ -1079,11 +1271,15 @@ export default function MoodBoard() {
                 <div className="flex justify-between items-center mb-4">
                   <h2
                     className="text-lg sm:text-xl font-semibold text-black"
-                    style={fonts?.primary ? {
-                      fontFamily: fonts.primary.family,
-                      fontWeight: fonts.primary.weight,
-                      fontStyle: fonts.primary.style,
-                    } : undefined}
+                    style={
+                      fonts?.primary
+                        ? {
+                            fontFamily: fonts.primary.family,
+                            fontWeight: fonts.primary.weight,
+                            fontStyle: fonts.primary.style,
+                          }
+                        : undefined
+                    }
                   >
                     Color Palette
                   </h2>
@@ -1107,10 +1303,12 @@ export default function MoodBoard() {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10"
-                          onClick={() => handleRegenerate('colors')}
-                          disabled={regeneratingSection?.type === 'colors'}
+                          onClick={() => handleRegenerate("colors")}
+                          disabled={regeneratingSection?.type === "colors"}
                         >
-                          <SparkleIcon className={`h-5 w-5 ${regeneratingSection?.type === 'colors' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon
+                            className={`h-5 w-5 ${regeneratingSection?.type === "colors" ? "animate-spin" : ""}`}
+                          />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Generate new colors</TooltipContent>
@@ -1119,7 +1317,7 @@ export default function MoodBoard() {
                 </div>
 
                 <AnimatePresence mode="wait">
-                  {regeneratingSection?.type === 'colors' ? (
+                  {regeneratingSection?.type === "colors" ? (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -1150,11 +1348,15 @@ export default function MoodBoard() {
                 <div className="flex justify-between items-center mb-4">
                   <h2
                     className="text-lg sm:text-xl font-semibold text-black"
-                    style={fonts?.primary ? {
-                      fontFamily: fonts.primary.family,
-                      fontWeight: fonts.primary.weight,
-                      fontStyle: fonts.primary.style,
-                    } : undefined}
+                    style={
+                      fonts?.primary
+                        ? {
+                            fontFamily: fonts.primary.family,
+                            fontWeight: fonts.primary.weight,
+                            fontStyle: fonts.primary.style,
+                          }
+                        : undefined
+                    }
                   >
                     Brand Keywords
                   </h2>
@@ -1165,7 +1367,12 @@ export default function MoodBoard() {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10"
-                          onClick={() => handleCopyToClipboard(moodBoardData.keywords.join(', '), 'Keywords')}
+                          onClick={() =>
+                            handleCopyToClipboard(
+                              moodBoardData.keywords.join(", "),
+                              "Keywords",
+                            )
+                          }
                         >
                           <Download className="h-5 w-5" />
                         </Button>
@@ -1178,10 +1385,12 @@ export default function MoodBoard() {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10"
-                          onClick={() => handleRegenerate('keywords')}
-                          disabled={regeneratingSection?.type === 'keywords'}
+                          onClick={() => handleRegenerate("keywords")}
+                          disabled={regeneratingSection?.type === "keywords"}
                         >
-                          <SparkleIcon className={`h-5 w-5 ${regeneratingSection?.type === 'keywords' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon
+                            className={`h-5 w-5 ${regeneratingSection?.type === "keywords" ? "animate-spin" : ""}`}
+                          />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Regenerate with AI</TooltipContent>
@@ -1189,16 +1398,21 @@ export default function MoodBoard() {
                   </div>
                 </div>
                 <AnimatePresence mode="wait">
-                  {regeneratingSection?.type === 'keywords' ? (
+                  {regeneratingSection?.type === "keywords" ? (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
                       className="flex flex-wrap gap-3"
                     >
-                      {Array(5).fill(0).map((_, index) => (
-                        <Skeleton key={index} className="h-8 w-24 rounded-full" />
-                      ))}
+                      {Array(5)
+                        .fill(0)
+                        .map((_, index) => (
+                          <Skeleton
+                            key={index}
+                            className="h-8 w-24 rounded-full"
+                          />
+                        ))}
                     </motion.div>
                   ) : (
                     <motion.div
@@ -1214,11 +1428,15 @@ export default function MoodBoard() {
                           initial={{ scale: 0.9, opacity: 0 }}
                           animate={{ scale: 1, opacity: 1 }}
                           transition={{ delay: index * 0.1 }}
-                          style={fonts?.secondary ? {
-                            fontFamily: fonts.secondary.family,
-                            fontWeight: fonts.secondary.weight,
-                            fontStyle: fonts.secondary.style,
-                          } : undefined}
+                          style={
+                            fonts?.secondary
+                              ? {
+                                  fontFamily: fonts.secondary.family,
+                                  fontWeight: fonts.secondary.weight,
+                                  fontStyle: fonts.secondary.style,
+                                }
+                              : undefined
+                          }
                         >
                           {keyword}
                         </motion.span>
@@ -1234,11 +1452,15 @@ export default function MoodBoard() {
                 <div className="flex justify-between items-center mb-4">
                   <h2
                     className="text-lg sm:text-xl font-semibold text-black"
-                    style={fonts?.primary ? {
-                      fontFamily: fonts.primary.family,
-                      fontWeight: fonts.primary.weight,
-                      fontStyle: fonts.primary.style,
-                    } : undefined}
+                    style={
+                      fonts?.primary
+                        ? {
+                            fontFamily: fonts.primary.family,
+                            fontWeight: fonts.primary.weight,
+                            fontStyle: fonts.primary.style,
+                          }
+                        : undefined
+                    }
                   >
                     Brand Mood
                   </h2>
@@ -1249,7 +1471,12 @@ export default function MoodBoard() {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10"
-                          onClick={() => handleCopyToClipboard(moodBoardData.moodDescription, 'Mood description')}
+                          onClick={() =>
+                            handleCopyToClipboard(
+                              moodBoardData.moodDescription,
+                              "Mood description",
+                            )
+                          }
                         >
                           <Copy className="h-5 w-5" />
                         </Button>
@@ -1262,10 +1489,12 @@ export default function MoodBoard() {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10"
-                          onClick={() => handleRegenerate('mood')}
-                          disabled={regeneratingSection?.type === 'mood'}
+                          onClick={() => handleRegenerate("mood")}
+                          disabled={regeneratingSection?.type === "mood"}
                         >
-                          <SparkleIcon className={`h-5 w-5 ${regeneratingSection?.type === 'mood' ? 'animate-spin' : ''}`} />
+                          <SparkleIcon
+                            className={`h-5 w-5 ${regeneratingSection?.type === "mood" ? "animate-spin" : ""}`}
+                          />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>Regenerate with AI</TooltipContent>
@@ -1273,7 +1502,7 @@ export default function MoodBoard() {
                   </div>
                 </div>
                 <AnimatePresence mode="wait">
-                  {regeneratingSection?.type === 'mood' ? (
+                  {regeneratingSection?.type === "mood" ? (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
@@ -1291,11 +1520,15 @@ export default function MoodBoard() {
                     >
                       <p
                         className="text-black"
-                        style={fonts?.secondary ? {
-                          fontFamily: fonts.secondary.family,
-                          fontWeight: fonts.secondary.weight,
-                          fontStyle: fonts.secondary.style,
-                        } : undefined}
+                        style={
+                          fonts?.secondary
+                            ? {
+                                fontFamily: fonts.secondary.family,
+                                fontWeight: fonts.secondary.weight,
+                                fontStyle: fonts.secondary.style,
+                              }
+                            : undefined
+                        }
                       >
                         {moodBoardData.moodDescription}
                       </p>
@@ -1314,7 +1547,9 @@ export default function MoodBoard() {
           </div>
         ) : (
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Failed to load mood board data</p>
+            <p className="text-muted-foreground">
+              Failed to load mood board data
+            </p>
           </div>
         )}
       </div>
