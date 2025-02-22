@@ -972,7 +972,7 @@ textTransform: "none",
           {selectedCardId && (
             <div className="space-y-8">
               {/* Header/Navigation */}
-              <div className="w-full bg-white border-b border-gray-100 mb-4">
+              <div className={`w-full ${selectedBackground} mb-4`}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
@@ -983,7 +983,7 @@ textTransform: "none",
                           className="w-8 h-8 object-contain"
                         />
                       )}
-                      <span className="text-xl font-semibold" style={textStyle}>
+                      <span className="text-xl font-semibold text-white" style={tertiaryTextStyle}>
                         {brandName}
                       </span>
                     </div>
@@ -993,8 +993,8 @@ textTransform: "none",
                           <li key={item}>
                             <a
                               href="#"
-                              className="text-gray-600 hover:text-gray-900"
-                              style={secondaryTextStyle}
+                              className="text-white/80 hover:text-white"
+                              style={tertiaryTextStyle}
                             >
                               {item}
                             </a>
