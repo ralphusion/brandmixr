@@ -195,8 +195,13 @@ const CARD_GRADIENTS = [
 export default function MoodBoard() {
   const [, navigate] = useLocation();
   const moodBoardRef = useRef<HTMLDivElement>(null);
-  const [colors, setColors] = useState<Array<{ hex: string; name: string }>>(
-    [],
+  const [colors, setColors] = useState<Array<{ hex: string; name: string }>>([
+    { hex: '#E0F7FA', name: 'light breeze' },
+    { hex: '#283593', name: 'midnight voyage' },
+    { hex: '#FFB5C2', name: 'soft coral' },
+    { hex: '#B4E7CE', name: 'mint whisper' },
+    { hex: '#E6C9FF', name: 'lavender mist' }
+  ],
   );
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -883,7 +888,7 @@ export default function MoodBoard() {
       fontFamily: "Arial, sans-serif",
       fontWeight: "400",
       fontStyle: "normal",
-      textTransform: "none",
+textTransform: "none",
       letterSpacing: "normal",
       color: colors[1]?.hex || "#000000", // Using second color from palette
     };
