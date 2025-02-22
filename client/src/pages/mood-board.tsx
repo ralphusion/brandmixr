@@ -971,6 +971,41 @@ textTransform: "none",
 
           {selectedCardId && (
             <div className="space-y-8">
+              {/* Header/Navigation */}
+              <div className="w-full bg-white border-b border-gray-100 mb-4">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      {logoSvg && (
+                        <img
+                          src={logoSvg}
+                          alt="Brand Logo"
+                          className="w-8 h-8 object-contain"
+                        />
+                      )}
+                      <span className="text-xl font-semibold" style={textStyle}>
+                        {brandName}
+                      </span>
+                    </div>
+                    <nav>
+                      <ul className="flex gap-6">
+                        {['Home', 'About', 'Services', 'Products', 'Contact'].map((item) => (
+                          <li key={item}>
+                            <a
+                              href="#"
+                              className="text-gray-600 hover:text-gray-900"
+                              style={secondaryTextStyle}
+                            >
+                              {item}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </nav>
+                  </div>
+                </div>
+              </div>
+
               {/* Hero Section */}
               <div
                 className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative mb-6`}
