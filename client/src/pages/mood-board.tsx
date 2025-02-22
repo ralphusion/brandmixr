@@ -852,41 +852,8 @@ export default function MoodBoard() {
 
           {selectedCardId && (
             <div className="space-y-8">
-              {/* Navigation Bar */}
-              <div className={`${selectedBackground} w-full rounded-lg overflow-hidden`}>
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-10 h-10 bg-white/90 dark:bg-white/80 rounded-lg p-2">
-                        {logoSvg && (
-                          <img
-                            src={logoSvg}
-                            alt="Brand Logo"
-                            className="w-full h-full object-contain"
-                          />
-                        )}
-                      </div>
-                      <span className="text-white font-semibold text-lg" style={textStyle}>
-                        {brandName}
-                      </span>
-                    </div>
-                    <nav className="hidden md:flex space-x-8">
-                      {['Home', 'About', 'Services', 'Contact'].map((item) => (
-                        <span
-                          key={item}
-                          className="text-white/90 hover:text-white cursor-pointer"
-                          style={textStyle}
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </nav>
-                  </div>
-                </div>
-              </div>
-
               {/* Hero Section */}
-              <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative`}>
+              <div className={`${selectedBackground} w-full min-h-[400px] rounded-lg overflow-hidden relative mb-6`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-black/50 to-transparent"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
                   <div className="max-w-2xl">
@@ -915,8 +882,9 @@ export default function MoodBoard() {
                       <Button
                         className="px-4 py-2 rounded"
                         style={{
-                          backgroundColor: colors[1]?.hex || '#000000',
-                          color: '#ffffff'
+                          backgroundColor: 'transparent',
+                          border: `2px solid ${colors[2]?.hex || '#000000'}`,
+                          color: colors[2]?.hex || '#000000'
                         }}
                       >
                         Learn More
