@@ -942,7 +942,9 @@ export default function MoodBoard() {
                   <Card key={feature} className="overflow-hidden">
                     <CardContent className="bg-gray-100 p-6 h-full flex flex-col items-center text-center">
                       <h4 className="text-xl font-semibold mb-2">{feature}</h4>
-                    </CardContent>
+                <p className="text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+              </div>
+            </CardContent>
                   </Card>
                 ))}
               </div>
