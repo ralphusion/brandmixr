@@ -41,6 +41,8 @@ export async function generateMoodBoard(
   keywords: string[];
   moodDescription: string;
   imagePrompts: string[];
+  brandStory: string;
+  testimonials: Array<{ text: string; author: string; position: string }>;
 }> {
   if (provider === 'gemini') {
     const prompt = `Create a brand mood board for "${brandName}" in the ${industry} industry. Return the response in JSON format with the following structure:
@@ -61,6 +63,13 @@ export async function generateMoodBoard(
 
   const prompt = `Create a brand mood board for "${brandName}" in the ${industry} industry.
 Please provide the following elements in JSON format:
+
+1. A color palette (5 colors) that reflects the brand's personality, with the first color being very light and the second being dark
+2. Keywords that capture the brand's essence (5-7 words)
+3. A short mood description (2-3 sentences)
+4. Image generation prompts (3 prompts) for DALL-E to create mood images
+5. A compelling brand story (2-3 paragraphs)
+6. Three customer testimonials with fictional names and positions
 
 1. A color palette (5 colors) that reflects the brand's personality
 2. Keywords that capture the brand's essence (5-7 words)
