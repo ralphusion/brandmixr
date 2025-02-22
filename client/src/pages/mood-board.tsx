@@ -17,7 +17,7 @@ import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/api";
 import { generateLightColor, generateDarkColor } from "@/lib/colors";
 import { IconStyle } from '@/types';
