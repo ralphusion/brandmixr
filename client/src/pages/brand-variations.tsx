@@ -14,7 +14,7 @@ import html2canvas from 'html2canvas';
 import { useFonts } from "@/contexts/FontContext";
 
 // Extended background styles including dark greys
-const BACKGROUNDS = [
+export const BACKGROUNDS = [
   {
     bg: "bg-gradient-to-br from-emerald-50 to-teal-100 dark:from-emerald-950 dark:to-teal-900",
     text: "text-emerald-800 dark:text-emerald-100"
