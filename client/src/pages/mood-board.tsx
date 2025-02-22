@@ -927,8 +927,7 @@ export default function MoodBoard() {
                 {testimonials.map((testimonial, index) => (
                   <div
                     key={index}
-                    className="p-6 rounded-lg relative overflow-hidden"
-                    style={{ background: CARD_GRADIENTS[index % CARD_GRADIENTS.length] }}
+                    className={`p-6 rounded-lg relative overflow-hidden ${BACKGROUNDS[index % BACKGROUNDS.length].bg} ${BACKGROUNDS[index % BACKGROUNDS.length].text}`}
                   >
                     <div className="absolute top-4 right-4">
                       <svg className="w-8 h-8 opacity-20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#fff' }}>
