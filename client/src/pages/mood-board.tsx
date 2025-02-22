@@ -735,7 +735,7 @@ export default function MoodBoard() {
     </Card>
   );
 
-  const exportMoodBoard = () => {
+  const handleExportMoodBoard = () => {
     try {
       if (!colors || colors.length === 0) {
         throw new Error('No colors available to export');
@@ -822,7 +822,7 @@ export default function MoodBoard() {
       return `#f0f0f0`;
     }
 
-    const generateDarkColor = (hexColor: string) => {
+    const generateDarkColor = (hexColor: string) =>) => {
       // Placeholder - Replace with actual dark color generation logic
       return `#333333`;
     }
@@ -1054,7 +1054,7 @@ export default function MoodBoard() {
     );
   };
 
-  const exportMoodBoard = () => {
+  const handleExportMoodBoard = () => {
     try {
       if (!colors || colors.length === 0) {
         throw new Error('No colors available to export');
@@ -1155,7 +1155,7 @@ export default function MoodBoard() {
                           variant="ghost"
                           size="sm"
                           className="h-10 w-10"
-                          onClick={exportMoodBoard}
+                          onClick={handleExportMoodBoard}
                         >
                           <Download className="h-5 w-5" />
                         </Button>
