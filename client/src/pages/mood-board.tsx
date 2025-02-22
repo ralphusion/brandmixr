@@ -17,6 +17,15 @@ import html2canvas from 'html2canvas';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
 import { generateIconSvg } from "@/lib/generateIcon";
+
+function isColorDark(hexColor: string) {
+  const r = parseInt(hexColor.slice(1, 3), 16);
+  const g = parseInt(hexColor.slice(3, 5), 16);
+  const b = parseInt(hexColor.slice(5, 7), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness < 128;
+}
+
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
@@ -930,8 +939,8 @@ export default function MoodBoard() {
                     key={index}
                     className="p-6 rounded-lg relative overflow-hidden"
                     style={{
-                      background: index === 0 ? '#7FDBFF' : index === 1 ? '#001F3F' : '#2ECC40',
-                      color: index === 1 ? '#ffffff' : '#000000'
+                      background: colors[index]?.hex || '#000000',
+                      color: isColorDark(colors[index]?.hex || '#000000') ? '#ffffff' : '#000000'
                     }}
                   >
                     <div className="absolute top-4 right-4">
