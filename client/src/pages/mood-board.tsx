@@ -822,7 +822,7 @@ export default function MoodBoard() {
       return `#f0f0f0`;
     }
 
-    const generateDarkColor = (hexColor: string) =>) => {
+    const generateDarkColor = (hexColor: string) => {
       // Placeholder - Replace with actual dark color generation logic
       return `#333333`;
     }
