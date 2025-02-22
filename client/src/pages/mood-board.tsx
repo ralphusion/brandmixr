@@ -1047,7 +1047,7 @@ textTransform: "none",
 
               {/* Brand Story Section */}
               <div
-                className="flex items-center gap-8 p-8 rounded-lg mb-8"
+                className="flex items-center gap-8 p-8 rounded-lg mb-8 shadow-lg"
                 style={{
                   backgroundColor: generateLightColor(
                     colors[1]?.hex || "#f0f0f0",
@@ -1055,18 +1055,15 @@ textTransform: "none",
                 }}
               >
                 <div className="w-1/3 flex justify-center">
-                  <svg
-                    className="w-32 h-32"
-                    viewBox="0 0 24 24"
-                    style={{
-                      color: generateDarkColor(colors[1]?.hex || "#000000"),
-                    }}
-                  >
-                    <path
-                      fill="currentColor"
-                      d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"
-                    />
-                  </svg>
+                  {logoSvg && (
+                    <div className="w-32 h-32 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-4 shadow-sm">
+                      <img
+                        src={logoSvg}
+                        alt="Brand Logo"
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
+                  )}
                 </div>
                 <div className="w-2/3">
                   <h3
@@ -1084,8 +1081,8 @@ textTransform: "none",
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {["Innovation", "Quality", "Excellence"].map((feature, idx) => (
-                  <Card key={feature} className="overflow-hidden" style={{
-                    border: `4px solid ${idx === 0 ? colors[4]?.hex : idx === 1 ? colors[2]?.hex : colors[3]?.hex}`
+                  <Card key={feature} className="overflow-hidden shadow-lg" style={{
+                    border: `2px solid ${idx === 0 ? colors[4]?.hex : idx === 1 ? colors[2]?.hex : colors[3]?.hex}`
                   }}>
                     <CardContent
                       className={`bg-gray-100 p-6 h-full flex flex-col items-center text-center`}
@@ -1113,7 +1110,7 @@ textTransform: "none",
               </div>
 
               {/* Contact Section */}
-              <Card className={`bg-gray-100 overflow-hidden`}>
+              <Card className={`bg-gray-100 overflow-hidden shadow-lg`}>
                 <CardContent className="p-6">
                   <h3
                     className="text-2xl font-semibold text-black mb-6"
