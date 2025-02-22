@@ -957,13 +957,21 @@ textTransform: "none",
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       {logoSvg && (
-                        <img
-                          src={logoSvg}
-                          alt="Brand Logo"
-                          className="w-8 h-8 object-contain"
-                        />
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-white/90 dark:bg-white/80 p-2 shadow-sm">
+                          <img
+                            src={logoSvg}
+                            alt="Brand Logo"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
                       )}
-                      <span className="text-xl font-semibold text-white" style={tertiaryTextStyle}>
+                      <span className="text-xl font-semibold text-white" style={selectedFont ? {
+                        fontFamily: selectedFont.fontFamily || 'Inter',
+                        fontWeight: selectedFont.fontWeight || '600',
+                        fontStyle: selectedFont.fontStyle || 'normal',
+                        textTransform: selectedFont.textTransform || 'none',
+                        letterSpacing: selectedFont.letterSpacing || 'normal',
+                      } : undefined}>
                         {brandName}
                       </span>
                     </div>
