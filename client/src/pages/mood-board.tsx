@@ -958,7 +958,7 @@ export default function MoodBoard() {
                       </div>
                     </div>
                   </CardContent>
-                </Card>
+                </Card>,
 
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
