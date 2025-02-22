@@ -871,19 +871,18 @@ export default function MoodBoard() {
 
     // Website mockup styling
     const textStyle = {
-      fontFamily: selectedFont?.fontFamily || fonts?.primary?.family || "Inter",
-      fontWeight: selectedFont?.fontWeight || fonts?.primary?.weight || "600",
-      fontStyle: selectedFont?.fontStyle || "normal",
-      textTransform: selectedFont?.textTransform || "none",
-      letterSpacing: selectedFont?.letterSpacing || "normal",
+      fontFamily: "Inter",
+      fontWeight: "600",
+      fontStyle: "normal",
+      textTransform: "none",
+      letterSpacing: "normal",
       color: colors[0]?.hex || "#000000", // Using first color from palette for headers
     };
 
     const secondaryTextStyle = {
-      fontFamily:
-        selectedFont?.fontFamily || fonts?.secondary?.family || "Inter",
-      fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || "400",
-      fontStyle: selectedFont?.fontStyle || "normal",
+      fontFamily: "Inter",
+      fontWeight: "400",
+      fontStyle: "normal",
       textTransform: "none",
       letterSpacing: "normal",
       color: colors[1]?.hex || "#000000", // Using second color from palette
