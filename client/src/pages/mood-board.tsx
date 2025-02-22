@@ -20,6 +20,7 @@ import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
+import { BACKGROUNDS } from "@/pages/brand-variations";
 
 interface FontSettings {
   primary: {
@@ -819,7 +820,7 @@ export default function MoodBoard() {
       { text: "This has changed the way I work!", author: "Peter Jones", position: "Marketing Manager, Gamma Industries" },
     ];
 
-    const Icon = ({ icon, className, style }: {icon: any; className: string; style: any }) => {
+    const Icon = ({ icon, className, style }: {icon: any; className: string; style: any}) => {
       // Placeholder - Replace with actual Icon component
       return <div className={className} style={style}>{icon}</div>;
     };
