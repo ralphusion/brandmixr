@@ -1047,7 +1047,7 @@ textTransform: "none",
 
               {/* Brand Story Section */}
               <div
-                className="flex items-center gap-8 p-8 rounded-lg mb-8 shadow-lg"
+                className="flex items-center gap-8 p-8 rounded-lg mb-8 shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.01] cursor-pointer"
                 style={{
                   backgroundColor: generateLightColor(
                     colors[1]?.hex || "#f0f0f0",
@@ -1081,7 +1081,7 @@ textTransform: "none",
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {["Innovation", "Quality", "Excellence"].map((feature, idx) => (
-                  <Card key={feature} className="overflow-hidden shadow-lg" style={{
+                  <Card key={feature} className="overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.02] cursor-pointer" style={{
                     border: `2px solid ${idx === 0 ? colors[4]?.hex : idx === 1 ? colors[2]?.hex : colors[3]?.hex}`
                   }}>
                     <CardContent
@@ -1110,7 +1110,7 @@ textTransform: "none",
               </div>
 
               {/* Contact Section */}
-              <Card className={`bg-gray-100 overflow-hidden shadow-lg`}>
+              <Card className={`bg-gray-100 overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl hover:scale-[1.01] cursor-pointer`}>
                 <CardContent className="p-6">
                   <h3
                     className="text-2xl font-semibold text-black mb-6"
