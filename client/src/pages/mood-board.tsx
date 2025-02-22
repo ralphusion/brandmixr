@@ -10,6 +10,9 @@ import { Logo } from "@/components/Logo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { Skeleton } from "@/components/ui/skeleton";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { ColorPaletteEditor } from "@/components/ColorPaletteEditor";
 import html2canvas from 'html2canvas';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useFonts } from "@/contexts/FontContext";
@@ -17,11 +20,6 @@ import { generateIconSvg } from "@/lib/generateIcon";
 import { HexColorPicker } from "react-colorful";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
-import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/api";
-import { generateLightColor, generateDarkColor } from "@/lib/colors";
-import { IconStyle } from '@/types';
-
 
 interface FontSettings {
   primary: {
@@ -772,6 +770,11 @@ export default function MoodBoard() {
     setLogoColor(e.target.value);
   };
 
+  if (!brandName) {
+    navigate('/');
+    return null;
+  }
+
   const ProductMockupsSection = ({ selectedCardId, cardBackgrounds, logoSvg, brandName, fonts }: {
     selectedCardId: string | null;
     cardBackgrounds: string[];
@@ -813,6 +816,16 @@ export default function MoodBoard() {
       color: 'white' // Ensure good contrast
     };
 
+
+    const generateLightColor = (hexColor: string) => {
+      // Placeholder - Replace with actual light color generation logic
+      return `#f0f0f0`;
+    }
+
+    const generateDarkColor = (hexColor: string) => {
+      // Placeholder - Replace with actual dark color generation logic
+      return `#333333`;
+    }
 
     const brandStory = "This is a placeholder for the brand story.  It should be dynamically generated from the brand mood description using an LLM.";
     const testimonials = [
@@ -923,11 +936,36 @@ export default function MoodBoard() {
                   <p style={secondaryTextStyle}>{moodBoardData?.moodDescription || 'Loading brand story...'}</p>
                 </div>
               </div>
+
+              {/* Testimonials Section */}
+              <div className="grid grid-cols-3 gap-6 mb-8">
+                {testimonials.map((testimonial, index) => (
+                  <Card
+                    key={index}
+                    className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200"
+                  >
+                    <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full min-h-[200px]" style={{ backgroundColor: generateLightColor(colors[index % colors.length]?.hex || '#f0f0f0') }}>
+                      <div className="absolute top-4 right-4">
+                        <svg className="w-8 h-8 opacity-20" viewBox="0 0 24 24" fill="currentColor" style={{ color: generateDarkColor(colors[index % colors.length]?.hex || '#000000') }}>
+                        <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
+                      </svg>
+                    </div>
+                    <div className="relative z-10">
+                      <p className="mb-6 text-white/90 font-medium">{testimonial.text}</p>
+                      <div className="border-t border-white/10 pt-4">
+                        <p className="font-semibold text-white">{testimonial.author}</p>
+                        <p className="text-white/70 text-sm">{testimonial.position}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
                   <Card key={feature} className="overflow-hidden">
-                    <CardContent className="bg-gray-100 p-6 h-full flex flex-col items-center text-center">
+                    <CardContent className={`bg-gray-100 p-6 h-full flex flex-col items-center text-center`}>
                       <div className="w-12 h-12 bg-white/90 rounded-full mb-4 flex items-center justify-center">
                         <div className="w-6 h-6 text-gray-900">
                           {idx === 0 && <Building2 />}
@@ -952,30 +990,6 @@ export default function MoodBoard() {
                 ))}
               </div>
 
-              {/* Testimonials Section */}
-              <div className="grid grid-cols-3 gap-6 mb-8">
-                {testimonials.map((testimonial, index) => (
-                  <Card
-                    key={index}
-                    className="relative overflow-hidden hover:shadow-lg transition-shadow duration-200"
-                  >
-                    <CardContent className="p-6 flex flex-col items-center justify-center text-center h-full min-h-[200px]" style={{ backgroundColor: generateLightColor(colors[index % colors.length]?.hex || '#f0f0f0') }}>
-                      <div className="absolute top-4 right-4">
-                        <svg className="w-8 h-8 opacity-20" viewBox="0 0 24 24" fill="currentColor" style={{ color: generateDarkColor(colors[index % colors.length]?.hex || '#000000') }}>
-                          <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
-                        </svg>
-                      </div>
-                      <div className="relative z-10">
-                        <p className="mb-6 text-white/90 font-medium">{testimonial.text}</p>
-                        <div className="border-t border-white/10 pt-4">
-                          <p className="font-semibold text-white">{testimonial.author}</p>
-                          <p className="text-white/70 text-sm">{testimonial.position}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
               {/* Contact Section */}
               <Card className={`bg-gray-100 overflow-hidden`}>
                 <CardContent className="p-6">
@@ -1216,7 +1230,15 @@ export default function MoodBoard() {
                       {moodBoardData.keywords.map((keyword, index) => (
                         <motion.span
                           key={index}
-                          className="inline-block px-3 py-1 bg-gray-100 rounded-full text-sm"
+                          className="px-4 py-2 bg-muted rounded-full text-sm font-medium text-muted-foreground"
+                          initial={{ scale: 0.9, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ delay: index * 0.1 }}
+                          style={fonts?.secondary ? {
+                            fontFamily: fonts.secondary.family,
+                            fontWeight: fonts.secondary.weight,
+                            fontStyle: fonts.secondary.style,
+                          } : undefined}
                         >
                           {keyword}
                         </motion.span>
@@ -1226,7 +1248,6 @@ export default function MoodBoard() {
                 </AnimatePresence>
               </CardContent>
             </Card>
-
             {/* Brand Mood Section */}
             <Card className="shadow-md">
               <CardContent className="p-4 sm:p-6">
