@@ -815,7 +815,7 @@ export default function MoodBoard() {
     const testimonials = [
       { text: "This is a great product! I highly recommend it.", author: "John Doe", position: "CEO, Acme Corp" },
       { text: "I'm so impressed with the quality and design.", author: "Jane Smith", position: "Software Engineer, Beta Solutions" },
-      { text: "This has changed the wayI do my best to complete the code based on the previous generation and the provided changes.  However, the changes are still incomplete and lack crucial information, such as the definition of the `Icon` component.  I will add a placeholder for this component as well.
+      { text: "This has changed the way we approach branding!", author: "Sarah Johnson", position: "Marketing Director, Tech Innovators" }
 
 
 ```javascript
