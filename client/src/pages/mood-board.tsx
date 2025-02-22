@@ -823,7 +823,7 @@ export default function MoodBoard() {
     }
 
     const brandStory = "This is a placeholder for the brand story.  It should be dynamically generated from the brand mood description using an LLM.";
-    const testimonials = [
+    const testimonials =[
       { text: "This is a great product! I highly recommend it.", author: "John Doe", position: "CEO, Acme Corp" },
       { text: "I'm so impressed with the quality and design.", author: "Jane Smith", position: "Software Engineer, Beta Solutions", },
       { text: "This has changed the way I work!", author: "Peter Jones", position: "Marketing Manager, Gamma Industries" },
@@ -951,7 +951,7 @@ export default function MoodBoard() {
                     <CardContent 
                       className="p-6 flex flex-col items-center justify-center text-center h-full min-h-[200px] relative overflow-hidden" 
                       style={{ 
-                        background: `linear-gradient(135deg, ${generateDarkColor(colors[index % colors.length]?.hex || '#1a1a1a')} 0%, ${generateDarkColor(colors[(index + 1) % colors.length]?.hex || '#2a2a2a')} 100%)`,
+                        background: `linear-gradient(135deg, rgba(0,0,0,0.9), rgba(0,0,0,0.7))`,
                         color: '#ffffff'
                       }}
                     >
