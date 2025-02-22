@@ -936,6 +936,17 @@ export default function MoodBoard() {
                   <p style={secondaryTextStyle}>{moodBoardData?.moodDescription || 'Loading brand story...'}</p>
                 </div>
               </div>
+              {/* Features Section */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
+                {['Innovation', 'Quality', 'Excellence'].map((feature, idx) => (
+                  <Card key={feature} className="overflow-hidden">
+                    <CardContent className="bg-gray-100 p-6 h-full flex flex-col items-center text-center">
+                      <h4 className="text-xl font-semibold mb-2">{feature}</h4>
+                      <p className="text-gray-600">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
 
               {/* Testimonials Section */}
               <div className="grid grid-cols-3 gap-6 mb-8">
