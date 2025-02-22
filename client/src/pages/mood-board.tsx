@@ -912,11 +912,13 @@ export default function MoodBoard() {
               {/* Brand Story Section */}
               <div className="flex items-center gap-8 p-8 rounded-lg mb-8" style={{ backgroundColor: generateLightColor(colors[1]?.hex || '#f0f0f0') }}>
                 <div className="w-1/3 flex justify-center">
-                  <Icon icon="fluent:book-information-24-regular" className="w-32 h-32" style={{ color: generateDarkColor(colors[0]?.hex || '#000000') }} />
+                  <svg className="w-32 h-32" viewBox="0 0 24 24" style={{ color: generateDarkColor(colors[1]?.hex || '#000000') }}>
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z"/>
+                  </svg>
                 </div>
                 <div className="w-2/3">
-                  <h3 className="text-2xl mb-4" style={textStyle}>Our Story</h3>
-                  <p style={secondaryTextStyle}>{brandStory}</p>
+                  <h3 className="text-2xl mb-4" style={{ ...textStyle, color: colors[1]?.hex || '#000000' }}>Our Story</h3>
+                  <p style={secondaryTextStyle}>{moodBoardData?.moodDescription || 'Loading brand story...'}</p>
                 </div>
               </div>
 
@@ -925,15 +927,21 @@ export default function MoodBoard() {
                 {testimonials.map((testimonial, index) => (
                   <div
                     key={index}
-                    className="p-6 rounded-lg"
-                    style={{ backgroundColor: generateLightColor(colors[index % colors.length]?.hex || '#f0f0f0') }}
+                    className="p-6 rounded-lg relative overflow-hidden"
+                    style={{ background: CARD_GRADIENTS[index % CARD_GRADIENTS.length] }}
                   >
-                    <div className="mb-4">
-                      <Icon icon="mdi:quote" className="w-8 h-8" style={{ color: generateDarkColor(colors[index % colors.length]?.hex || '#000000') }} />
+                    <div className="absolute top-4 right-4">
+                      <svg className="w-8 h-8 opacity-20" viewBox="0 0 24 24" fill="currentColor" style={{ color: '#fff' }}>
+                        <path d="M4.583 17.321C3.553 16.227 3 15 3 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179zm10 0C13.553 16.227 13 15 13 13.011c0-3.5 2.457-6.637 6.03-8.188l.893 1.378c-3.335 1.804-3.987 4.145-4.247 5.621.537-.278 1.24-.375 1.929-.311 1.804.167 3.226 1.648 3.226 3.489a3.5 3.5 0 01-3.5 3.5c-1.073 0-2.099-.49-2.748-1.179z"/>
+                      </svg>
                     </div>
-                    <p className="mb-4" style={secondaryTextStyle}>{testimonial.text}</p>
-                    <p className="font-semibold" style={textStyle}>{testimonial.author}</p>
-                    <p style={secondaryTextStyle}>{testimonial.position}</p>
+                    <div className="relative z-10">
+                      <p className="mb-6 text-white/90 font-medium">{testimonial.text}</p>
+                      <div className="border-t border-white/10 pt-4">
+                        <p className="font-semibold text-white">{testimonial.author}</p>
+                        <p className="text-white/70 text-sm">{testimonial.position}</p>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
