@@ -1084,7 +1084,9 @@ textTransform: "none",
               {/* Features Section */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-8">
                 {["Innovation", "Quality", "Excellence"].map((feature, idx) => (
-                  <Card key={feature} className="overflow-hidden">
+                  <Card key={feature} className="overflow-hidden" style={{
+                    border: `4px solid ${idx === 0 ? colors[4]?.hex : idx === 1 ? colors[2]?.hex : colors[3]?.hex}`
+                  }}>
                     <CardContent
                       className={`bg-gray-100 p-6 h-full flex flex-col items-center text-center`}
                     >
