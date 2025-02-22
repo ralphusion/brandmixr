@@ -838,7 +838,14 @@ export default function MoodBoard() {
       <Card className="shadow-md">
         <CardContent className="p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-foreground" style={textStyle}>
+            <h2
+              className="text-lg sm:text-xl font-semibold text-black mb-4"
+              style={fonts?.primary ? {
+                fontFamily: fonts.primary.family,
+                fontWeight: fonts.primary.weight,
+                fontStyle: fonts.primary.style,
+              } : undefined}
+            >
               Brand Website Preview
             </h2>
           </div>
