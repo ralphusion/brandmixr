@@ -871,7 +871,7 @@ export default function MoodBoard() {
 
     // Website mockup styling
     const textStyle = {
-      fontFamily: "Inter",
+      fontFamily: "Arial, sans-serif",
       fontWeight: "600",
       fontStyle: "normal",
       textTransform: "none",
@@ -880,7 +880,7 @@ export default function MoodBoard() {
     };
 
     const secondaryTextStyle = {
-      fontFamily: "Inter",
+      fontFamily: "Arial, sans-serif",
       fontWeight: "400",
       fontStyle: "normal",
       textTransform: "none",
@@ -889,8 +889,7 @@ export default function MoodBoard() {
     };
 
     const tertiaryTextStyle = {
-      fontFamily:
-        selectedFont?.fontFamily || fonts?.secondary?.family || "Inter",
+      fontFamily: "Arial, sans-serif",
       fontWeight: selectedFont?.fontWeight || fonts?.secondary?.weight || "400",
       fontStyle: selectedFont?.fontStyle || "normal",
       textTransform: "none",
