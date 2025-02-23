@@ -216,6 +216,7 @@ export default function MoodBoard() {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
   const selectedCardRef = useRef<HTMLDivElement>(null);
   const [colorPickerOpen, setColorPickerOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Added mobile menu state
 
   const params = new URLSearchParams(window.location.search);
   const brandName = params.get("name");
@@ -885,10 +886,10 @@ export default function MoodBoard() {
     };
 
     const secondaryTextStyle = {
-      fontFamily: "Arial, sans-serif",
+      fontFamily: "Arialsans-serif",
       fontWeight: "400",
       fontStyle: "normal",
-textTransform: "none",
+      textTransform: "none",
       letterSpacing: "normal",
       color: colors[1]?.hex || "#000000", // Using second color from palette
     };
@@ -976,7 +977,40 @@ textTransform: "none",
                       </span>
                     </div>
                     <nav>
-                      <ul className="flex gap-6">
+                      <div className="md:hidden">
+                        <button
+                          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                          className="text-white p-2"
+                        >
+                          <svg
+                            className="w-6 h-6"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path d="M4 6h16M4 12h16M4 18h16"></path>
+                          </svg>
+                        </button>
+                        {mobileMenuOpen && (
+                          <ul className="absolute left-0 right-0 bg-black/90 p-4 mt-2">
+                            {['Home', 'About', 'Services', 'Products', 'Contact'].map((item) => (
+                              <li key={item} className="py-2">
+                                <a
+                                  href="#"
+                                  className="text-white/80 hover:text-white block"
+                                  style={tertiaryTextStyle}
+                                >
+                                  {item}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                      <ul className="hidden md:flex space-x-6">
                         {['Home', 'About', 'Services', 'Products', 'Contact'].map((item) => (
                           <li key={item}>
                             <a
