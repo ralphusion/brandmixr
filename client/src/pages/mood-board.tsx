@@ -995,7 +995,7 @@ export default function MoodBoard() {
                           </svg>
                         </button>
                         {mobileMenuOpen && (
-                          <ul className="absolute container mx-auto bg-white p-4 mt-2 z-50 left-1/2 -translate-x-1/2 max-w-screen-xl shadow-lg">
+                          <ul className="absolute left-0 right-0 bg-black/90 p-4 mt-2 z-50">
                             {['Home', 'About', 'Services', 'Products', 'Contact'].map((item) => (
                               <li key={item} className="py-2">
                                 <a
