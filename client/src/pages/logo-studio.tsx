@@ -246,12 +246,6 @@ export default function LogoStudio() {
                   <Card className={`${style.bg} transition-transform hover:scale-105 overflow-hidden shadow-lg dark:shadow-md dark:shadow-black/20 cursor-pointer`}>
                     <CardContent className="p-6 flex flex-col items-center justify-center min-h-[300px] gap-6">
                       <div className="flex flex-col items-center gap-4">
-                        <svg
-                          viewBox="0 0 24 24"
-                          className={`w-12 h-12 ${style.text}`}
-                          fill="currentColor"
-                          dangerouslySetInnerHTML={{ __html: logo }}
-                        />
                         <motion.h3
                           className={`text-3xl text-center ${style.text} ${fontStyle}`}
                           whileHover={{ scale: 1.05 }}
