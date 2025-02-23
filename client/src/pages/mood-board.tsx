@@ -437,8 +437,14 @@ export default function MoodBoard() {
   }, [brandName, iconStyle, logoColor]);
 
   const generateLogo = () => {
-    // Logo generation removed
-    return;
+    if (!brandName) return;
+    const svg = generateIconSvg(brandName, {
+      style: iconStyle,
+      color: logoColor,
+      backgroundColor: "white",
+    });
+    const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
+    setLogoSvg(dataUrl);
   };
 
   const handleRegenerateLogo = () => {
