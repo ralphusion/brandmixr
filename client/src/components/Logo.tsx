@@ -1,14 +1,20 @@
-import { Text } from "lucide-react";
+
+import { cn } from "@/lib/utils";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
-      <div className="bg-gradient-to-r from-primary to-primary/90 p-2 rounded-lg dark:from-primary/90 dark:to-primary">
-        <Text className="w-6 h-6 text-primary-foreground" />
-      </div>
-      <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/90 bg-clip-text text-transparent dark:from-primary dark:to-primary/90 dark:text-primary-foreground/90">
-        BrandMixr
-      </span>
+    <div className={cn("flex items-center gap-2", className)}>
+      <svg width="24" height="24" viewBox="0 0 139 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M23.8456 18.9442C23.8456 25.5402 18.5402 30.8456 11.9442 30.8456C5.34824 30.8456 0.0428467 25.5402 0.0428467 18.9442C0.0428467 12.3482 5.34824 7.04285 11.9442 7.04285C18.5402 7.04285 23.8456 12.3482 23.8456 18.9442ZM6.62825 18.9442C6.62825 21.9045 9.02091 24.2971 11.9813 24.2971C14.9416 24.2971 17.3343 21.9045 17.3343 18.9442C17.3343 15.9839 14.9416 13.5913 11.9813 13.5913C9.02091 13.5913 6.62825 15.9839 6.62825 18.9442Z" fill="#6C5CE7"/>
+        <path d="M42.6651 23.4228V8.46569H47.9705V23.4228H42.6651Z" fill="#2D3436"/>
+        <path d="M51.1936 23.4228V8.46569H56.499V23.4228H51.1936Z" fill="#2D3436"/>
+        <path d="M67.1469 23.4228L61.952 8.46569H67.3688L69.8357 17.4842L72.3026 8.46569H77.7194L72.5245 23.4228H67.1469Z" fill="#2D3436"/>
+        <path d="M80.2605 23.4228V8.46569H85.5659V23.4228H80.2605Z" fill="#2D3436"/>
+        <path d="M98.0675 23.4228H92.7621V8.46569H98.0675C102.879 8.46569 106.506 12.0928 106.506 15.9442C106.506 19.7956 102.879 23.4228 98.0675 23.4228ZM98.0675 13.8131H98.0304V18.0753H98.0675C99.7494 18.0753 101.09 16.7347 101.09 15.9442C101.09 15.1537 99.7494 13.8131 98.0675 13.8131Z" fill="#2D3436"/>
+        <path d="M110.471 23.4228V8.46569H124.433V13.8131H115.776V14.4484H124.433V17.4413H115.776V18.0753H124.433V23.4228H110.471Z" fill="#2D3436"/>
+        <path d="M127.803 23.4228V8.46569H138.414V13.8131H133.109V23.4228H127.803Z" fill="#2D3436"/>
+      </svg>
+      <span className="text-lg font-bold text-primary tracking-wider">BRANDMIXR</span>
     </div>
   );
 }
