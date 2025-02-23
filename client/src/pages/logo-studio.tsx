@@ -150,7 +150,6 @@ export default function LogoStudio() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Mood Board
           </Button>
-          <Logo />
         </div>
       </div>
 

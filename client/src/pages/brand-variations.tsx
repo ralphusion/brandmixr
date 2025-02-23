@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Download } from "lucide-react";
-import { Logo } from "@/components/Logo";
+//import { Logo } from "@/components/Logo"; //Removed Logo import
 import { useState, useEffect, useRef } from "react";
 import { generateIconSvg } from "@/lib/generateIcon";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -234,7 +234,7 @@ export default function BrandVariations() {
             <span className="hidden sm:inline">Back to Generated Names</span>
             <span className="sm:hidden">Back</span>
           </Button>
-          <Logo className="h-6 sm:h-8" />
+          {/* Logo Removed */}
         </div>
         <div className="flex items-center gap-3">
           <Button
