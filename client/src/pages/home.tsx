@@ -157,18 +157,34 @@ export default function Home() {
         </div>
 
         <div className="max-w-4xl mx-auto">
+          <div className="flex justify-end mb-4 gap-2">
+            <Button variant="outline" onClick={() => setAuthMode('login')}>Login</Button>
+            <Button onClick={() => setAuthMode('signup')}>Sign Up</Button>
+          </div>
           <NameGeneratorForm
             onGenerate={(data) => generateMutation.mutate(data)}
             isGenerating={generateMutation.isPending}
+          />
+          <AuthDialog 
+            isOpen={!!authMode} 
+            onClose={() => setAuthMode(null)}
+            mode={authMode as 'login' | 'signup'} 
           />
 
           {displayedNames.length > 0 && (
             <div className="mt-8">
               <h2 className="text-2xl font-semibold mb-4">Generated Names</h2>
               <ResultsGrid
-                names={displayedNames}
+                names={isAuthenticated ? displayedNames : displayedNames.slice(0, 5)}
                 onSave={(name) => saveMutation.mutate(name)}
               />
+              {!isAuthenticated && displayedNames.length > 5 && (
+                <div className="text-center mt-8 p-6 bg-muted rounded-lg">
+                  <h3 className="text-lg font-semibold mb-2">Want to see more names?</h3>
+                  <p className="text-muted-foreground mb-4">Sign up to unlock all generated names and save your favorites.</p>
+                  <Button onClick={() => setAuthMode('signup')}>Sign Up Now</Button>
+                </div>
+              )}
               {generatedNames.length > displayedNames.length && (
                 <div ref={loadMoreRef} className="h-20 flex items-center justify-center">
                   <p className="text-muted-foreground">Scroll for more names...</p>
