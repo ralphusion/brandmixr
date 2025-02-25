@@ -1,115 +1,84 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { generateNames, generateDescription, generateMoodBoard, generateFontRecommendations, generateLogoWithDalle } from "./openai";
+import { 
+  generateNames, 
+  generateDescription, 
+  generateMoodBoard, 
+  generateFontRecommendations 
+} from "./openai";
 import { generateNameSchema } from "@shared/schema";
 import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
-import { checkDomainAvailability } from "./utils/domain";
-import { checkTrademarkAvailability } from "./utils/trademark";
+import { 
+  checkDomainAvailability, 
+  checkTrademarkAvailability 
+} from "./utils";
 import { generateSimpleLogo } from "./utils/logoGenerator";
 
+// Utility function for error handling
+const handleError = (error: unknown) => {
+  if (error instanceof ZodError) {
+    return { status: 400, message: "Invalid input data", details: error.errors };
+  }
+  if (error instanceof Error) {
+    if (error.message.includes('API key')) {
+      return { status: 503, message: "API service unavailable", details: "Configuration issue" };
+    }
+    return { status: 500, message: error.message };
+  }
+  return { status: 500, message: "An unexpected error occurred" };
+};
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // API Routes
   app.use("/api", apiRouter);
 
-  // Web App Routes
   app.post("/api/generate", async (req, res) => {
     try {
       const data = generateNameSchema.parse(req.body);
-      console.log("Generating names with params:", {
-        industry: data.industry,
-        style: data.style,
-        description: data.description?.substring(0, 50) + "..."
-      });
-
       const names = await generateNames(data);
-      console.log(`Successfully generated ${names.length} names`);
 
-      // Check domain and trademark availability for each name
       const namesWithChecks = await Promise.all(
         names.map(async (name) => {
-          try {
-            const [domainCheck, trademarkCheck] = await Promise.all([
-              checkDomainAvailability(name),
-              checkTrademarkAvailability(name)
-            ]);
+          const [domainCheck, trademarkCheck] = await Promise.all([
+            checkDomainAvailability(name),
+            checkTrademarkAvailability(name)
+          ]);
 
-            return {
-              name,
-              domain: domainCheck.domain,
-              domainAvailable: domainCheck.available,
-              trademarkExists: trademarkCheck.exists,
-              similarTrademarks: trademarkCheck.similarMarks
-            };
-          } catch (error) {
-            console.error(`Error checking availability for name ${name}:`, error);
-            return {
-              name,
-              domain: name.toLowerCase().replace(/\s+/g, '') + '.com',
-              domainAvailable: false,
-              trademarkExists: false,
-              similarTrademarks: []
-            };
-          }
+          return {
+            name,
+            domain: domainCheck.domain,
+            domainAvailable: domainCheck.available,
+            trademarkExists: trademarkCheck.exists,
+            similarTrademarks: trademarkCheck.similarMarks
+          };
         })
       );
 
       res.json(namesWithChecks);
     } catch (error) {
-      console.error("Error in name generation:", error);
-
-      if (error instanceof ZodError) {
-        res.status(400).json({ error: "Invalid input data", details: error.errors });
-      } else if (error instanceof Error) {
-        if (error.message.includes('API key')) {
-          res.status(503).json({ 
-            error: "API service is currently unavailable. Please try again later.",
-            details: "OpenAI API configuration issue"
-          });
-        } else {
-          res.status(500).json({ 
-            error: "Failed to generate names. Please try again.",
-            details: error.message
-          });
-        }
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message, details } = handleError(error);
+      res.status(status).json({ error: message, details });
     }
   });
 
-app.post("/api/generate-logo", async (req, res) => {
+  app.post("/api/generate-logo", async (req, res) => {
     try {
-      console.log("Received generate-logo request:", req.body);
       const { brandName, style, industry, isMore } = req.body;
-
       if (!brandName || !style || !industry) {
-        throw new Error("Brand name, style, and industry are required");
+        throw new Error("Missing required parameters");
       }
 
-      const numberOfLogos = 15; // Increased to generate 15 logos at once
+      const numberOfLogos = 15;
       const currentLogos = isMore ? (req.body.currentLogos || []) : [];
-      const startIndex = currentLogos.length;
+      const newLogos = Array(numberOfLogos)
+        .fill(null)
+        .map(() => generateSimpleLogo({ brandName, style, industry }));
 
-      console.log(`Generating ${numberOfLogos} logos for ${brandName}`);
-
-      // Generate new logos using our SVG generator
-      const newLogos = Array(numberOfLogos).fill(null).map(() =>
-        generateSimpleLogo({ brandName, style, industry })
-      );
-
-      console.log(`Successfully generated ${newLogos.length} new logos`);
-
-      const logos = isMore ? [...currentLogos, ...newLogos] : newLogos;
-      res.json({ logos });
+      res.json({ logos: isMore ? [...currentLogos, ...newLogos] : newLogos });
     } catch (error) {
-      console.error("Error in generate-logo endpoint:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
@@ -119,15 +88,12 @@ app.post("/api/generate-logo", async (req, res) => {
       const brandDescription = await generateDescription(name, industry, description, keywords);
       res.json({ description: brandDescription });
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
-  app.get("/api/names", async (req, res) => {
+  app.get("/api/names", async (_req, res) => {
     const names = await storage.getBrandNames();
     res.json(names);
   });
@@ -150,11 +116,8 @@ app.post("/api/generate-logo", async (req, res) => {
 
       res.json(savedName);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
@@ -163,15 +126,12 @@ app.post("/api/generate-logo", async (req, res) => {
       const name = await storage.toggleSaved(parseInt(req.params.id));
       res.json(name);
     } catch (error) {
-      if (error instanceof Error) {
-        res.status(404).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
-  app.get("/api/names/saved", async (req, res) => {
+  app.get("/api/names/saved", async (_req, res) => {
     const names = await storage.getSavedNames();
     res.json(names);
   });
@@ -179,22 +139,10 @@ app.post("/api/generate-logo", async (req, res) => {
   app.get("/api/mood-board", async (req, res) => {
     try {
       const { name, industry, style, provider } = req.query;
-
       if (!name || !industry || !style) {
-        console.error("Missing parameters:", { name, industry, style });
-        return res.status(400).json({
-          error: "Missing required parameters",
-          details: {
-            name: !name ? "missing" : "present",
-            industry: !industry ? "missing" : "present",
-            style: !style ? "missing" : "present"
-          }
-        });
+        throw new Error("Missing required parameters");
       }
 
-      console.log("Generating mood board for:", { name, industry, style, provider });
-
-      // Generate mood board content
       const moodBoard = await generateMoodBoard(
         name as string,
         industry as string,
@@ -202,20 +150,13 @@ app.post("/api/generate-logo", async (req, res) => {
         provider as 'openai' | 'gemini'
       );
 
-      console.log("Generated mood board content:", moodBoard);
-
       res.json(moodBoard);
     } catch (error) {
-      console.error("Error generating mood board:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
-
-  app.post("/api/mood-board/regenerate-keywords", async (req, res) => {
+    app.post("/api/mood-board/regenerate-keywords", async (req, res) => {
     try {
       const { name, industry, style, provider } = req.query;
       if (!name || !industry || !style) {
@@ -233,12 +174,8 @@ app.post("/api/generate-logo", async (req, res) => {
         keywords: moodBoard.keywords,
       });
     } catch (error) {
-      console.error("Error regenerating keywords:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
@@ -260,12 +197,8 @@ app.post("/api/generate-logo", async (req, res) => {
         moodDescription: moodBoard.moodDescription,
       });
     } catch (error) {
-      console.error("Error regenerating mood description:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
@@ -276,18 +209,14 @@ app.post("/api/generate-logo", async (req, res) => {
         return res.status(400).json({ error: "Missing required parameters" });
       }
 
-      const result = await generateSimpleLogo({ brandName: prompt, style, industry: ""}); //Assuming industry isn't needed here
+      const result = await generateSimpleLogo({ brandName: prompt, style, industry: ""}); 
 
       res.json({
         image: result
       });
     } catch (error) {
-      console.error("Error regenerating image:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
@@ -309,28 +238,16 @@ app.post("/api/generate-logo", async (req, res) => {
         colors: moodBoard.colors,
       });
     } catch (error) {
-      console.error("Error regenerating colors:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
   app.get("/api/font-recommendations", async (req, res) => {
     try {
       const { name, industry, style } = req.query;
-
       if (!name || !industry || !style) {
-        return res.status(400).json({
-          error: "Missing required parameters",
-          details: {
-            name: !name ? "missing" : "present",
-            industry: !industry ? "missing" : "present",
-            style: !style ? "missing" : "present"
-          }
-        });
+        throw new Error("Missing required parameters");
       }
 
       const recommendations = await generateFontRecommendations(
@@ -341,12 +258,8 @@ app.post("/api/generate-logo", async (req, res) => {
 
       res.json(recommendations);
     } catch (error) {
-      console.error("Error generating font recommendations:", error);
-      if (error instanceof Error) {
-        res.status(400).json({ error: error.message });
-      } else {
-        res.status(500).json({ error: "An unexpected error occurred" });
-      }
+      const { status, message } = handleError(error);
+      res.status(status).json({ error: message });
     }
   });
 
