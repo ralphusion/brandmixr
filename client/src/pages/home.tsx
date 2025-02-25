@@ -157,7 +157,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-end mb-4 gap-2">
+          <div className="fixed top-4 right-4 flex gap-2 z-50">
             <Button variant="outline" onClick={() => setAuthMode('login')}>Login</Button>
             <Button onClick={() => setAuthMode('signup')}>Sign Up</Button>
           </div>
@@ -176,7 +176,13 @@ export default function Home() {
               <h2 className="text-2xl font-semibold mb-4">Generated Names</h2>
               <ResultsGrid
                 names={isAuthenticated ? displayedNames : displayedNames.slice(0, 5)}
-                onSave={(name) => saveMutation.mutate(name)}
+                onSave={(name) => {
+                  if (!isAuthenticated) {
+                    setAuthMode('signup');
+                    return;
+                  }
+                  saveMutation.mutate(name);
+                }}
               />
               {!isAuthenticated && displayedNames.length > 5 && (
                 <div className="text-center mt-8 p-6 bg-muted rounded-lg">
