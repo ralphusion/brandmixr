@@ -40,6 +40,13 @@ export default function Home() {
   const [page, setPage] = useState(1);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [authMode, setAuthMode] = useState<'login' | 'signup' | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   const { data: savedNames = [] } = useQuery<BrandName[]>({
     queryKey: ["/api/names/saved"],
@@ -157,7 +164,7 @@ export default function Home() {
         </div>
 
         <div className="max-w-4xl mx-auto">
-          <div className="fixed top-4 right-4 flex gap-2 z-50">
+          <div className="fixed top-4 right-4 flex gap-2 z-50"> {/* Added this div to make the buttons visible */}
             <Button variant="outline" onClick={() => setAuthMode('login')}>Login</Button>
             <Button onClick={() => setAuthMode('signup')}>Sign Up</Button>
           </div>
@@ -165,11 +172,11 @@ export default function Home() {
             onGenerate={(data) => generateMutation.mutate(data)}
             isGenerating={generateMutation.isPending}
           />
-          <AuthDialog 
+          {/* <AuthDialog 
             isOpen={!!authMode} 
             onClose={() => setAuthMode(null)}
             mode={authMode as 'login' | 'signup'} 
-          />
+          /> */}
 
           {displayedNames.length > 0 && (
             <div className="mt-8">
