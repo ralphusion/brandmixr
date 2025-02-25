@@ -12,8 +12,9 @@ import { ZodError } from "zod";
 import { apiRouter } from "./routes/api";
 import { 
   checkDomainAvailability, 
-  checkTrademarkAvailability 
-} from "./utils/domainChecker";
+  type DomainCheckResult 
+} from "./utils/domain";
+import { checkTrademarkAvailability } from "./utils/trademark";
 import { generateSimpleLogo } from "./utils/logoGenerator";
 
 // Utility function for error handling
