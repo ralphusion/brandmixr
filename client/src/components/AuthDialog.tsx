@@ -15,36 +15,6 @@ interface AuthDialogProps {
 export function AuthDialog({ isOpen, onClose, mode }: AuthDialogProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch(`/api/auth/${mode}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Authentication failed');
-      }
-      
-      onClose();
-      window.location.reload();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Authentication failed');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -52,12 +22,12 @@ export function AuthDialog({ isOpen, onClose, mode }: AuthDialogProps) {
         <DialogHeader>
           <DialogTitle>{mode === 'login' ? 'Login' : 'Sign Up'}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="grid gap-4 py-4">
-          <Button type="button" variant="outline" className="gap-2">
+        <div className="grid gap-4 py-4">
+          <Button variant="outline" className="gap-2">
             <FcGoogle size={20} />
             Continue with Google
           </Button>
-          <Button type="button" variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2">
             <FaApple size={20} />
             Continue with Apple
           </Button>
@@ -71,27 +41,20 @@ export function AuthDialog({ isOpen, onClose, mode }: AuthDialogProps) {
               </span>
             </div>
           </div>
-          {error && (
-            <div className="text-red-500 text-sm">{error}</div>
-          )}
           <Input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            required
           />
           <Input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            required
           />
-          <Button type="submit" disabled={loading}>
-            {loading ? 'Loading...' : mode === 'login' ? 'Login' : 'Sign Up'}
-          </Button>
-        </form>
+          <Button>{mode === 'login' ? 'Login' : 'Sign Up'}</Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
