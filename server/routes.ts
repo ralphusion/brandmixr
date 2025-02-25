@@ -13,7 +13,7 @@ import { apiRouter } from "./routes/api";
 import { 
   checkDomainAvailability, 
   checkTrademarkAvailability 
-} from "./utils";
+} from "./utils/domainChecker";
 import { generateSimpleLogo } from "./utils/logoGenerator";
 
 // Utility function for error handling
